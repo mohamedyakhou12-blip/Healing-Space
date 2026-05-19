@@ -26,8 +26,9 @@ import { onAuthStateChanged, User } from "firebase/auth";
 /*  Session restoration on page load is done via /api/auth/session      */
 /*  which checks the iron-session cookie — no Firebase dependency.     */
 /*                                                                     */
-/*  NOTE: signInWithRedirect is NOT used because it's broken on Vercel */
-/*  serverless (JS state is lost on page navigation).                  */
+/*  NOTE: signInWithRedirect is used as a FALLBACK when signInWithPopup */
+/*  fails (network error, popup blocked). The redirect result is also   */
+/*  handled by getRedirectResult() in LoginPage/RegisterPage.           */
 /* ================================================================== */
 
 // Track whether we've already processed a Google sign-in during this mount

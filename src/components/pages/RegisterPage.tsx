@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -105,6 +105,44 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ── Handle redirect result (when user returns from Google) ──
+  useEffect(() => {
+    let handled = false;
+    getRedirectResult(auth).then((result) => {
+      if (result && !handled) {
+        handled = true;
+        console.log("[Google Register] Redirect sign-in successful for:", result.user.email);
+        result.user.getIdToken().then((idToken) => {
+          // Send ID token to backend
+          fetch("/api/auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idToken }),
+          })
+          .then(async (res) => {
+            const data = await res.json();
+            if (res.ok && data.success) {
+              useAppStore.getState().setUser({
+                id: data.user.id,
+                name: data.user.name,
+                email: data.user.email,
+                role: data.user.role,
+                avatar: data.user.avatar,
+                phone: data.user.phone,
+              });
+              toast.success(data.isNewUser ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "تم تسجيل الدخول بنجاح!");
+              useAppStore.getState().navigate("home");
+            }
+          })
+          .catch(() => {});
+        });
+      }
+    }).catch((error) => {
+      console.error("[Google Register] getRedirectResult error:", error?.code, error?.message);
+    });
+    return () => { handled = true; };
+  }, []);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -249,15 +287,27 @@ export default function RegisterPage() {
           { duration: 15000 }
         );
       } else if (code === "auth/popup-blocked") {
-        toast.error(
-          "المتصفح يمنع النوافذ المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع ثم المحاولة مرة أخرى",
-          { duration: 10000 }
-        );
+        // Popup blocked — fall back to redirect
+        console.log("[Google Register] Popup blocked, falling back to redirect...");
+        toast.info("جاري التحويل إلى صفحة غوغل لتسجيل الدخول...", { duration: 3000 });
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr: any) {
+          console.error("[Google Register] signInWithRedirect also failed:", redirectErr);
+          toast.error("فشل تسجيل الدخول. يرجى السماح بالنوافذ المنبثقة أو المحاولة مرة أخرى", { duration: 8000 });
+        }
+        return;
       } else if (code === "auth/network-request-failed") {
-        toast.error(
-          "خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى",
-          { duration: 8000 }
-        );
+        // Network error — fall back to redirect method
+        console.log("[Google Register] Network error with popup, falling back to redirect...");
+        toast.info("جاري التحويل إلى صفحة غوغل لتسجيل الدخول...", { duration: 3000 });
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr: any) {
+          console.error("[Google Register] signInWithRedirect also failed:", redirectErr);
+          toast.error("فشل الاتصال بغوغل. يرجى التحقق من اتصالك بالإنترنت والمحاولة لاحقاً", { duration: 8000 });
+        }
+        return;
       } else {
         // Show the actual error code for debugging
         console.error("[Google Register] Unhandled error code:", code);

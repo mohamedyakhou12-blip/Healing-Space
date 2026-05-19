@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock, Eye, EyeOff, Heart, Sparkles, Leaf, Shield, ArrowRight, KeyRound } from "lucide-react";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -104,6 +104,24 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminCodeError, setAdminCodeError] = useState("");
+
+  // ── Handle redirect result (when user returns from Google) ──
+  useEffect(() => {
+    let handled = false;
+    getRedirectResult(auth).then((result) => {
+      if (result && !handled) {
+        handled = true;
+        const email = result.user.email;
+        console.log("[Google Auth] Redirect sign-in successful for:", email);
+        result.user.getIdToken().then((idToken) => {
+          sendTokenToBackend(idToken);
+        });
+      }
+    }).catch((error) => {
+      console.error("[Google Auth] getRedirectResult error:", error?.code, error?.message);
+    });
+    return () => { handled = true; };
+  }, []);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -264,10 +282,10 @@ export default function LoginPage() {
   };
 
   // ── Google Login ──
-  // Uses signInWithPopup exclusively — no redirect fallback.
-  // Redirect-based auth is broken on Vercel serverless (JS state is lost on navigation).
-  // AppShell's onAuthStateChanged acts as a safety net if the popup succeeds but
-  // the backend call fails for any reason.
+  // Primary: signInWithPopup — works when popup is not blocked.
+  // Fallback: signInWithRedirect — used when popup fails due to network/popup issues.
+  // The redirect result is handled by the useEffect above AND AppShell's
+  // onAuthStateChanged safety net.
   const onGoogleLogin = async () => {
     // Mutex: prevent concurrent sign-in attempts
     if (isGoogleSignInInProgress()) {
@@ -313,19 +331,47 @@ export default function LoginPage() {
           { duration: 15000 }
         );
       } else if (code === "auth/popup-blocked") {
-        toast.error(
+        // Popup blocked — fall back to redirect
+        console.log("[Google Auth] Popup blocked, falling back to redirect...");
+        toast.info(
           locale === "ar"
-            ? "المتصفح يمنع النوافذ المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع ثم المحاولة مرة أخرى"
-            : "Popup blocked by browser. Please allow popups for this site and try again",
-          { duration: 10000 }
+            ? "جاري التحويل إلى صفحة غوغل لتسجيل الدخول..."
+            : "Redirecting to Google sign-in...",
+          { duration: 3000 }
         );
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr: any) {
+          console.error("[Google Auth] signInWithRedirect also failed:", redirectErr);
+          toast.error(
+            locale === "ar"
+              ? "فشل تسجيل الدخول. يرجى السماح بالنوافذ المنبثقة أو المحاولة مرة أخرى"
+              : "Sign-in failed. Please allow popups or try again",
+            { duration: 8000 }
+          );
+        }
+        return; // Don't reset loading — redirect is in progress
       } else if (code === "auth/network-request-failed") {
-        toast.error(
+        // Network error — fall back to redirect method
+        console.log("[Google Auth] Network error with popup, falling back to redirect...");
+        toast.info(
           locale === "ar"
-            ? "خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى"
-            : "Network error. Please check your internet connection and try again",
-          { duration: 8000 }
+            ? "جاري التحويل إلى صفحة غوغل لتسجيل الدخول..."
+            : "Redirecting to Google sign-in...",
+          { duration: 3000 }
         );
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr: any) {
+          console.error("[Google Auth] signInWithRedirect also failed:", redirectErr);
+          toast.error(
+            locale === "ar"
+              ? "فشل الاتصال بغوغل. يرجى التحقق من اتصالك بالإنترنت والمحاولة لاحقاً"
+              : "Failed to connect to Google. Please check your internet connection and try later",
+            { duration: 8000 }
+          );
+        }
+        return; // Don't reset loading — redirect is in progress
       } else {
         // Any other error — show the actual error code for debugging
         console.error("[Google Auth] Unhandled error code:", code);
