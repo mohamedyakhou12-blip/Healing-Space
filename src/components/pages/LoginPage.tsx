@@ -114,11 +114,36 @@ export default function LoginPage() {
         const email = result.user.email;
         console.log("[Google Auth] Redirect sign-in successful for:", email);
         result.user.getIdToken().then((idToken) => {
-          sendTokenToBackend(idToken);
+          sendTokenToBackend(idToken, true); // true = from redirect
         });
       }
     }).catch((error) => {
       console.error("[Google Auth] getRedirectResult error:", error?.code, error?.message);
+      // Show specific error messages for common issues
+      const code = error?.code || "";
+      if (code === "auth/unauthorized-domain") {
+        const currentDomain = window.location.hostname;
+        toast.error(
+          locale === "ar"
+            ? `النطاق (${currentDomain}) غير مصرح به في Firebase. يرجى إضافته في: Firebase Console → Authentication → Settings → Authorized domains`
+            : `Domain (${currentDomain}) not authorized. Add it in: Firebase Console → Authentication → Settings → Authorized domains`,
+          { duration: 15000 }
+        );
+      } else if (code === "auth/network-request-failed") {
+        toast.error(
+          locale === "ar"
+            ? "خطأ في الشبكة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى"
+            : "Network error. Please check your internet connection and try again",
+          { duration: 8000 }
+        );
+      } else {
+        toast.error(
+          locale === "ar"
+            ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى"
+            : "Google sign-in failed. Please try again",
+          { duration: 8000 }
+        );
+      }
     });
     return () => { handled = true; };
   }, []);
@@ -177,7 +202,13 @@ export default function LoginPage() {
         phone: result.user.phone,
       });
       toast.success(t("common.success"));
-      navigate("home");
+      // FIX: Use full page navigation when on a route page like /login
+      // where navigate() only changes the URL but doesn't switch the page
+      if (result.user.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/";
+      }
     } catch {
       toast.error(t("common.serverError"));
     } finally {
@@ -206,7 +237,8 @@ export default function LoginPage() {
           avatar: undefined,
         });
         toast.success(t("common.success"));
-        navigate("admin");
+        // FIX: Use full page navigation to /admin page
+        window.location.href = "/admin";
       } else {
         setAdminCodeError(t("adminAccess.wrongCode"));
       }
@@ -218,7 +250,10 @@ export default function LoginPage() {
   };
 
   // ── Helper: Send Firebase ID token to backend ──
-  const sendTokenToBackend = async (idToken: string): Promise<boolean> => {
+  // isRedirect: when true, we use full page navigation instead of SPA navigate()
+  // because after a redirect sign-in, the user is on a Next.js route page (e.g., /login)
+  // where navigate() only changes the URL but doesn't switch the rendered page component.
+  const sendTokenToBackend = async (idToken: string, isRedirect: boolean = false): Promise<boolean> => {
     try {
       const res = await fetch("/api/auth/google", {
         method: "POST",
@@ -256,7 +291,17 @@ export default function LoginPage() {
             ? (locale === "ar" ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "Account created successfully! Welcome")
             : (locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Login successful!")
         );
-        navigate("home");
+
+        // CRITICAL FIX: After redirect sign-in, we MUST use full page navigation
+        // because navigate() only uses pushState which doesn't switch the Next.js
+        // page component. The user is on /login page and navigate("home") would
+        // change the URL but keep showing the login form.
+        if (isRedirect || data.user.role === "admin") {
+          // Use full page navigation for redirect sign-in and admin users
+          window.location.href = data.user.role === "admin" ? "/admin" : "/";
+        } else {
+          navigate("home");
+        }
         return true;
       } else {
         const errorMsg = data.error || "Google login failed";

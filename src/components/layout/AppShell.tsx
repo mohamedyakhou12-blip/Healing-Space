@@ -115,7 +115,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ? (locale === "ar" ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "Account created successfully! Welcome")
               : (locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Login successful!")
           );
-          useAppStore.getState().navigate("home");
+
+          // CRITICAL FIX: Use full page navigation instead of navigate() because
+          // after a redirect sign-in, the user might be on a Next.js route page
+          // (like /login) where navigate() only changes the URL via pushState
+          // but doesn't switch the rendered page component.
+          if (typeof window !== "undefined") {
+            const targetPath = data.user.role === "admin" ? "/admin" : "/";
+            const currentPath = window.location.pathname;
+            if (currentPath !== targetPath) {
+              window.location.href = targetPath;
+            } else {
+              // Already on the right page, just update the store
+              useAppStore.getState().navigate(data.user.role === "admin" ? "admin" : "home");
+            }
+          }
           console.log("[AppShell] onAuthStateChanged: Session created for:", email);
         } else {
           console.error("[AppShell] onAuthStateChanged: Backend verification failed:", data.error);

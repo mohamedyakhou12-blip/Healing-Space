@@ -923,9 +923,18 @@ function RichTextEditor({ value, onChange, placeholder, dir }: RichTextEditorPro
 
 export default function AdminPage() {
   const { t } = useTranslation();
-  const { pageParams, navigate, locale, isAdmin, user } = useAppStore();
+  const { pageParams, navigate, locale, isAdmin, user, isLoadingAuth } = useAppStore();
   const isRtl = locale === "ar";
   const activeTab = (pageParams.tab as AdminTab) || "dashboard";
+
+  // Show loading state while session is being restored
+  if (isLoadingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" />
+      </div>
+    );
+  }
 
   // Client-side admin auth gate: redirect non-admins
   if (!isAdmin || !user) {

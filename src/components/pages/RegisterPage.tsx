@@ -132,7 +132,11 @@ export default function RegisterPage() {
                 phone: data.user.phone,
               });
               toast.success(data.isNewUser ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "تم تسجيل الدخول بنجاح!");
-              useAppStore.getState().navigate("home");
+              // CRITICAL FIX: Use full page navigation because after redirect,
+              // navigate() only changes the URL but doesn't switch the page component
+              if (typeof window !== "undefined") {
+                window.location.href = data.user.role === "admin" ? "/admin" : "/";
+              }
             }
           })
           .catch(() => {});
@@ -140,6 +144,15 @@ export default function RegisterPage() {
       }
     }).catch((error) => {
       console.error("[Google Register] getRedirectResult error:", error?.code, error?.message);
+      // Show error to user
+      const code = error?.code || "";
+      if (code === "auth/unauthorized-domain") {
+        const currentDomain = window.location.hostname;
+        toast.error(
+          `النطاق (${currentDomain}) غير مصرح به في Firebase. يرجى إضافته في: Firebase Console → Authentication → Settings → Authorized domains`,
+          { duration: 15000 }
+        );
+      }
     });
     return () => { handled = true; };
   }, []);
