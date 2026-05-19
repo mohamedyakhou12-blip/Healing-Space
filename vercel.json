@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/courses/:path*", "destination": "/" },
+    { "source": "/articles/:path*", "destination": "/" },
+    { "source": "/podcasts/:path*", "destination": "/" },
+    { "source": "/videos/:path*", "destination": "/" },
+    { "source": "/pdfs/:path*", "destination": "/" },
+    { "source": "/live/:path*", "destination": "/" }
+  ]
+}

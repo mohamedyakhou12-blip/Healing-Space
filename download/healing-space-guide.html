@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل منصة فضاء الشفاء الشامل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --accent: #f59e0b;
+      --accent-light: #fef3c7;
+      --bg: #ffffff;
+      --bg-soft: #f8fafc;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      font-family: 'Cairo', 'DejaVu Sans', sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 22mm;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* ── Cover Page ── */
+    .cover {
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 40%, #065f46 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30mm 25mm;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -20%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 36px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .cover h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover h2 {
+      font-size: 20px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-divider {
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-desc {
+      font-size: 15px;
+      line-height: 1.9;
+      max-width: 500px;
+      opacity: 0.85;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-meta {
+      margin-top: 50px;
+      font-size: 12px;
+      opacity: 0.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Table of Contents ── */
+    .toc {
+      padding: 25mm 22mm;
+    }
+
+    .toc h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 24px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid var(--primary);
+      display: inline-block;
+    }
+
+    .toc-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .toc-list li {
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+
+    .toc-list li .toc-num {
+      background: var(--primary);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 10px;
+      flex-shrink: 0;
+    }
+
+    .toc-list li .toc-title {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    /* ── Section Styles ── */
+    .section {
+      margin-bottom: 28px;
+    }
+
+    h2.section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2.section-title .num {
+      background: var(--primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    h3.sub-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 18px;
+      margin-bottom: 10px;
+      padding-right: 12px;
+      border-right: 4px solid var(--accent);
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+      line-height: 1.9;
+    }
+
+    ul {
+      margin-bottom: 14px;
+      padding-right: 20px;
+    }
+
+    ul li {
+      margin-bottom: 6px;
+      line-height: 1.8;
+    }
+
+    /* ── Feature Cards ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .feature-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      border-top: 3px solid var(--primary);
+    }
+
+    .feature-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feature-card p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      line-height: 1.7;
+    }
+
+    /* ── Info Box ── */
+    .info-box {
+      background: var(--primary-light);
+      border: 1px solid #99f6e4;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 14px 0;
+    }
+
+    .info-box.warning {
+      background: var(--accent-light);
+      border-color: #fde68a;
+    }
+
+    .info-box h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+
+    .info-box.warning h4 {
+      color: #92400e;
+    }
+
+    .info-box p, .info-box ul {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    /* ── Table ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      background: var(--primary);
+      color: white;
+      padding: 10px 12px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: var(--bg-soft);
+    }
+
+    /* ── Tech Stack Badge ── */
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border: 1px solid #99f6e4;
+    }
+
+    .tech-badge.accent {
+      background: var(--accent-light);
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    /* ── Page Break ── */
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Step List ── */
+    .step-list {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 14px 0;
+    }
+
+    .step-list li {
+      counter-increment: step;
+      padding: 10px 14px 10px 0;
+      position: relative;
+      padding-right: 44px;
+      margin-bottom: 6px;
+    }
+
+    .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      right: 0;
+      top: 8px;
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ COVER PAGE ═══════════════════════ -->
+<div class="cover page">
+  <div class="cover-icon">&#9733;</div>
+  <h1>فضاء الشفاء</h1>
+  <h2>دليل شامل لمنصة الدكتورة نسرين التعليمية</h2>
+  <div class="cover-divider"></div>
+  <p class="cover-desc">
+    شرح مفصّل خطوة بخطوة لجميع خصائص ومميزات منصة فضاء الشفاء،
+    المنصة التعليمية المتخصصة في مجال العلاج النفسي والتطوير الذاتي.
+    يغطي هذا الدليل نظام المصادقة، إدارة المحتوى، نظام الاشتراكات والمدفوعات،
+    لوحة تحكم المشرف، نظام الأمان، والتكاملات التقنية.
+  </p>
+  <p class="cover-meta">الإصدار 1.0 — مايو 2026</p>
+</div>
+
+<!-- ═══════════════════════ TABLE OF CONTENTS ═══════════════════════ -->
+<div class="page toc page-break">
+  <h2>فهرس المحتويات</h2>
+  <ul class="toc-list">
+    <li><span class="toc-num">1</span><span class="toc-title">نظرة عامة على المنصة</span></li>
+    <li><span class="toc-num">2</span><span class="toc-title">البنية التقنية والتقنيات المستخدمة</span></li>
+    <li><span class="toc-num">3</span><span class="toc-title">نظام المصادقة وتسجيل الدخول</span></li>
+    <li><span class="toc-num">4</span><span class="toc-title">الصفحة الرئيسية والمحتوى الديناميكي</span></li>
+    <li><span class="toc-num">5</span><span class="toc-title">نظام الدورات التعليمية</span></li>
+    <li><span class="toc-num">6</span><span class="toc-title">المقالات والبودكاست والفيديوهات والكتب</span></li>
+    <li><span class="toc-num">7</span><span class="toc-title">البث المباشر</span></li>
+    <li><span class="toc-num">8</span><span class="toc-title">نظام الاشتراكات والخطط</span></li>
+    <li><span class="toc-num">9</span><span class="toc-title">نظام المدفوعات عبر CCP</span></li>
+    <li><span class="toc-num">10</span><span class="toc-title">شراء المحتوى الفردي</span></li>
+    <li><span class="toc-num">11</span><span class="toc-title">لوحة تحكم المشرف (Admin)</span></li>
+    <li><span class="toc-num">12</span><span class="toc-title">نظام التحكم في الوصول للمحتوى</span></li>
+    <li><span class="toc-num">13</span><span class="toc-title">نظام الأمان والحماية</span></li>
+    <li><span class="toc-num">14</span><span class="toc-title">التكاملات الخارجية</span></li>
+    <li><span class="toc-num">15</span><span class="toc-title">دعم اللغات المتعددة والتصميم المتجاوب</span></li>
+    <li><span class="toc-num">16</span><span class="toc-title">ملخص الميزات الكامل</span></li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 1 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">1</span> نظرة عامة على المنصة</h2>
+    <p>
+      <strong>فضاء الشفاء</strong> (Healing Space / Espace de Guérison) هي منصة تعليمية رقمية متكاملة أسستها الدكتورة نسرين، تختص في مجال العلاج النفسي والتطوير الذاتي. تهدف المنصة إلى تقديم محتوى تعليمي متنوع يشمل الدورات التدريبية، المقالات المتخصصة، حلقات البودكاست الملهمة، الفيديوهات التعليمية، الكتب الإلكترونية، والبث المباشر، كل ذلك ضمن بيئة رقمية آمنة وسهلة الاستخدام تدعم اللغات العربية والفرنسية والإنجليزية.
+    </p>
+    <p>
+      تعمل المنصة بنموذج اشتراكات مرن يتيح للمستخدمين الاختيار بين الاشتراك الكامل الذي يمنح وصولاً لجميع المحتوى، أو اشتراكات مخصصة لنوع محتوى واحد مثل الدورات فقط أو البودكاست فقط، بالإضافة إلى إمكانية شراء المحتوى فرادى بدون الحاجة لاشتراك كامل. يتم التعامل المالي عبر نظام CCP (الحساب البريدي الجزائري) حيث يُحوّل المستخدم المبلغ ثم يرفع إيصال الدفع لمراجعته من طرف المشرف.
+    </p>
+
+    <h3 class="sub-title">الرؤية والرسالة</h3>
+    <p>
+      تسعى منصة فضاء الشفاء إلى جعل المعرفة في مجال الصحة النفسية والعلاج النفسي متاحة للجميع في العالم العربي، مع الحفاظ على جودة المحتوى العلمي وموثوقيته. المنصة تجمع بين العمق الأكاديمي والأسلوب المبسط الذي يسهل فهمه واستيعابه، مما يجعلها منصة فريدة من نوعها في المنطقة.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">2</span> البنية التقنية والتقنيات المستخدمة</h2>
+    <p>
+      بُنيت المنصة على أحدث التقنيات المتاحة لضمان الأداء العالي والأمان القوي وسهولة التوسع. إليك نظرة تفصيلية على كل مكون تقني:
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>&#9881; الواجهة الأمامية</h4>
+        <p>Next.js 16 مع App Router، React، TypeScript، وTailwind CSS 4. تستخدم تحميلًا ديناميكيًا (Dynamic Import) لكل صفحة لتحسين الأداء.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; مكونات UI</h4>
+        <p>shadcn/ui — مكتبة مكونات عالية الجودة مبنية على Radix UI مع دعم كامل للتصميم المتجاوب وتخصيص الثيمات.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; إدارة الحالة</h4>
+        <p>Zustand — مكتبة خفيفة لإدارة حالة التطبيق (المستخدم، التنقل، اللغة، الشريط الجانبي) مع دعم كامل لـ TypeScript.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; المصادقة</h4>
+        <p>Firebase Authentication (Client + Admin SDK) — تسجيل دخول بالبريد الإلكتروني وكلمة المرور، تسجيل دخول بحساب غوغل عبر signInWithPopup.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; قاعدة البيانات</h4>
+        <p>Firebase Firestore — قاعدة بيانات NoSQL مرنة مع طبقة تجريد db.ts تحاكي نمط Prisma ORM للعمليات CRUD.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; تخزين الملفات</h4>
+        <p>Cloudinary للمحتوى (صور، فيديوهات، صوتيات، PDF) مع تحسين تلقائي. Firebase Storage للإيصالات.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; الجلسات</h4>
+        <p>iron-session — جلسات مشفرة مبنية على الكوكيز (لا تخزين على الخادم). مدة الجلسة 7 أيام مع مفتاح تشفير 32 حرفًا.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#9881; الرسوم المتحركة</h4>
+        <p>Framer Motion — حركات انتقالية سلسة بين الصفحات، تأثيرات الظهور التدريجي، والعداد المتحرك في الصفحة الرئيسية.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title">التقنيات الإضافية</h3>
+    <div class="tech-badges">
+      <span class="tech-badge">React Hook Form + Zod</span>
+      <span class="tech-badge">Sonner (Toast)</span>
+      <span class="tech-badge">@dnd-kit (Drag & Drop)</span>
+      <span class="tech-badge">MDX Editor</span>
+      <span class="tech-badge accent">next-themes</span>
+      <span class="tech-badge accent">Vercel Deployment</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 3 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">3</span> نظام المصادقة وتسجيل الدخول</h2>
+    <p>
+      يستخدم الموقع نظام مصادقة متكاملًا يجمع بين Firebase Client SDK للواجهة الأمامية وFirebase Admin SDK للخادم، مع إدارة جلسات مشفرة عبر iron-session. هذا النظام يوفر طبقات حماية متعددة ويضمن تجربة مستخدم سلسة.
+    </p>
+
+    <h3 class="sub-title">طرق التسجيل والدخول</h3>
+    <ul>
+      <li><strong>البريد الإلكتروني وكلمة المرور:</strong> يمكن للمستخدمين إنشاء حساب جديد باستخدام بريدهم الإلكتروني وكلمة مرور آمنة. يتم التحقق من صحة البيانات باستخدام مكتبة Zod قبل إرسالها.</li>
+      <li><strong>تسجيل الدخول بحساب غوغل:</strong> عبر نافذة منبثقة (signInWithPopup) تتيح للمستخدم اختيار حسابه الغوغلي مباشرة. عند أول تسجيل دخول يتم إنشاء حساب جديد تلقائيًا.</li>
+      <li><strong>دخول المشرف:</strong> يتطلب كود وصول خاص (ADMIN_ACCESS_CODE) مخزن كمتغير بيئة على الخادم فقط، ولا يُكشف أبدًا في الكود العام.</li>
+    </ul>
+
+    <h3 class="sub-title">مسار المصادقة خطوة بخطوة</h3>
+    <ol class="step-list">
+      <li>المستخدم يملأ نموذج تسجيل الدخول أو ينقر على زر غوغل</li>
+      <li>Firebase يتحقق من بيانات الاعتماد ويعيد ID Token</li>
+      <li>يُرسل الـ ID Token إلى نقطة API الخلفية (/api/auth/login أو /api/auth/google)</li>
+      <li>Admin SDK يتحقق من صحة الـ Token ويسحب بيانات المستخدم من Firestore</li>
+      <li>إذا كان المستخدم جديدًا يتم إنشاء حساب تلقائيًا في قاعدة البيانات</li>
+      <li>تُنشأ جلسة مشفرة (iron-session) تحتوي على userId و role و isAdmin</li>
+      <li>يُحدث Zustand Store في الواجهة ببيانات المستخدم</li>
+      <li>يُعاد توجيه المستخدم إلى الصفحة الرئيسية</li>
+    </ol>
+
+    <h3 class="sub-title">شبكة أمان onAuthStateChanged</h3>
+    <p>
+      بالإضافة إلى مسار النافذة المنبثقة الرئيسي، يعمل مستمع onAuthStateChanged كشبكة أمان. إذا نجحت مصادقة Firebase لكن فشل استدعاء الخادم لأي سبب (مثل خطأ شبكة)، يلتقط هذا المستمع حالة تسجيل الدخول ويُنشئ الجلسة تلقائيًا. يتضمن نظام حماية ضد المعالجة المزدوجة عبر متغير googleAuthProcessedThisMount.
+    </p>
+
+    <h3 class="sub-title">استعادة الجلسة</h3>
+    <p>
+      عند إعادة تحميل الصفحة، يتم استعادة الجلسة من كوكي iron-session عبر نقطة /api/auth/session دون الاعتماد على Firebase. ثم تُسحب بيانات المستخدم الكاملة من /api/auth/profile. هذا يضمن عمل الموقع حتى لو لم يكن Firebase متاحًا مؤقتًا.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">4</span> الصفحة الرئيسية والمحتوى الديناميكي</h2>
+    <p>
+      الصفحة الرئيسية هي واجهة المنصة الأولى وتتكون من عدة أقسام قابلة للتخصيص بالكامل من طرف المشرف. تتميز بتصميم عصري مع تدرجات لونية هادئة وحركات انتقالية سلسة.
+    </p>
+
+    <h3 class="sub-title">أقسام الصفحة الرئيسية</h3>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>&#127916; شريط العرض (Slider)</h4>
+        <p>عرض صور ترويجية قابلة للنقر مع روابط. يدعم عناوين ثلاثية اللغة وترتيب مخصص. يمكن إضافة عدد غير محدود من الشرائح.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127775; قسم البطل (Hero)</h4>
+        <p>عنوان رئيسي ووصف وأزرار إجراء (CTA) قابلة للتخصيص بالكامل بثلاث لغات. يظهر اسم الدكتورة نسرين بشكل بارز.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127909; فيديو المقدمة</h4>
+        <p>فيديو تعريفي اختياري يدعم YouTube والفيديو المباشر. يعرض صورة مصغرة مع زر تشغيل أنيق قبل التشغيل.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128736; شبكة الخدمات</h4>
+        <p>ست بطاقات تفاعلية: الدورات، المقالات، البودكاست، الفيديوهات، الكتب، البث المباشر. كل بطاقة بصورة ووصف وأيقونة مميزة.</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h4>&#128161; التخصيص الديناميكي</h4>
+      <p>يمكن للمشرف تخصيص: عنوان البطل، العرض الفرعي، الوصف، اسم صاحب الموقع، نصوص أزرار CTA، رابط فيديو المقدمة، وإظهار/إخفاء كل قسم. جميع الإعدادات تُحفظ ثلاثية اللغة وتُخزن مؤقتًا في localStorage لمنع الوميض عند التحديث.</p>
+    </div>
+
+    <h3 class="sub-title">إحصائيات متحركة</h3>
+    <p>
+      تعرض الصفحة الرئيسية عدادًا متحركًا يظهر عند التمرير، يعرض إحصائيات مثل عدد الأعضاء (1200+)، عدد الدورات (55+)، عدد المقالات (230+)، وتقييم المستخدمين (4.9). تستخدم هذه الإحصائيات تقنية العداد المتحرك (Animated Counter) مع تأثيرات Framer Motion.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 5 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">5</span> نظام الدورات التعليمية</h2>
+    <p>
+      يُعد نظام الدورات العمود الفقري للمنصة التعليمية. يتميز بهيكل هرمي منظم يضم الدورات التي تحتوي على فصول، وكل فصل يحتوي على دروس متعددة. هذا النظام يدعم المحتوى ثلاثي اللغة والتتبع التدريجي لتقدم المستخدم.
+    </p>
+
+    <h3 class="sub-title">هيكل الدورة</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>المستوى</th>
+          <th>الوصف</th>
+          <th>الحقول الرئيسية</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>الدورة (Course)</strong></td>
+          <td>الوحدة التعليمية الرئيسية</td>
+          <td>العنوان، الوصف، الصورة، السعر، الحالة (منشور/مسودة)، المدرّب</td>
+        </tr>
+        <tr>
+          <td><strong>الفصل (Chapter)</strong></td>
+          <td>مجموعة منظمة داخل الدورة</td>
+          <td>العنوان، الترتيب، معرّف الدورة</td>
+        </tr>
+        <tr>
+          <td><strong>الدرس (Lesson)</strong></td>
+          <td>محتوى تعليمي فردى</td>
+          <td>العنوان، المدة، رابط الفيديو، مجاني/مدفوع، الترتيب</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">ميزات الدورات</h3>
+    <ul>
+      <li><strong>محتوى ثلاثي اللغة:</strong> كل دورة وفصل ودرس يحتوي على عناوين وأوصاف بالعربية والفرنسية والإنجليزية، ويتم عرض اللغة المناسبة تلقائيًا.</li>
+      <li><strong>وضع العلامة المجانية:</strong> يمكن تحديد دروس معينة كـ "مجانية" لجذب المستخدمين، بينما تتطلب بقية الدروس اشتراكًا أو شراءًا فرديًا.</li>
+      <li><strong>تتبع التقدم:</strong> نظام courseProgress يتيح تتبع الدروس المكتملة ونسبة التقدم لكل مستخدم.</li>
+      <li><strong>نظام التقييم:</strong> يمكن للمستخدمين تقييم الدورات وترك تعليقات عبر نظام Reviews.</li>
+      <li><strong>عرض تفاعلي:</strong> واجهة عرض الدورة تتضمن أكورديون للفصول، شريط تقدم، وأزرار تسجيل/متابعة ذكية حسب حالة المستخدم.</li>
+      <li><strong>حوار الشراء:</strong> عند محاولة الوصول لمحتوى مقيد، يظهر حوار PurchaseDialog يتيح الشراء الفردي أو الاشتراك.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">6</span> المقالات والبودكاست والفيديوهات والكتب</h2>
+    <p>
+      بالإضافة إلى الدورات، توفر المنصة أربعة أنواع أخرى من المحتوى التعليمي، كل نوع له صفحة عرض خاصة ونظام إدارة في لوحة تحكم المشرف:
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>&#128196; المقالات (Articles)</h4>
+        <p>مقالات علمية متخصصة مع محرر MDX متقدم، صور غلاف، وقت قراءة estimated، تصنيفات، ومقالات ذات صلة. تدعم المحتوى ثلاثي اللغة والتقييمات.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127911; البودكاست (Podcasts)</h4>
+        <p>حلقات صوتية مع مشغل مدمج، أرقام حلقات، مدة، مضيف، وروابط بث. تدعم ملفات صوتية عبر Cloudinary مع تحويل تلقائي.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127909; الفيديوهات (Videos)</h4>
+        <p>فيديوهات تعليمية مع دعم YouTube والفيديو المباشر عبر Cloudinary. صور مصغرة تلقائية، جودة عالية، وتشغيل متكيف.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128214; الكتب الإلكترونية (PDFs)</h4>
+        <p>كتب ومستندات PDF قابلة للتحميل مع معاينة مباشرة. تخزين عبر Cloudinary كملفات raw مع روابط تحميل آمنة.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title">ميزات مشتركة لجميع أنواع المحتوى</h3>
+    <ul>
+      <li><strong>حالة النشر:</strong> كل محتوى يمكن أن يكون "منشور" (published) أو "مسودة" (draft)، ويظهر فقط المنشور للمستخدمين.</li>
+      <li><strong>نظام التقييمات:</strong> يمكن للمستخدمين المسجلين تقييم أي محتوى من 1 إلى 5 نجوم مع تعليق نصي.</li>
+      <li><strong>التحكم في الوصول:</strong> المحتوى المجاني متاح للجميع، والمحتوى المدفوع يتطلب اشتراكًا أو شراءًا فرديًا.</li>
+      <li><strong>العناوين ثلاثية اللغة:</strong> titleAr, titleFr, titleEn مع fallback ذكي حسب لغة المستخدم.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 7 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">7</span> البث المباشر</h2>
+    <p>
+      توفر المنصة نظام بث مباشر يتيح للدكتورة نسرين إجراء جلسات تفاعلية حية مع المتابعين. يتميز هذا النظام بإدارة ذكية لحالات البث المختلفة:
+    </p>
+    <ul>
+      <li><strong>بث مباشر (Live):</strong> جلسة جارية حاليًا تظهر في أعلى القائمة مع مؤشر بث أحمر.</li>
+      <li><strong>بث قادم (Upcoming):</strong> جلسة مجدولة مع تاريخ ووقت البث المتوقع.</li>
+      <li><strong>بث منتهي (Ended):</strong> جلسة سابقة مع رابط التسجيل إن وُجد.</li>
+    </ul>
+    <p>
+      يمكن للمشرف تحديد تاريخ ووقت البث (scheduledAt)، رابط البث (YouTube أو رابط مباشر)، ووصف الجلسة. تُفرز الجلسات تلقائيًا بحيث تظهر المباشرة أولًا ثم القادمة ثم المنتهية.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">8</span> نظام الاشتراكات والخطط</h2>
+    <p>
+      يعتمد الموقع على نموذج اشتراكات مرن يمنح المستخدمين خيارات متعددة للوصول إلى المحتوى. كل خطة لها سعرها وميزاتها الخاصة، ويمكن للمشرف تعديل الأسعار والإعدادات من لوحة التحكم.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>الخطة</th>
+          <th>الوصف</th>
+          <th>السعر الافتراضي</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>الوصول الكامل (Full)</strong></td>
+          <td>جميع أنواع المحتوى + شهادات + دعم مخصص</td>
+          <td>2,000 DA</td>
+        </tr>
+        <tr>
+          <td><strong>الدورات فقط</strong></td>
+          <td>جميع الدورات + شهادات + تتبع التقدم</td>
+          <td>500 DA</td>
+        </tr>
+        <tr>
+          <td><strong>المقالات فقط</strong></td>
+          <td>جميع المقالات + مقالات حصرية + تحميل PDF</td>
+          <td>500 DA</td>
+        </tr>
+        <tr>
+          <td><strong>البودكاست فقط</strong></td>
+          <td>جميع الحلقات + حلقات حصرية + تحميل للاستماع</td>
+          <td>500 DA</td>
+        </tr>
+        <tr>
+          <td><strong>الفيديوهات فقط</strong></td>
+          <td>جميع الفيديوهات + محتوى حصري + جودة عالية</td>
+          <td>500 DA</td>
+        </tr>
+        <tr>
+          <td><strong>الكتب فقط</strong></td>
+          <td>جميع الكتب + تحميل بلا حدود + إصدارات جديدة</td>
+          <td>500 DA</td>
+        </tr>
+        <tr>
+          <td><strong>البث المباشر فقط</strong></td>
+          <td>جميع البث + تسجيلات سابقة + جلسات تفاعلية</td>
+          <td>500 DA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <h4>&#128274; التحكم الدقيق في خطة الوصول الكامل</h4>
+      <p>يمكن للمشرف تحديد أنواع المحتوى المشمولة في خطة "الوصول الكامل" عبر إعداد fullPlanIncludes. كما يمكن استثناء عناصر محددة من الخطة الكاملة عبر fullPlanExcludedItems، مما يوفر تحكمًا دقيقًا على مستوى العنصر الفردي.</p>
+    </div>
+
+    <h3 class="sub-title">دعم الاشتراكات المتعددة</h3>
+    <p>
+      يمكن للمستخدم أن يكون لديه عدة اشتراكات نشطة في نفس الوقت (مثلاً: اشتراك الدورات + اشتراك البودكاست). نظام التحقق يفحص جميع الاشتراكات النشطة ويمنح الوصول وفقًا لذلك. يتم تجديد الاشتراكات يدويًا من طرف المشرف بعد التحقق من الدفع.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">9</span> نظام المدفوعات عبر CCP</h2>
+    <p>
+      يستخدم الموقع نظام دفع مبني على الحساب البريدي الجزائري (CCP) مناسبًا للسوق المحلي. مسار الدفع يتضمن عدة خطوات واضحة ومؤمنة:
+    </p>
+    <ol class="step-list">
+      <li>المستخدم يختار خطة الاشتراك أو المحتوى الفردي المراد شراؤه</li>
+      <li>يتم عرض رقم الحساب البريدي CCP مع اسم صاحب الحساب والولاية</li>
+      <li>المستخدم يحوّل المبلغ المطلوب عبر وكالة البريد أو تطبيق CCP</li>
+      <li>يُرفع صورة إيصال الدفع (صورة أو PDF، الحد الأقصى 20MB) عبر منطقة السحب والإفلات</li>
+      <li>يُدخل المستخدم رقم CCP الخاص به</li>
+      <li>يُرسل طلب الدفع إلى الخادم ويُسجّل بحالة "قيد المراجعة" (pending)</li>
+      <li>يتحقق المشرف من الإيصال ويوافق أو يرفض مع ملاحظة اختيارية</li>
+      <li>عند الموافقة، يُفعّل الاشتراك أو الشراء تلقائيًا</li>
+    </ol>
+
+    <div class="info-box warning">
+      <h4>&#9888; ملاحظة مهمة</h4>
+      <p>تُخزن إيصالات الدفع في Firebase Storage (وليس Cloudinary) لضمان خصوصيتها. يستغرق التحقق عادة 24 ساعة عمل. يمكن للمشرف رفض الدفع مع إضافة ملاحظة تشرح السبب.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 10-11 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">10</span> شراء المحتوى الفردي</h2>
+    <p>
+      يتيح النظام للمستخدمين شراء عناصر محتوى فردية (دورة واحدة، مقال واحد، فيديو واحد...) بدون الحاجة للاشتراك الكامل. هذه الميزة يمكن تفعيلها أو تعطيلها من إعدادات الموقع بواسطة المشرف عبر مفتاح individualPurchasesEnabled.
+    </p>
+    <p>
+      عند محاولة الوصول لمحتوى مقيد، يظهر حوار PurchaseDialog يعرض خيارين: شراء العنصر بسعره المحدد، أو الاشتراك في خطة كاملة. الشراء الفردي يمنح وصولاً دائمًا لا ينتهي، على عكس الاشتراكات التي لها تاريخ انتهاء.
+    </p>
+    <p>
+      تُسجل المشتريات الفردية في مجموعة purchases في Firestore وتحتوي على معرّف المحتوى ونوعه وسعره وحالته. نظام التحقق من الوصول يفحص المشتريات المقبولة قبل السماح بالوصول.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">11</span> لوحة تحكم المشرف (Admin)</h2>
+    <p>
+      لوحة تحكم شاملة تتيح للدكتورة نسرين إدارة جميع جوانب المنصة من واجهة واحدة. تتكون من ثمانية أقسام رئيسية:
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>&#128202; لوحة المعلومات</h4>
+        <p>إحصائيات شاملة: عدد الأعضاء، المدفوعات المعلقة، الإيرادات، الاشتراكات النشطة. رسوم بيانية ومؤشرات أداء رئيسية.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128101; إدارة الأعضاء</h4>
+        <p>عرض وبحث وتصفية الأعضاء. تفعيل/تعطيل حسابات، عرض تفاصيل الاشتراكات والمدفوعات لكل عضو.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128179; المدفوعات</h4>
+        <p>مراجعة إيصالات الدفع، الموافقة أو الرفض مع ملاحظات. عرض تفاصيل كل دفعة مع صورة الإيصال.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128218; إدارة المحتوى</h4>
+        <p>إنشاء وتعديل وحذف: الدورات (مع فصول ودروس)، المقالات، البودكاست، الفيديوهات، PDF، البث المباشر. محرر MDX للمقالات.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128176; الأسعار</h4>
+        <p>تعديل أسعار الاشتراكات وأسعار المحتوى الفردي. تحديد المحتوى المشمول في الخطة الكاملة.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127912; تخصيص الرئيسية</h4>
+        <p>تعديل نصوص الصفحة الرئيسية بثلاث لغات، إضافة شرائح عرض، إدارة الفيديو التعريفي، إظهار/إخفاء الأقسام. سحب وإفلات لإعادة الترتيب.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128736; الإعدادات</h4>
+        <p>رقم CCP واسم صاحبه والولاية، تفعيل/تعطيل الشراء الفردي، كود وصول المشرف، إعدادات أخرى.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128230; المشتريات</h4>
+        <p>مراجعة طلبات الشراء الفردي للمحتوى، الموافقة أو الرفض. عرض المحتوى المشترى وحالته.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title">نظام رفع الملفات في لوحة التحكم</h3>
+    <p>
+      يدعم المشرف رفع الملفات بطريقتين: رفع مباشر إلى Cloudinary عبر التوقيع المسبق (Signed Upload) للملفات الكبيرة (فيديوهات، صوتيات)، ورفع عبر الخادم (/api/upload) للملفات الصغيرة. يتم تحديد نوع المورد تلقائيًا حسب MIME type (صورة، فيديو، صوت، مستند) ويُخزن في المجلد المناسب.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 12-13 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">12</span> نظام التحكم في الوصول للمحتوى</h2>
+    <p>
+      يُعد نظام التحكم في الوصول (Content Access Control) من أهم أنظمة المنصة، حيث يحدد بدقة من يستطيع رؤية ماذا. يعتمد على مجموعة من القواعد الهرمية:
+    </p>
+
+    <h3 class="sub-title">قواعد الوصول</h3>
+    <ol class="step-list">
+      <li><strong>المحتوى المجاني:</strong> متاح دائمًا للجميع بما في ذلك الزوار غير المسجلين</li>
+      <li><strong>المشرفون:</strong> وصول كامل لجميع المحتوى بدون قيود</li>
+      <li><strong>المحتوى المشترى فرديًا:</strong> وصول دائم لا ينتهي للعنصر المحدد</li>
+      <li><strong>خطة الوصول الكامل:</strong> وفقًا لـ fullPlanIncludes مع استثناء العناصر في fullPlanExcludedItems</li>
+      <li><strong>الاشتراكات المحددة:</strong> وصول فقط لنوع المحتوى المشترك فيه</li>
+      <li><strong>بدون اشتراك:</strong> لا وصول للمحتوى المدفوع</li>
+    </ol>
+
+    <div class="info-box">
+      <h4>&#128273; دالة canAccessContentById</h4>
+      <p>هي الدالة المركزية التي تحقق من الوصول. تأخذ: المستخدم، نوع المحتوى، معرّف المحتوى، هل هو مجاني، قائمة المشتريات الفردية، الخطط النشطة، محتوى الخطة الكاملة، والعناصر المستثناة. تُرجع true أو false وفقًا للقواعد أعلاه بالترتيب.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">13</span> نظام الأمان والحماية</h2>
+    <p>
+      تتضمن المنصة نظام أمان متعدد الطبقات يحمي البيانات والعمليات من التهديدات الشائعة. إليك تفصيل كل طبقة:
+    </p>
+
+    <h3 class="sub-title">13.1 Proxy الأمني (Next.js 16)</h3>
+    <p>
+      يعمل ملف proxy.ts كطبقة أمان أولية لجميع طلبات API. يتضمن سبع طبقات حماية:
+    </p>
+    <ul>
+      <li><strong>تحديد المعدل (Rate Limiting):</strong> 60 طلب/دقيقة عام، 10 للمصادقة، 20 للمشرف، 30 للمحتوى، 10 للمدفوعات. تنظيف تلقائي للإدخالات القديمة كل 10 دقائق.</li>
+      <li><strong>رمز CSRF (Double-Submit Cookie):</strong> كوكي + ترويسة مخصصة مع مقارنة آمنة من ناحية التوقيت.</li>
+      <li><strong>حماية الأصل (Origin Protection):</strong> التحقق من Origin/Referer لطلبات التعديل، رفض الأصول غير الموثوقة.</li>
+      <li><strong>حد حجم الطلب:</strong> 10MB للطلبات العادية، 1.1GB للرفع.</li>
+      <li><strong>التحقق من الطريقة:</strong> قبول HTTP methods القياسية فقط.</li>
+      <li><strong>ترويسات أمان:</strong> X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, X-Request-ID.</li>
+      <li><strong>كشف الوكلاء المشبوهين:</strong> اكتشاف sqlmap, nikto, nmap وغيرها.</li>
+    </ul>
+
+    <h3 class="sub-title">13.2 تشفير الجلسات</h3>
+    <p>
+      تستخدم iron-session جلسات مشفرة بالكامل مبنية على الكوكيز (httpOnly, secure, sameSite=lax). مفتاح التشفير يجب أن يكون 32 حرفًا على الأقل ويُقرأ من متغير البيئة SESSION_SECRET. مدة الجلسة 7 أيام.
+    </p>
+
+    <h3 class="sub-title">13.3 أمان قاعدة البيانات</h3>
+    <p>
+      وحدة db-security.ts توفر: التحقق من أسماء المجموعات المسموحة (whitelist)، التحقق من معرّفات المستندات (منع الحقن)، التحقق من شروط where، وتطهير البيانات (sanitizeFirestoreData) قبل الكتابة لمنع حقن الحقول.
+    </p>
+
+    <h3 class="sub-title">13.4 حماية المشرف</h3>
+    <p>
+      كود وصول المشرف (ADMIN_ACCESS_CODE) يُخزن كمتغير بيئة على الخادم فقط ولا يُرسل أبدًا إلى الواجهة الأمامية. يتم التحقق منه عبر نقطة /api/auth/verify-admin. جميع عمليات المشرف تتطلب ترويسة x-admin-code صالحة.
+    </p>
+
+    <h3 class="sub-title">13.5 تطهير HTML</h3>
+    <p>
+      مكتبة html-sanitize.ts تُنظف محتوى HTML من العناصر والسمات الخطرة قبل عرضه، مما يمنع هجمات XSS عبر محتوى المقالات.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 14-16 ═══════════════════════ -->
+<div class="page page-break">
+  <div class="section">
+    <h2 class="section-title"><span class="num">14</span> التكاملات الخارجية</h2>
+    <p>
+      تعتمد المنصة على عدة خدمات خارجية متكاملة لتقديم تجربة مستخدم متكاملة:
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>الخدمة</th>
+          <th>الغرض</th>
+          <th>التفاصيل</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Firebase Auth</strong></td>
+          <td>المصادقة</td>
+          <td>Client SDK + Admin SDK، بريد إلكتروني + غوغل، إدارة المستخدمين</td>
+        </tr>
+        <tr>
+          <td><strong>Firebase Firestore</strong></td>
+          <td>قاعدة البيانات</td>
+          <td>NoSQL، 15+ مجموعة، استعلامات مرنة، عداد تلقائي</td>
+        </tr>
+        <tr>
+          <td><strong>Firebase Storage</strong></td>
+          <td>تخزين الملفات</td>
+          <td>إيصالات الدفع، ملفات مؤقتة، روابط آمنة</td>
+        </tr>
+        <tr>
+          <td><strong>Cloudinary</strong></td>
+          <td>إدارة الوسائط</td>
+          <td>تحسين تلقائي (WebP/AVIF)، CDN عالمي، صور مصغرة تلقائية، فيديو HLS</td>
+        </tr>
+        <tr>
+          <td><strong>Vercel</strong></td>
+          <td>الاستضافة</td>
+          <td>Serverless، CDN عالمي، متغيرات بيئة مشفرة، نشر تلقائي من GitHub</td>
+        </tr>
+        <tr>
+          <td><strong>iron-session</strong></td>
+          <td>الجلسات</td>
+          <td>تشفير الكوكيز، لا تخزين خادم، 7 أيام مدة</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">15</span> دعم اللغات المتعددة والتصميم المتجاوب</h2>
+    <p>
+      تدعم المنصة ثلاث لغات بالكامل: العربية (الافتراضية)، الفرنسية، والإنجليزية. نظام i18n مدمج يوفر:
+    </p>
+    <ul>
+      <li><strong>خطاف useTranslation:</strong> يوفر دالة t() للترجمة، اللغة الحالية، دالة تغيير اللغة، واتجاه النص (RTL/LTR).</li>
+      <li><strong>ملفات ترجمة كاملة:</strong> ملفات ar.ts, en.ts, fr.ts تحتوي على ترجمات لجميع النصوص في الواجهة.</li>
+      <li><strong>دعم RTL:</strong> الصفحة الرئيسية بـ dir="rtl" للعربية، وdir="ltr" للغات الأخرى. جميع المكونات تدعم الاتجاهين.</li>
+      <li><strong>خط Cairo:</strong> خط عربي احترافي من Google Fonts يدعم العربية واللاتينية بأوزان متعددة.</li>
+      <li><strong>محتوى ثلاثي اللغة:</strong> كل عنصر محتوى (دورة، مقال، إلخ) يحتوي على عناوين وأوصاف باللغات الثلاث.</li>
+    </ul>
+
+    <h3 class="sub-title">التصميم المتجاوب</h3>
+    <p>
+      الموقع متجاوب بالكامل ويعمل بسلاسة على جميع أحجام الشاشات. الشريط الجانبي ثابت على سطح المكتب (256px) ويتحول إلى Sheet (درج) على الهاتف. جميع الشبكات تتكيف من عمود واحد على الهاتف إلى عدة أعمدة على الشاشات الكبيرة. أزرار اللمس بحجم مناسب، والنصوص مقروءة على جميع الأجهزة.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><span class="num">16</span> ملخص الميزات الكامل</h2>
+    <p>
+      فيما يلي ملخص شامل لجميع ميزات منصة فضاء الشفاء:
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>&#128274; المصادقة والأمان</h4>
+        <p>تسجيل دخول بالبريد وغوغل، جلسات مشفرة، CSRF، Rate Limiting، كود مشرف آمن، تطهير HTML، حماية الأصل.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128218; إدارة المحتوى</h4>
+        <p>6 أنواع محتوى (دورات، مقالات، بودكاست، فيديوهات، كتب، بث مباشر)، محرر MDX، رفع Cloudinary، محتوى ثلاثي اللغة.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128179; الاشتراكات والمدفوعات</h4>
+        <p>7 خطط اشتراك، شراء فردي، دفع CCP مع إيصالات، موافقة/رفض من المشرف، سجل مدفوعات كامل.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128736; لوحة تحكم المشرف</h4>
+        <p>8 أقسام: المعلومات، الأعضاء، المدفوعات، المحتوى، الأسعار، تخصيص الرئيسية، الإعدادات، المشتريات.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#127760; اللغات والتصميم</h4>
+        <p>3 لغات (عربي، فرنسي، إنجليزي)، RTL/LTR، تصميم متجاوب، خط Cairo، حركات Framer Motion.</p>
+      </div>
+      <div class="feature-card">
+        <h4>&#128269; SEO والأداء</h4>
+        <p>JSON-LD، Open Graph، sitemap.xml، robots.txt، تحميل ديناميكي، تخزين مؤقت ذكي، CDN عالمي.</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h4>&#128640; الأداء والتحسين</h4>
+      <p>
+        تستخدم المنصة تحميلًا ديناميكيًا (Dynamic Import) لكل صفحة بحيث لا تُحمّل جميع الصفحات مرة واحدة. كما يعمل نظام cachedFetch على تخزين بيانات API مؤقتًا لمدة قابلة للتعيين، ويُخزن المحتوى الديناميكي في localStorage لمنع وميض المحتوى عند التحديث. نظام SplashScreen يوفر تجربة تحميل أنيقة.
+      </p>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    فضاء الشفاء — منصة الدكتورة نسرين التعليمية | الدليل الشامل الإصدار 1.0
+  </div>
+</div>
+
+</body>
+</html>

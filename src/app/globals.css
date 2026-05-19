@@ -1,0 +1,610 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   فضاء الشفاء - Healing Space
+   Calming, wellness-focused design system
+   RTL Arabic support · Light/Dark mode · Glassmorphism
+   ============================================================ */
+
+@theme inline {
+  /* ── Semantic Color Tokens ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Healing Palette (Static) ── */
+  --color-healing-teal: #0D9488;
+  --color-healing-teal-light: #5EEAD4;
+  --color-healing-gold: #D4A853;
+  --color-healing-gold-light: #F0D48A;
+  --color-healing-sage: #A8C5A0;
+  --color-healing-lavender: #B4A7D6;
+  --color-healing-rose: #D4A0A0;
+  --color-healing-sky: #7FB5C9;
+
+  /* ── Border Radius ── */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── Font Families ── */
+  --font-sans: var(--font-geist-sans), "Noto Sans Arabic", "Cairo", "Tajawal", system-ui,
+    -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-arabic: "Noto Sans Arabic", "Cairo", "Tajawal", "Noto Kufi Arabic", sans-serif;
+
+  /* ── Animations ── */
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-slide-in-up: slideInUp 0.5s ease-out forwards;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-audio-wave: audio-wave 1s ease-in-out infinite;
+  --animate-live-pulse: live-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   Light Mode (Default)
+   ============================================================ */
+:root {
+  --radius: 0.75rem;
+
+  /* Background & Foreground */
+  --background: hsl(150, 20%, 98%);
+  --foreground: hsl(220, 15%, 15%);
+
+  /* Card */
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(220, 15%, 15%);
+
+  /* Popover */
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(220, 15%, 15%);
+
+  /* Primary – Soft Teal */
+  --primary: hsl(173, 80%, 32%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  /* Secondary – Sage Wash */
+  --secondary: hsl(150, 25%, 94%);
+  --secondary-foreground: hsl(173, 60%, 25%);
+
+  /* Muted */
+  --muted: hsl(150, 15%, 94%);
+  --muted-foreground: hsl(220, 10%, 45%);
+
+  /* Accent – Warm Gold */
+  --accent: hsl(41, 60%, 58%);
+  --accent-foreground: hsl(220, 15%, 15%);
+
+  /* Destructive */
+  --destructive: hsl(0, 65%, 55%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  /* Borders & Inputs */
+  --border: hsl(150, 15%, 88%);
+  --input: hsl(150, 15%, 88%);
+  --ring: hsl(173, 70%, 45%);
+
+  /* Charts */
+  --chart-1: hsl(173, 70%, 40%);
+  --chart-2: hsl(41, 60%, 58%);
+  --chart-3: hsl(130, 35%, 55%);
+  --chart-4: hsl(260, 40%, 68%);
+  --chart-5: hsl(200, 45%, 58%);
+
+  /* Sidebar */
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(220, 15%, 15%);
+  --sidebar-primary: hsl(173, 80%, 32%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(150, 25%, 94%);
+  --sidebar-accent-foreground: hsl(173, 60%, 25%);
+  --sidebar-border: hsl(150, 15%, 88%);
+  --sidebar-ring: hsl(173, 70%, 45%);
+}
+
+/* ============================================================
+   Dark Mode
+   ============================================================ */
+.dark {
+  --background: hsl(223, 26%, 14%);
+  --foreground: hsl(150, 15%, 90%);
+
+  --card: hsl(223, 20%, 18%);
+  --card-foreground: hsl(150, 15%, 90%);
+
+  --popover: hsl(223, 20%, 18%);
+  --popover-foreground: hsl(150, 15%, 90%);
+
+  --primary: hsl(173, 70%, 42%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(223, 18%, 22%);
+  --secondary-foreground: hsl(173, 60%, 70%);
+
+  --muted: hsl(223, 15%, 22%);
+  --muted-foreground: hsl(220, 10%, 60%);
+
+  --accent: hsl(41, 55%, 50%);
+  --accent-foreground: hsl(0, 0%, 100%);
+
+  --destructive: hsl(0, 60%, 50%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  --border: hsl(223, 15%, 25%);
+  --input: hsl(223, 15%, 25%);
+  --ring: hsl(173, 60%, 40%);
+
+  --chart-1: hsl(173, 65%, 50%);
+  --chart-2: hsl(41, 55%, 55%);
+  --chart-3: hsl(130, 30%, 50%);
+  --chart-4: hsl(260, 45%, 60%);
+  --chart-5: hsl(200, 40%, 55%);
+
+  --sidebar: hsl(223, 22%, 12%);
+  --sidebar-foreground: hsl(150, 15%, 90%);
+  --sidebar-primary: hsl(173, 70%, 42%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(223, 18%, 20%);
+  --sidebar-accent-foreground: hsl(173, 60%, 70%);
+  --sidebar-border: hsl(223, 15%, 22%);
+  --sidebar-ring: hsl(173, 60%, 40%);
+}
+
+/* ============================================================
+   Base Layer
+   ============================================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Headings Hierarchy ── */
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+  }
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  h5 {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  h6 {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+}
+
+/* ============================================================
+   RTL Arabic Support
+   ============================================================ */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] p,
+[dir="rtl"] li,
+[dir="rtl"] span,
+[dir="rtl"] td,
+[dir="rtl"] th,
+[dir="rtl"] label {
+  line-height: 1.9;
+}
+
+/* Flip directional transforms for RTL */
+[dir="rtl"] .slide-in-left {
+  animation-name: slideInRight;
+}
+[dir="rtl"] .slide-in-right {
+  animation-name: slideInLeft;
+}
+
+/* Ensure proper sidebar direction */
+[dir="rtl"] .sidebar {
+  direction: rtl;
+}
+
+/* ============================================================
+   Smooth Theme Transitions
+   ============================================================ */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+/* ============================================================
+   Custom Scrollbar
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(173, 30%, 70%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(173, 50%, 50%);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(173, 30%, 35%);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(173, 50%, 45%);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(173, 30%, 70%) transparent;
+}
+
+.dark * {
+  scrollbar-color: hsl(173, 30%, 35%) transparent;
+}
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes audio-wave {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(2);
+  }
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+/* ============================================================
+   Utility Classes
+   ============================================================ */
+
+/* ── Glass Card – Glassmorphism ── */
+.glass-card {
+  background: hsl(0 0% 100% / 65%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(0 0% 100% / 30%);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 30px hsl(0 0% 0% / 5%);
+}
+
+.dark .glass-card {
+  background: hsl(223 26% 14% / 65%);
+  border: 1px solid hsl(0 0% 100% / 8%);
+  box-shadow: 0 4px 30px hsl(0 0% 0% / 20%);
+}
+
+/* ── Gradient Text – Decorative Headings ── */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    hsl(173, 80%, 32%) 0%,
+    hsl(41, 60%, 58%) 50%,
+    hsl(130, 35%, 50%) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Hover Lift – Card Interaction ── */
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px hsl(173 30% 30% / 12%);
+}
+
+.dark .hover-lift:hover {
+  box-shadow: 0 12px 40px hsl(0 0% 0% / 30%);
+}
+
+/* ── Content Lock Overlay ── */
+.content-lock-overlay {
+  position: relative;
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.content-lock-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: hsl(150 20% 98% / 30%);
+  border-radius: var(--radius);
+}
+
+.dark .content-lock-overlay::after {
+  background: hsl(223 26% 14% / 30%);
+}
+
+/* ── Audio Wave ── */
+.audio-wave {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+}
+
+.audio-wave span {
+  display: inline-block;
+  width: 3px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 2px;
+  animation: audio-wave 1s ease-in-out infinite;
+}
+
+.audio-wave span:nth-child(2) {
+  animation-delay: 0.1s;
+  height: 14px;
+}
+.audio-wave span:nth-child(3) {
+  animation-delay: 0.2s;
+  height: 20px;
+}
+.audio-wave span:nth-child(4) {
+  animation-delay: 0.3s;
+  height: 14px;
+}
+.audio-wave span:nth-child(5) {
+  animation-delay: 0.4s;
+  height: 8px;
+}
+
+/* ── Live Pulse Indicator ── */
+.live-pulse {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  background: hsl(0, 70%, 55%);
+  border-radius: 50%;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+.live-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid hsl(0, 70%, 55%);
+  animation: live-pulse 1.5s ease-in-out infinite;
+  opacity: 0;
+}
+
+/* ============================================================
+   Site Background — Professional Gradient System
+   Clean, subtle gradient wash with fine noise texture
+   Inspired by Linear / Vercel / Stripe aesthetic
+   ============================================================ */
+
+/* ── Main Background Container ── */
+.healing-site-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Layer 1: Subtle Gradient Wash ── */
+.healing-site-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(173 60% 45% / 0.035) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 70% at 85% 70%, hsl(41 50% 55% / 0.025) 0%, transparent 65%);
+  pointer-events: none;
+  animation: gradientWash 18s ease-in-out infinite alternate;
+}
+
+.dark .healing-site-bg::before {
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(173 50% 40% / 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 70% at 85% 70%, hsl(41 45% 40% / 0.04) 0%, transparent 65%);
+}
+
+@keyframes gradientWash {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0.85;
+    transform: translate(-0.3%, 0.2%);
+  }
+}
+
+/* ── Noise Texture Overlay ── */
+.healing-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+.dark .healing-noise {
+  opacity: 0.02;
+}
+
+/* ============================================================
+   Star Rating
+   ============================================================ */
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+  direction: ltr; /* Stars always render LTR */
+}
+
+.star-rating .star {
+  color: hsl(41, 60%, 58%);
+  font-size: 1.25rem;
+  transition: transform 0.15s ease;
+  cursor: default;
+}
+
+.star-rating .star:hover {
+  transform: scale(1.2);
+}
+
+.star-rating .star.empty {
+  color: hsl(0, 0%, 80%);
+}
+
+.dark .star-rating .star.empty {
+  color: hsl(0, 0%, 30%);
+}
