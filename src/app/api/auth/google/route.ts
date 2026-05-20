@@ -36,6 +36,12 @@ const googleSchema = z.object({
 const FIREBASE_PROJECT_ID =
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
 
+// Google OAuth Client ID — used by Google Identity Services (GIS)
+// GIS JWT tokens have this as their audience instead of the Firebase project ID
+const GOOGLE_OAUTH_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID ||
+  "873540723647-0ca7nsrgolgd36nk60m49tn46u4759mn.apps.googleusercontent.com";
+
 // ── Google tokeninfo fallback verification ──
 // When Firebase Admin SDK is not configured (missing service account key),
 // we use Google's public tokeninfo endpoint to verify the ID token.
@@ -73,11 +79,14 @@ async function verifyViaTokenInfo(idToken: string): Promise<{
 
     const info: TokenInfoResult = await res.json();
 
-    // Validate audience — the token MUST be for our Firebase project
+    // Validate audience — the token MUST be for our Firebase project or Google OAuth client
+    // Firebase ID tokens have aud = project ID
+    // GIS JWT tokens have aud = Google OAuth Client ID
     const validAudiences = [
       FIREBASE_PROJECT_ID,
       `${FIREBASE_PROJECT_ID}.firebaseapp.com`,
       `${FIREBASE_PROJECT_ID}.web.app`,
+      GOOGLE_OAUTH_CLIENT_ID,
     ];
 
     if (!validAudiences.includes(info.aud)) {

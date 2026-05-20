@@ -5,6 +5,13 @@
     { "source": "/podcasts/:path*", "destination": "/" },
     { "source": "/videos/:path*", "destination": "/" },
     { "source": "/pdfs/:path*", "destination": "/" },
-    { "source": "/live/:path*", "destination": "/" }
+    { "source": "/live/:path*", "destination": "/" },
+    { "source": "/login", "destination": "/" },
+    { "source": "/register", "destination": "/" },
+    { "source": "/admin/:path*", "destination": "/" },
+    { "source": "/profile", "destination": "/" },
+    { "source": "/subscriptions", "destination": "/" },
+    { "source": "/payment", "destination": "/" },
+    { "source": "/notifications", "destination": "/" }
   ]
 }

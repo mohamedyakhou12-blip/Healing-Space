@@ -1,151 +1,40 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider } from "next-themes";
 import { useTranslation } from "@/lib/i18n";
-import { useAppStore, ROUTE_TO_PAGE } from "@/lib/store";
+import { useAppStore, ROUTE_TO_PAGE, PAGE_ROUTES } from "@/lib/store";
 import { Header } from "@/components/layout/Header";
 import { SidebarDesktop, SidebarMobile } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
 import { SplashScreen } from "@/components/SplashScreen";
 import { initCSRFProtection } from "@/lib/csrf-client";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
 
 /* ================================================================== */
 /*  AppShell                                                           */
 /*                                                                     */
-/*  Auth flow:                                                         */
-/*  PRIMARY: signInWithPopup — handled in LoginPage/RegisterPage.      */
-/*  Result is available immediately, no page navigation, no state loss.*/
-/*                                                                     */
-/*  SAFETY NET: onAuthStateChanged — detects any Firebase sign-in      */
-/*  that wasn't processed by the popup handler (e.g., popup succeeded  */
-/*  but backend call failed). Creates the server session automatically.*/
+/*  Auth flow (simplified):                                            */
+/*  - Email/password login: handled by LoginPage → /api/auth/login     */
+/*  - Google sign-in: handled by GIS → /api/auth/google                */
+/*  - Admin login: handled by LoginPage → /api/auth/verify-admin       */
 /*                                                                     */
 /*  Session restoration on page load is done via /api/auth/session      */
 /*  which checks the iron-session cookie — no Firebase dependency.     */
 /*                                                                     */
-/*  NOTE: signInWithRedirect is used as a FALLBACK when signInWithPopup */
-/*  fails (network error, popup blocked). The redirect result is also   */
-/*  handled by getRedirectResult() in LoginPage/RegisterPage.           */
+/*  NOTE: The old onAuthStateChanged safety net has been REMOVED.      */
+/*  It caused race conditions and double-processing of Google          */
+/*  sign-ins. The new GIS approach handles everything in the           */
+/*  LoginPage/RegisterPage callback, eliminating the need for a        */
+/*  safety net.                                                        */
 /* ================================================================== */
-
-// Track whether we've already processed a Google sign-in during this mount
-// This prevents double-processing by both onAuthStateChanged and the popup handler
-let googleAuthProcessedThisMount = false;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { dir } = useTranslation();
   const [bgLoaded, setBgLoaded] = useState(false);
-  const authListenerSetup = useRef(false);
 
   // ── Initialize CSRF Protection ──
-  // This must run before any mutating fetch calls are made.
   useEffect(() => {
     initCSRFProtection();
-  }, []);
-
-  // ── onAuthStateChanged: Safety net for Firebase sign-ins ──
-  // This catches cases where:
-  // 1. The popup succeeded but the backend call failed (network error, etc.)
-  // 2. The user was already signed in from a previous session (Firebase persistence)
-  //
-  // This does NOT replace the popup handler — it's a fallback only.
-  // It checks: is there a Firebase user but NO client-side user state? → create session
-  useEffect(() => {
-    if (authListenerSetup.current) return;
-    authListenerSetup.current = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
-      // Skip if already logged in on the client side (popup handler already processed)
-      const store = useAppStore.getState();
-      if (store.user) {
-        console.log("[AppShell] onAuthStateChanged: user already in store, skipping");
-        return;
-      }
-
-      // Skip if the popup handler already processed this sign-in
-      if (googleAuthProcessedThisMount) {
-        console.log("[AppShell] onAuthStateChanged: auth already processed this mount, skipping");
-        return;
-      }
-
-      if (!firebaseUser) {
-        // No Firebase user — not signed in via Firebase
-        return;
-      }
-
-      // We have a Firebase user but no client-side user state!
-      // This means the popup handler didn't process this sign-in successfully.
-      // Let's create the session now as a safety net.
-      const email = firebaseUser.email;
-      console.log("[AppShell] onAuthStateChanged: Detected Firebase sign-in not processed by popup handler:", email);
-
-      // Mark as processed to prevent double-processing
-      googleAuthProcessedThisMount = true;
-      store.setIsLoadingAuth(true);
-
-      try {
-        const idToken = await firebaseUser.getIdToken();
-        console.log("[AppShell] onAuthStateChanged: Got ID token, sending to backend...");
-
-        const res = await fetch("/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          useAppStore.getState().setUser({
-            id: data.user.id,
-            name: data.user.name,
-            email: data.user.email,
-            role: data.user.role,
-            avatar: data.user.avatar,
-            phone: data.user.phone,
-          });
-
-          const { locale } = useAppStore.getState();
-          const toast = (await import("sonner")).toast;
-          toast.success(
-            data.isNewUser
-              ? (locale === "ar" ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "Account created successfully! Welcome")
-              : (locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Login successful!")
-          );
-
-          // CRITICAL FIX: Use full page navigation instead of navigate() because
-          // after a redirect sign-in, the user might be on a Next.js route page
-          // (like /login) where navigate() only changes the URL via pushState
-          // but doesn't switch the rendered page component.
-          if (typeof window !== "undefined") {
-            const targetPath = data.user.role === "admin" ? "/admin" : "/";
-            const currentPath = window.location.pathname;
-            if (currentPath !== targetPath) {
-              window.location.href = targetPath;
-            } else {
-              // Already on the right page, just update the store
-              useAppStore.getState().navigate(data.user.role === "admin" ? "admin" : "home");
-            }
-          }
-          console.log("[AppShell] onAuthStateChanged: Session created for:", email);
-        } else {
-          console.error("[AppShell] onAuthStateChanged: Backend verification failed:", data.error);
-          // Don't show error toast here — the popup handler's error message is already visible
-        }
-      } catch (err) {
-        console.error("[AppShell] onAuthStateChanged: Failed to create session:", err);
-      } finally {
-        useAppStore.getState().setIsLoadingAuth(false);
-        if (typeof window !== "undefined") {
-          (window as any).__googleSignInInProgress = false;
-        }
-      }
-    });
-
-    return () => unsubscribe();
   }, []);
 
   // ── Restore session on mount ──
@@ -190,10 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             }
 
             // FALLBACK: If profile fetch failed but session says user is logged in,
-            // set user from session data. This is critical for:
-            // - Admin sessions with temporary IDs (admin-<uuid>)
-            // - Google auth users created when Firestore was down
-            // - Any case where the profile endpoint is unavailable
+            // set user from session data.
             if (!profileRestored && !useAppStore.getState().user) {
               console.log("[AppShell] Falling back to session data for user:", data.userId);
               store.setUser({
@@ -216,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     restoreSession();
 
-    // Fetch public site settings (e.g., individualPurchasesEnabled)
+    // Fetch public site settings
     (async () => {
       try {
         const res = await fetch("/api/public-settings");
@@ -253,13 +139,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Background is now pure CSS — no image preload needed
-  // setBgLoaded kept for potential future use
   useEffect(() => { setBgLoaded(true); }, []);
 
   // ── Sync initial route from browser URL ──
-  // When a user navigates directly to a route like /courses, the Zustand
-  // store starts with currentPage: "home". This effect detects the actual
-  // URL and syncs the store so the correct page is rendered.
   useEffect(() => {
     const path = window.location.pathname;
     const page = ROUTE_TO_PAGE[path];
@@ -280,7 +162,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if (page) {
         const store = useAppStore.getState();
         if (store.currentPage !== page) {
-          store.navigate(page, event.state?.params || {});
+          // Use setState directly (no pushState) since browser already changed URL
+          useAppStore.setState({ currentPage: page, pageParams: event.state?.params || {} });
         }
       }
     }

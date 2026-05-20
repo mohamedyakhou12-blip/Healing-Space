@@ -1,6 +1,4 @@
 import { create } from "zustand";
-import { signOut } from "firebase/auth";
-import { auth } from "./firebase";
 import { clearCSRFToken } from "./csrf-client";
 
 export type Locale = "ar" | "fr" | "en";
@@ -123,14 +121,22 @@ export const useAppStore = create<AppState>()((set) => ({
   pageParams: {},
   navigate: (page, params = {}) => {
     set({ currentPage: page, pageParams: params });
-    // Update browser URL for SEO-friendly routing (SPA-style, no page reload)
     const route = PAGE_ROUTES[page];
     if (route && typeof window !== "undefined") {
       const currentPath = window.location.pathname;
       if (currentPath !== route) {
-        // Use replaceState for internal navigation to avoid creating
-        // extra history entries when just switching tabs
-        window.history.pushState({ page, params }, "", route);
+        // CRITICAL FIX: When on a Next.js route page (like /login, /admin),
+        // pushState only changes the URL but doesn't switch the Next.js page
+        // component. We must use full page navigation to actually switch pages.
+        // When already on the main SPA page (/), pushState works fine.
+        const isOnRoutePage = currentPath !== "/" && ROUTE_TO_PAGE[currentPath];
+        if (isOnRoutePage) {
+          // On a route page — need full navigation to switch Next.js pages
+          window.location.href = route;
+        } else {
+          // On the main SPA page — use pushState for smooth client-side navigation
+          window.history.pushState({ page, params }, "", route);
+        }
       }
     }
   },
@@ -157,29 +163,24 @@ export const useAppStore = create<AppState>()((set) => ({
     }),
   setIsLoadingAuth: (loading) => set({ isLoadingAuth: loading }),
   logout: async () => {
-    // 1. Sign out from Firebase client SDK
-    try {
-      await signOut(auth);
-    } catch {
-      // Ignore Firebase sign-out errors
-    }
-    // 2. Clear server session
+    // 1. Clear server session
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {
       // Ignore network errors
     }
-    // 3. Clear CSRF token
+    // 2. Clear CSRF token
     clearCSRFToken();
-    // 4. Clear client state
+    // 3. Clear client state
     set({
       user: null,
       isAdmin: false,
       currentPage: "home",
     });
-    // 4. Navigate to home page URL
+    // 4. Navigate to home page — use full page navigation to ensure
+    // the page component switches correctly from any route page
     if (typeof window !== "undefined" && window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
+      window.location.href = "/";
     }
   },
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,8 +17,6 @@ import {
   Leaf,
   ShieldCheck,
 } from "lucide-react";
-import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -77,24 +75,47 @@ const fadeUp = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Global mutex: shared with LoginPage via window object               */
+/*  Google Identity Services (GIS) - same as LoginPage                 */
 /* ------------------------------------------------------------------ */
-function isGoogleSignInInProgress(): boolean {
-  if (typeof window === "undefined") return false;
-  return !!(window as any).__googleSignInInProgress;
+
+const GOOGLE_CLIENT_ID = "873540723647-0ca7nsrgolgd36nk60m49tn46u4759mn.apps.googleusercontent.com";
+
+interface CredentialResponse {
+  credential: string;
+  select_by: string;
 }
-function setGoogleSignInInProgress(val: boolean): void {
-  if (typeof window !== "undefined") {
-    (window as any).__googleSignInInProgress = val;
-  }
+
+interface GoogleAccountsId {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: CredentialResponse) => void;
+    auto_select?: boolean;
+    cancel_on_tap_outside?: boolean;
+  }) => void;
+  renderButton: (
+    parent: HTMLElement,
+    options: {
+      theme?: "outline" | "filled_blue" | "filled_black";
+      size?: "large" | "medium" | "small";
+      text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+      shape?: "rectangular" | "pill" | "circle" | "square";
+      logo_alignment?: "left" | "center";
+      width?: string | number;
+      locale?: string;
+    }
+  ) => void;
+}
+
+interface WindowWithGoogle extends Window {
+  google?: {
+    accounts: {
+      id: GoogleAccountsId;
+    };
+  };
 }
 
 /* ================================================================== */
 /*  RegisterPage                                                       */
-/*                                                                     */
-/*  Google sign-in uses signInWithPopup (same as LoginPage).           */
-/*  Result is available immediately — no redirect state loss.          */
-/*  AppShell also has an onAuthStateChanged safety net.                */
 /* ================================================================== */
 
 export default function RegisterPage() {
@@ -105,57 +126,129 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [gisReady, setGisReady] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+  const credentialCallbackRef = useRef<((credential: string) => void) | null>(null);
 
-  // ── Handle redirect result (when user returns from Google) ──
+  // ── Load Google Identity Services script ──
   useEffect(() => {
-    let handled = false;
-    getRedirectResult(auth).then((result) => {
-      if (result && !handled) {
-        handled = true;
-        console.log("[Google Register] Redirect sign-in successful for:", result.user.email);
-        result.user.getIdToken().then((idToken) => {
-          // Send ID token to backend
-          fetch("/api/auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idToken }),
-          })
-          .then(async (res) => {
-            const data = await res.json();
-            if (res.ok && data.success) {
-              useAppStore.getState().setUser({
-                id: data.user.id,
-                name: data.user.name,
-                email: data.user.email,
-                role: data.user.role,
-                avatar: data.user.avatar,
-                phone: data.user.phone,
-              });
-              toast.success(data.isNewUser ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "تم تسجيل الدخول بنجاح!");
-              // CRITICAL FIX: Use full page navigation because after redirect,
-              // navigate() only changes the URL but doesn't switch the page component
-              if (typeof window !== "undefined") {
-                window.location.href = data.user.role === "admin" ? "/admin" : "/";
-              }
-            }
-          })
-          .catch(() => {});
+    if (typeof window === "undefined") return;
+
+    const win = window as WindowWithGoogle;
+    if (win.google?.accounts?.id) {
+      setGisReady(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      console.log("[GIS] Google Identity Services loaded (Register)");
+      setGisReady(true);
+    };
+    script.onerror = () => {
+      console.error("[GIS] Failed to load Google Identity Services");
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  // ── Initialize GIS and render button ──
+  useEffect(() => {
+    if (!gisReady || !googleButtonRef.current) return;
+
+    const win = window as WindowWithGoogle;
+    if (!win.google?.accounts?.id) return;
+
+    try {
+      win.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response: CredentialResponse) => {
+          console.log("[GIS] Got credential response (Register)");
+          if (response.credential && credentialCallbackRef.current) {
+            credentialCallbackRef.current(response.credential);
+          }
+        },
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      if (googleButtonRef.current) {
+        googleButtonRef.current.innerHTML = "";
+        win.google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: "outline",
+          size: "large",
+          text: "signup_with",
+          shape: "rectangular",
+          logo_alignment: "center",
+          width: googleButtonRef.current.offsetWidth,
+          locale: locale === "ar" ? "ar" : locale === "fr" ? "fr" : "en",
         });
       }
-    }).catch((error) => {
-      console.error("[Google Register] getRedirectResult error:", error?.code, error?.message);
-      // Show error to user
-      const code = error?.code || "";
-      if (code === "auth/unauthorized-domain") {
-        const currentDomain = window.location.hostname;
-        toast.error(
-          `النطاق (${currentDomain}) غير مصرح به في Firebase. يرجى إضافته في: Firebase Console → Authentication → Settings → Authorized domains`,
-          { duration: 15000 }
-        );
+    } catch (err) {
+      console.error("[GIS] Failed to initialize:", err);
+    }
+  }, [gisReady, locale]);
+
+  // ── Send Google credential to backend ──
+  const sendCredentialToBackend = useCallback(async (credential: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      console.log("[GIS] Sending credential to backend (Register)...");
+
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: credential }),
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        console.error("[GIS] Backend returned non-JSON:", res.status);
+        toast.error("خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً", { duration: 8000 });
+        return false;
       }
-    });
-    return () => { handled = true; };
-  }, []);
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setUser({
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          avatar: data.user.avatar,
+          phone: data.user.phone,
+        });
+        toast.success(
+          data.isNewUser
+            ? "تم إنشاء الحساب بنجاح! مرحباً بك"
+            : "تم تسجيل الدخول بنجاح!"
+        );
+        // Use full page navigation
+        window.location.href = data.user.role === "admin" ? "/admin" : "/";
+        return true;
+      } else {
+        console.error("[GIS] Backend error:", data.error);
+        toast.error(
+          "فشل التحقق من حساب غوغل. يرجى المحاولة مرة أخرى",
+          { duration: 8000 }
+        );
+        return false;
+      }
+    } catch (fetchErr) {
+      console.error("[GIS] Fetch to backend failed:", fetchErr);
+      toast.error("خطأ في الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت", { duration: 8000 });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setUser]);
+
+  useEffect(() => {
+    credentialCallbackRef.current = sendCredentialToBackend;
+  }, [sendCredentialToBackend]);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -211,130 +304,11 @@ export default function RegisterPage() {
         phone: result.user.phone,
       });
       toast.success("تم إنشاء الحساب بنجاح! مرحباً بك");
-      // Use full page navigation because navigate() only changes the URL
-      // but doesn't switch the Next.js page component on route pages like /register
+      // Use full page navigation
       window.location.href = "/";
     } catch {
       toast.error("حدث خطأ في الاتصال بالخادم");
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ── Google Register: Popup-only approach ──
-  // No redirect fallback — redirect-based auth is broken on Vercel serverless.
-  // AppShell's onAuthStateChanged acts as a safety net.
-  const onGoogleRegister = async () => {
-    if (isGoogleSignInInProgress()) {
-      console.log("[Google Register] Sign-in already in progress, ignoring click");
-      return;
-    }
-    setGoogleSignInInProgress(true);
-    setIsLoading(true);
-
-    try {
-      console.log("[Google Register] Starting popup sign-in...");
-      const result = await signInWithPopup(auth, googleProvider);
-
-      const email = result.user.email;
-      console.log("[Google Register] Popup sign-in successful for:", email);
-
-      // Get the Firebase ID token and send to backend
-      const idToken = await result.user.getIdToken();
-      console.log("[Google Register] Got ID token, sending to backend...");
-
-      // Send ID token to backend for verification
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      // Handle non-JSON responses
-      const contentType = res.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        console.error("[Google Register] Backend returned non-JSON:", res.status);
-        toast.error("خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً", { duration: 8000 });
-        return;
-      }
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setUser({
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          role: data.user.role,
-          avatar: data.user.avatar,
-          phone: data.user.phone,
-        });
-        toast.success(
-          data.isNewUser
-            ? "تم إنشاء الحساب بنجاح! مرحباً بك"
-            : "تم تسجيل الدخول بنجاح!"
-        );
-        // Use full page navigation because navigate() only changes the URL
-        // but doesn't switch the Next.js page component on route pages like /register
-        window.location.href = data.user.role === "admin" ? "/admin" : "/";
-        console.log("[Google Register] Registration/Login successful:", email);
-      } else {
-        console.error("[Google Register] Backend verification failed:", data.error);
-        toast.error(
-          "فشل التحقق من حساب غوغل. يرجى المحاولة مرة أخرى",
-          { duration: 8000 }
-        );
-      }
-    } catch (error: any) {
-      const code = error?.code || "";
-      const msg = error?.message || "";
-      console.error("[Google Register] signInWithPopup error:", code, msg);
-
-      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-        console.log("[Google Register] User closed the popup");
-      } else if (code === "auth/unauthorized-domain") {
-        const currentDomain = typeof window !== "undefined" ? window.location.hostname : "unknown";
-        toast.error(
-          `النطاق (${currentDomain}) غير مصرح به في Firebase. يرجى إضافته في: Firebase Console → Authentication → Settings → Authorized domains`,
-          { duration: 15000 }
-        );
-      } else if (code === "auth/operation-not-allowed") {
-        toast.error(
-          "تسجيل الدخول بغوغل غير مفعّل. يرجى تفعيله في: Firebase Console → Authentication → Sign-in method",
-          { duration: 15000 }
-        );
-      } else if (code === "auth/popup-blocked") {
-        // Popup blocked — fall back to redirect
-        console.log("[Google Register] Popup blocked, falling back to redirect...");
-        toast.info("جاري التحويل إلى صفحة غوغل لتسجيل الدخول...", { duration: 3000 });
-        try {
-          await signInWithRedirect(auth, googleProvider);
-        } catch (redirectErr: any) {
-          console.error("[Google Register] signInWithRedirect also failed:", redirectErr);
-          toast.error("فشل تسجيل الدخول. يرجى السماح بالنوافذ المنبثقة أو المحاولة مرة أخرى", { duration: 8000 });
-        }
-        return;
-      } else if (code === "auth/network-request-failed") {
-        // Network error — fall back to redirect method
-        console.log("[Google Register] Network error with popup, falling back to redirect...");
-        toast.info("جاري التحويل إلى صفحة غوغل لتسجيل الدخول...", { duration: 3000 });
-        try {
-          await signInWithRedirect(auth, googleProvider);
-        } catch (redirectErr: any) {
-          console.error("[Google Register] signInWithRedirect also failed:", redirectErr);
-          toast.error("فشل الاتصال بغوغل. يرجى التحقق من اتصالك بالإنترنت والمحاولة لاحقاً", { duration: 8000 });
-        }
-        return;
-      } else {
-        // Show the actual error code for debugging
-        console.error("[Google Register] Unhandled error code:", code);
-        toast.error(
-          `فشل تسجيل الدخول بغوغل (${code}). يرجى المحاولة مرة أخرى`,
-          { duration: 10000 }
-        );
-      }
-    } finally {
-      setGoogleSignInInProgress(false);
       setIsLoading(false);
     }
   };
@@ -571,20 +545,30 @@ export default function RegisterPage() {
                   <Separator className="flex-1" />
                 </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full gap-2 rounded-xl py-5"
-                  onClick={onGoogleRegister}
-                >
-                  <svg className="size-5" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                  </svg>
-                  {t("auth.loginWithGoogle")}
-                </Button>
+                {/* Google Sign-Up Button via GIS */}
+                <div className="w-full">
+                  <div
+                    ref={googleButtonRef}
+                    className="flex w-full justify-center overflow-hidden rounded-xl [&>div]:w-full!"
+                    style={{ minHeight: gisReady ? 44 : 0 }}
+                  />
+                  {!gisReady && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full gap-2 rounded-xl py-5"
+                      disabled
+                    >
+                      <svg className="size-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      </svg>
+                      {locale === "ar" ? "جاري تحميل تسجيل الدخول بغوغل..." : "Loading Google Sign-In..."}
+                    </Button>
+                  )}
+                </div>
 
                 <p className="text-sm text-muted-foreground">
                   {t("auth.hasAccount")}{" "}
