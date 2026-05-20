@@ -165,7 +165,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           const store = useAppStore.getState();
           // Only restore if not already logged in
           if (!store.user) {
-            // Fetch full user data from profile API
+            let profileRestored = false;
+
+            // Try to fetch full user data from profile API
             try {
               const profileRes = await fetch("/api/auth/profile");
               if (profileRes.ok) {
@@ -179,11 +181,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     avatar: profileData.user.avatar,
                     phone: profileData.user.phone,
                   });
+                  profileRestored = true;
                   console.log("[AppShell] Session restored for:", profileData.user.email);
                 }
               }
             } catch {
               console.warn("[AppShell] Session exists but profile fetch failed");
+            }
+
+            // FALLBACK: If profile fetch failed but session says user is logged in,
+            // set user from session data. This is critical for:
+            // - Admin sessions with temporary IDs (admin-<uuid>)
+            // - Google auth users created when Firestore was down
+            // - Any case where the profile endpoint is unavailable
+            if (!profileRestored && !useAppStore.getState().user) {
+              console.log("[AppShell] Falling back to session data for user:", data.userId);
+              store.setUser({
+                id: data.userId,
+                name: data.role === "admin" ? "Admin" : "User",
+                email: data.role === "admin" ? "admin@healingspace.com" : "",
+                role: (data.role as "user" | "admin") || "user",
+                avatar: undefined,
+                phone: undefined,
+              });
             }
           }
         }

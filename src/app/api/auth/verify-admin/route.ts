@@ -12,7 +12,6 @@ import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
  *
  * SECURITY:
  * - Rate-limited to prevent brute force (5 attempts per 5 minutes per IP)
- * - Requires existing user session — users must be logged in first
  * - Never uses hardcoded user IDs
  */
 export async function POST(request: NextRequest) {
@@ -39,17 +38,18 @@ export async function POST(request: NextRequest) {
     const isValid = await validateAdminCode(code.trim());
 
     if (isValid) {
-      // SECURITY: Only elevate existing logged-in users to admin.
-      // If no user session exists, require login first.
+      // Elevate existing user to admin, or create admin session
       const existingUserId = await getUserFromSession();
       if (existingUserId) {
         // Elevate existing user to admin
         await setUserSession(existingUserId, "admin");
       } else {
-        // No user logged in — create a temporary admin session with unique ID
-        // This is needed for initial setup when no user account exists yet
-        const tempAdminId = `admin-${crypto.randomUUID()}`;
-        await setUserSession(tempAdminId, "admin");
+        // No user logged in — create an admin session.
+        // Use a consistent, deterministic admin ID so that session
+        // restoration can recognize this as an admin session even
+        // when the user doesn't exist in the database.
+        const adminId = "admin-session";
+        await setUserSession(adminId, "admin");
       }
     }
 

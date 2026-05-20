@@ -211,7 +211,9 @@ export default function RegisterPage() {
         phone: result.user.phone,
       });
       toast.success("تم إنشاء الحساب بنجاح! مرحباً بك");
-      navigate("home");
+      // Use full page navigation because navigate() only changes the URL
+      // but doesn't switch the Next.js page component on route pages like /register
+      window.location.href = "/";
     } catch {
       toast.error("حدث خطأ في الاتصال بالخادم");
     } finally {
@@ -272,7 +274,9 @@ export default function RegisterPage() {
             ? "تم إنشاء الحساب بنجاح! مرحباً بك"
             : "تم تسجيل الدخول بنجاح!"
         );
-        navigate("home");
+        // Use full page navigation because navigate() only changes the URL
+        // but doesn't switch the Next.js page component on route pages like /register
+        window.location.href = data.user.role === "admin" ? "/admin" : "/";
         console.log("[Google Register] Registration/Login successful:", email);
       } else {
         console.error("[Google Register] Backend verification failed:", data.error);

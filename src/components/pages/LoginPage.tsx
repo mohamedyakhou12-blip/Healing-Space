@@ -292,16 +292,11 @@ export default function LoginPage() {
             : (locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Login successful!")
         );
 
-        // CRITICAL FIX: After redirect sign-in, we MUST use full page navigation
-        // because navigate() only uses pushState which doesn't switch the Next.js
+        // CRITICAL FIX: Always use full page navigation after Google sign-in.
+        // navigate() only uses pushState which doesn't switch the Next.js
         // page component. The user is on /login page and navigate("home") would
         // change the URL but keep showing the login form.
-        if (isRedirect || data.user.role === "admin") {
-          // Use full page navigation for redirect sign-in and admin users
-          window.location.href = data.user.role === "admin" ? "/admin" : "/";
-        } else {
-          navigate("home");
-        }
+        window.location.href = data.user.role === "admin" ? "/admin" : "/";
         return true;
       } else {
         const errorMsg = data.error || "Google login failed";
