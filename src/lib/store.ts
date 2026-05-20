@@ -86,6 +86,8 @@ interface AppState {
   currentPage: PageName;
   pageParams: Record<string, unknown>;
   navigate: (page: PageName, params?: Record<string, unknown>) => void;
+  /** Whether the app was initially loaded on the SPA root page "/" */
+  _spaMode: boolean;
 
   // Sidebar
   sidebarOpen: boolean;
@@ -111,7 +113,22 @@ interface AppState {
   setSiteSettings: (settings: Record<string, string>) => void;
 }
 
-export const useAppStore = create<AppState>()((set) => ({
+/**
+ * Detect if we started on the SPA root page.
+ * When the user loads "/" directly, the SPA takes over and renders
+ * all pages dynamically via Zustand state. When they load a route
+ * page like "/login" or "/admin", Next.js serves a dedicated page.
+ *
+ * This flag determines how navigation works:
+ * - SPA mode: use pushState for smooth client-side transitions
+ * - Route mode: use full page navigation for reliable page switches
+ */
+function detectSpaMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname === "/";
+}
+
+export const useAppStore = create<AppState>()((set, get) => ({
   // Locale defaults to Arabic (primary audience)
   locale: "ar",
   setLocale: (locale) => set({ locale }),
@@ -119,23 +136,24 @@ export const useAppStore = create<AppState>()((set) => ({
   // Navigation
   currentPage: "home",
   pageParams: {},
+  _spaMode: typeof window !== "undefined" ? detectSpaMode() : false,
   navigate: (page, params = {}) => {
+    const state = get();
     set({ currentPage: page, pageParams: params });
     const route = PAGE_ROUTES[page];
     if (route && typeof window !== "undefined") {
       const currentPath = window.location.pathname;
       if (currentPath !== route) {
-        // CRITICAL FIX: When on a Next.js route page (like /login, /admin),
-        // pushState only changes the URL but doesn't switch the Next.js page
-        // component. We must use full page navigation to actually switch pages.
-        // When already on the main SPA page (/), pushState works fine.
-        const isOnRoutePage = currentPath !== "/" && ROUTE_TO_PAGE[currentPath];
-        if (isOnRoutePage) {
-          // On a route page — need full navigation to switch Next.js pages
-          window.location.href = route;
-        } else {
-          // On the main SPA page — use pushState for smooth client-side navigation
+        if (state._spaMode) {
+          // ── SPA MODE: use pushState for smooth client-side navigation ──
+          // The SPA on "/" renders all pages dynamically via Zustand state.
+          // pushState changes the URL for bookmarkability without a full reload.
           window.history.pushState({ page, params }, "", route);
+        } else {
+          // ── ROUTE MODE: full page navigation for reliable page switches ──
+          // We're on a dedicated Next.js route page (e.g. /login, /admin).
+          // Must use full navigation to load the target Next.js page.
+          window.location.href = route;
         }
       }
     }

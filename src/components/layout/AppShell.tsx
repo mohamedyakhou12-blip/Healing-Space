@@ -13,19 +13,17 @@ import { initCSRFProtection } from "@/lib/csrf-client";
 /* ================================================================== */
 /*  AppShell                                                           */
 /*                                                                     */
-/*  Auth flow (simplified):                                            */
+/*  Auth flow:                                                         */
 /*  - Email/password login: handled by LoginPage → /api/auth/login     */
-/*  - Google sign-in: handled by GIS → /api/auth/google                */
 /*  - Admin login: handled by LoginPage → /api/auth/verify-admin       */
 /*                                                                     */
 /*  Session restoration on page load is done via /api/auth/session      */
 /*  which checks the iron-session cookie — no Firebase dependency.     */
 /*                                                                     */
-/*  NOTE: The old onAuthStateChanged safety net has been REMOVED.      */
-/*  It caused race conditions and double-processing of Google          */
-/*  sign-ins. The new GIS approach handles everything in the           */
-/*  LoginPage/RegisterPage callback, eliminating the need for a        */
-/*  safety net.                                                        */
+/*  Navigation:                                                        */
+/*  - SPA mode (loaded from "/"): pushState + Zustand state            */
+/*  - Route mode (loaded from /login, /admin, etc.): full page nav     */
+/*  The _spaMode flag in the store determines which strategy is used.  */
 /* ================================================================== */
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -141,14 +139,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Background is now pure CSS — no image preload needed
   useEffect(() => { setBgLoaded(true); }, []);
 
-  // ── Sync initial route from browser URL ──
+  // ── Set SPA mode and sync initial route from browser URL ──
   useEffect(() => {
     const path = window.location.pathname;
-    const page = ROUTE_TO_PAGE[path];
-    if (page && page !== "home") {
-      const store = useAppStore.getState();
-      if (store.currentPage === "home") {
-        // Use setState directly to avoid pushState (we're already at this URL)
+    const isSpaMode = path === "/";
+
+    // Set SPA mode flag — this determines navigation strategy
+    useAppStore.setState({ _spaMode: isSpaMode });
+
+    // If we're on a route page, update currentPage to match the URL
+    // so the sidebar highlights correctly
+    if (!isSpaMode) {
+      const page = ROUTE_TO_PAGE[path];
+      if (page) {
+        useAppStore.setState({ currentPage: page });
+      }
+    } else {
+      // In SPA mode, also check URL for initial page
+      const page = ROUTE_TO_PAGE[path];
+      if (page && page !== "home") {
         useAppStore.setState({ currentPage: page });
       }
     }

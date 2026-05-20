@@ -42,18 +42,6 @@ const pageComponents: Record<string, React.ComponentType> = {
   homepageCustomizer: HomepageCustomizerPage,
 };
 
-const pageVariants = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -16 },
-};
-
-const pageTransition = {
-  type: "tween" as const,
-  ease: "easeInOut" as const,
-  duration: 0.25,
-};
-
 export default function Page() {
   const currentPage = useAppStore((s) => s.currentPage);
   const userId = useAppStore((s) => s.user?.id);
@@ -68,11 +56,10 @@ export default function Page() {
       <AnimatePresence mode="wait">
         <motion.div
           key={pageKey}
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={pageTransition}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
         >
           <PageComponent />
         </motion.div>

@@ -25,23 +25,23 @@ const nextConfig: NextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
           // Restrict framing to same origin only
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          // ── Improved Content Security Policy ──
-          // Tightened script-src: removed 'unsafe-eval' where possible
-          // Kept 'unsafe-inline' and Firebase domains for compatibility
+          // ── Content Security Policy ──
+          // Removed Google Identity Services and GIS-specific entries since
+          // Google sign-in has been removed. Kept Firebase and Cloudinary entries.
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // Google Identity Services + Firebase Auth need these script sources
-              "script-src 'self' 'unsafe-inline' https://apis.google.com https://*.gstatic.com https://www.gstatic.com https://accounts.google.com",
+              // Firebase Auth needs these script sources
+              "script-src 'self' 'unsafe-inline' https://*.gstatic.com https://www.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",
               "media-src 'self' blob: https:",
               "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com",
-              // Allow all Firebase + Google connections for Auth + Cloudinary direct upload
-              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://apis.google.com https://accounts.google.com https://api.cloudinary.com",
-              // Google Sign-In popup/iframe needs these frame sources
-              "frame-src 'self' https://*.google.com https://*.firebaseapp.com https://accounts.google.com blob:",
+              // Allow Firebase + Cloudinary connections
+              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.cloudinary.com",
+              // Firebase auth handler needs frame source
+              "frame-src 'self' https://*.firebaseapp.com blob:",
               "frame-ancestors 'self'",
               "form-action 'self'",
               "object-src 'none'",
