@@ -54,7 +54,7 @@ function getSessionSecret(): string {
   // This is NOT ideal but prevents the app from crashing entirely.
   if (process.env.NODE_ENV === "production") {
     // Try to derive from Firebase project ID + API key (both are stable and available)
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247";
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
     const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
     const derived = `hs-session-${projectId}-${apiKey}-derived-key-at-least-32-chars`;
     if (derived.length >= 32) {

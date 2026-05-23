@@ -95,8 +95,8 @@ function initializeAdmin() {
       // but API routes MUST check firebaseReady before using Firestore
       adminApp = initializeApp(
         { 
-          projectId: sa.project_id || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247",
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${sa.project_id || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247"}.firebasestorage.app`,
+          projectId: sa.project_id || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f",
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${sa.project_id || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f"}.firebasestorage.app`,
         },
         ADMIN_APP_NAME
       );
@@ -114,8 +114,8 @@ function initializeAdmin() {
     // but API routes MUST check firebaseReady before using Firestore
     adminApp = initializeApp(
       { 
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247",
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247"}.firebasestorage.app`,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f",
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f"}.firebasestorage.app`,
       },
       ADMIN_APP_NAME
     );
