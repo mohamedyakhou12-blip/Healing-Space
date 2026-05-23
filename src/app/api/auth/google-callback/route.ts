@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setUserSession } from "@/lib/session";
+import { getIronSession } from "iron-session";
 import { sanitizeEmail } from "@/lib/sanitize";
 
 /**
@@ -8,13 +8,14 @@ import { sanitizeEmail } from "@/lib/sanitize";
  * Google OAuth 2.0 callback — receives the authorization code from Google,
  * exchanges it for user info, creates a session, and redirects to the homepage.
  *
- * This is the PRIMARY auth flow that doesn't depend on Firebase Client SDK.
- * It bypasses all CORS/COOP issues by handling OAuth server-to-server.
+ * This is the PRIMARY auth flow that bypasses all CORS/COOP issues by
+ * handling OAuth entirely server-to-server.
  *
- * IMPORTANT: The session cookie MUST be set on the redirect response.
- * In Next.js App Router, cookies set via iron-session's save() may not
- * propagate to NextResponse.redirect(). We use the cookies() API to
- * explicitly copy the session cookie to the redirect response.
+ * CRITICAL FIX: We use getIronSession(request, response, config) to set the
+ * session cookie DIRECTLY on the NextResponse.redirect() response object.
+ * Using setUserSession() (which calls cookies().set()) does NOT work because
+ * cookies set via the next/headers cookies() API are NOT included in
+ * explicitly created NextResponse objects.
  */
 
 const GOOGLE_CLIENT_ID =
@@ -23,6 +24,34 @@ const GOOGLE_CLIENT_ID =
 
 const GOOGLE_CLIENT_SECRET =
   process.env.GOOGLE_OAUTH_CLIENT_SECRET || "";
+
+// ── Session config (must match session.ts) ──
+function getSessionSecret(): string {
+  if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 32) {
+    return process.env.SESSION_SECRET;
+  }
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return "build-phase-temporary-secret-do-not-use-at-runtime";
+  }
+  if (process.env.NODE_ENV === "production") {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
+    return `hs-session-${projectId}-${apiKey}-derived-key-at-least-32-chars`;
+  }
+  return "dev-only-fallback-secret-do-not-use-in-prod-32ch";
+}
+
+const SESSION_OPTIONS = {
+  password: getSessionSecret(),
+  cookieName: "healing_session",
+  cookieOptions: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  },
+};
 
 interface GoogleTokenResponse {
   access_token: string;
@@ -90,7 +119,6 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error("[Google Callback] Token exchange failed:", tokenResponse.status, errorText);
-      // Check for redirect_uri_mismatch error
       if (errorText.includes("redirect_uri_mismatch")) {
         console.error(
           "[Google Callback] REDIRECT URI MISMATCH! The URI", redirectUri,
@@ -132,11 +160,9 @@ export async function GET(request: NextRequest) {
       const existingByEmail = await db.user.findUnique({ where: { email } });
 
       if (existingByEmail) {
-        // Update googleUid if missing
         const updateData: Record<string, unknown> = {};
         if (!existingByEmail.googleUid) updateData.googleUid = userInfo.sub;
         if (userInfo.picture && !existingByEmail.avatar) updateData.avatar = userInfo.picture;
-
         if (Object.keys(updateData).length > 0) {
           await db.user.update({ where: { id: existingByEmail.id }, data: updateData });
         }
@@ -156,14 +182,12 @@ export async function GET(request: NextRequest) {
             isActive: true,
           };
           if (userInfo.picture) userData.avatar = userInfo.picture;
-
           user = await db.user.create({ data: userData });
           console.log("[Google Callback] New user created:", email);
         }
       }
     } catch (dbError) {
       console.error("[Google Callback] Database error:", dbError);
-      // Fallback: create temporary user from token data
       user = {
         id: userInfo.sub,
         name: userInfo.name || email.split("@")[0],
@@ -174,41 +198,31 @@ export async function GET(request: NextRequest) {
       isNewUser = true;
     }
 
-    // Step 4: Set session and redirect
+    // Step 4: Create the redirect response FIRST, then set session cookie on it
     const role = user.role === "admin" ? "admin" : "user";
     const redirectPath = role === "admin" ? "/admin" : "/";
     const redirectUrl = new URL(redirectPath + "?login=success", getBaseUrl());
 
     console.log("[Google Callback] Login successful:", email, "role:", role);
 
-    // ── Set session cookie and create redirect response ──
-    // We must ensure the session cookie is set on the redirect response.
-    // In Next.js App Router, cookies set via iron-session may not
-    // automatically be included in NextResponse.redirect() responses.
+    // ── CRITICAL FIX: Set session cookie on the redirect response ──
+    // We must use getIronSession(request, response, config) so that
+    // iron-session sets the Set-Cookie header directly on our
+    // NextResponse.redirect() response object. Using setUserSession()
+    // (which calls cookies().set()) does NOT work because those cookies
+    // are not included in explicitly created NextResponse objects.
     try {
-      await setUserSession(user.id, role);
-
-      // Create redirect and explicitly copy the session cookie
       const response = NextResponse.redirect(redirectUrl);
 
-      // Read the session cookie that was just set by setUserSession
-      // and explicitly add it to the redirect response
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      const sessionCookie = cookieStore.get("healing_session");
+      // Use iron-session with Request + Response objects directly
+      // This ensures the session cookie is set on our redirect response
+      const session = await getIronSession(request, response, SESSION_OPTIONS);
+      session.userId = user.id;
+      session.userRole = role;
+      session.isAdmin = role === "admin";
+      await session.save();
 
-      if (sessionCookie) {
-        response.cookies.set("healing_session", sessionCookie.value, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24 * 7,
-          path: "/",
-        });
-        console.log("[Google Callback] Session cookie set on redirect response");
-      } else {
-        console.warn("[Google Callback] Session cookie not found after setUserSession!");
-      }
+      console.log("[Google Callback] Session cookie set on redirect response");
 
       return response;
     } catch (sessionError) {
