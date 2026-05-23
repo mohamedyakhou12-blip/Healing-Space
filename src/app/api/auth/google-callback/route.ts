@@ -217,9 +217,13 @@ export async function GET(request: NextRequest) {
       // Use iron-session with Request + Response objects directly
       // This ensures the session cookie is set on our redirect response
       const session = await getIronSession(request, response, SESSION_OPTIONS);
-      session.userId = user.id;
-      session.userRole = role;
-      session.isAdmin = role === "admin";
+      // Cast to any to bypass TypeScript module augmentation issue:
+      // The IronSessionData interface is declared in session.ts but
+      // TypeScript doesn't see it here because getIronSession(request, response, config)
+      // returns IronSession<object> without the module augmentation.
+      (session as any).userId = user.id;
+      (session as any).userRole = role;
+      (session as any).isAdmin = role === "admin";
       await session.save();
 
       console.log("[Google Callback] Session cookie set on redirect response");
