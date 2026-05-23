@@ -8,7 +8,13 @@ import { sanitizeEmail } from "@/lib/sanitize";
  * Google OAuth 2.0 callback — receives the authorization code from Google,
  * exchanges it for user info, creates a session, and redirects to the homepage.
  *
- * This is the FALLBACK auth flow that doesn't depend on Firebase Client SDK.
+ * This is the PRIMARY auth flow that doesn't depend on Firebase Client SDK.
+ * It bypasses all CORS/COOP issues by handling OAuth server-to-server.
+ *
+ * IMPORTANT: The session cookie MUST be set on the redirect response.
+ * In Next.js App Router, cookies set via iron-session's save() may not
+ * propagate to NextResponse.redirect(). We use the cookies() API to
+ * explicitly copy the session cookie to the redirect response.
  */
 
 const GOOGLE_CLIENT_ID =
@@ -55,12 +61,12 @@ export async function GET(request: NextRequest) {
   // User denied access
   if (error) {
     console.error("[Google Callback] OAuth error:", error);
-    return NextResponse.redirect(new URL("/login?error=google_denied", getBaseUrl()));
+    return NextResponse.redirect(new URL(`/login?error=google_denied`, getBaseUrl()));
   }
 
   if (!code) {
     console.error("[Google Callback] No authorization code received");
-    return NextResponse.redirect(new URL("/login?error=no_code", getBaseUrl()));
+    return NextResponse.redirect(new URL(`/login?error=no_code`, getBaseUrl()));
   }
 
   try {
@@ -84,7 +90,15 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error("[Google Callback] Token exchange failed:", tokenResponse.status, errorText);
-      return NextResponse.redirect(new URL("/login?error=token_exchange_failed", getBaseUrl()));
+      // Check for redirect_uri_mismatch error
+      if (errorText.includes("redirect_uri_mismatch")) {
+        console.error(
+          "[Google Callback] REDIRECT URI MISMATCH! The URI", redirectUri,
+          "must be added in Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client > Authorized redirect URIs"
+        );
+        return NextResponse.redirect(new URL(`/login?error=redirect_uri_mismatch`, getBaseUrl()));
+      }
+      return NextResponse.redirect(new URL(`/login?error=token_exchange_failed`, getBaseUrl()));
     }
 
     const tokens: GoogleTokenResponse = await tokenResponse.json();
@@ -97,7 +111,7 @@ export async function GET(request: NextRequest) {
 
     if (!userInfoResponse.ok) {
       console.error("[Google Callback] Failed to get user info:", userInfoResponse.status);
-      return NextResponse.redirect(new URL("/login?error=user_info_failed", getBaseUrl()));
+      return NextResponse.redirect(new URL(`/login?error=user_info_failed`, getBaseUrl()));
     }
 
     const userInfo: GoogleUserInfo = await userInfoResponse.json();
@@ -105,7 +119,7 @@ export async function GET(request: NextRequest) {
 
     if (!userInfo.email || !userInfo.email_verified) {
       console.error("[Google Callback] Missing or unverified email");
-      return NextResponse.redirect(new URL("/login?error=email_not_verified", getBaseUrl()));
+      return NextResponse.redirect(new URL(`/login?error=email_not_verified`, getBaseUrl()));
     }
 
     // Step 3: Find or create user in database
@@ -160,21 +174,49 @@ export async function GET(request: NextRequest) {
       isNewUser = true;
     }
 
-    // Step 4: Set session
+    // Step 4: Set session and redirect
     const role = user.role === "admin" ? "admin" : "user";
+    const redirectPath = role === "admin" ? "/admin" : "/";
+    const redirectUrl = new URL(redirectPath + "?login=success", getBaseUrl());
+
+    console.log("[Google Callback] Login successful:", email, "role:", role);
+
+    // ── Set session cookie and create redirect response ──
+    // We must ensure the session cookie is set on the redirect response.
+    // In Next.js App Router, cookies set via iron-session may not
+    // automatically be included in NextResponse.redirect() responses.
     try {
       await setUserSession(user.id, role);
+
+      // Create redirect and explicitly copy the session cookie
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Read the session cookie that was just set by setUserSession
+      // and explicitly add it to the redirect response
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const sessionCookie = cookieStore.get("healing_session");
+
+      if (sessionCookie) {
+        response.cookies.set("healing_session", sessionCookie.value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24 * 7,
+          path: "/",
+        });
+        console.log("[Google Callback] Session cookie set on redirect response");
+      } else {
+        console.warn("[Google Callback] Session cookie not found after setUserSession!");
+      }
+
+      return response;
     } catch (sessionError) {
       console.error("[Google Callback] Failed to set session:", sessionError);
-      return NextResponse.redirect(new URL("/login?error=session_failed", getBaseUrl()));
+      return NextResponse.redirect(new URL(`/login?error=session_failed`, getBaseUrl()));
     }
-
-    // Step 5: Redirect to homepage (logged in)
-    console.log("[Google Callback] Login successful:", email);
-    const redirectUrl = role === "admin" ? "/admin" : "/";
-    return NextResponse.redirect(new URL(redirectUrl + "?login=success", getBaseUrl()));
   } catch (error) {
     console.error("[Google Callback] Unhandled error:", error);
-    return NextResponse.redirect(new URL("/login?error=unknown", getBaseUrl()));
+    return NextResponse.redirect(new URL(`/login?error=unknown`, getBaseUrl()));
   }
 }

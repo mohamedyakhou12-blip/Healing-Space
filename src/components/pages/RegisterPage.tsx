@@ -37,8 +37,6 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 import { toast } from "sonner";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
 
 /* ------------------------------------------------------------------ */
 /*  Schema                                                             */
@@ -153,52 +151,13 @@ export default function RegisterPage() {
     }
   };
 
-  const onGoogleSignIn = async () => {
+  const onGoogleSignIn = () => {
+    // ── Server-side OAuth 2.0 flow ──
+    // Firebase Client SDK popup/redirect fails due to CORS/COOP issues on Vercel.
+    // Instead, redirect to server route which handles the full OAuth flow.
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      const data = await res.json().catch(() => ({ success: false, error: "Server error" }));
-
-      if (!res.ok || !data.success) {
-        toast.error(
-          locale === "ar" ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى" : "Google sign-in failed. Please try again",
-          { duration: 5000 }
-        );
-        return;
-      }
-
-      setUser({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        role: data.user.role,
-        avatar: data.user.avatar,
-        phone: data.user.phone,
-      });
-
-      toast.success(locale === "ar" ? "مرحباً بك!" : "Welcome!");
-      window.location.href = "/";
-    } catch (error: any) {
-      const errorCode = error?.code || "";
-      if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") return;
-      if (errorCode === "auth/popup-blocked") {
-        toast.error(locale === "ar" ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة" : "Popup was blocked. Please allow popups", { duration: 7000 });
-        return;
-      }
-      toast.error(locale === "ar" ? "حدث خطأ أثناء تسجيل الدخول بغوغل" : "Google sign-in error", { duration: 5000 });
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    window.location.href = "/api/auth/google-redirect";
   };
 
   return (

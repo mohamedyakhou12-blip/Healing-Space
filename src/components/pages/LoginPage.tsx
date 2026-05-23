@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,8 +27,6 @@ import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 import { setStoredAdminCode } from "@/lib/api-helpers";
 import { toast } from "sonner";
-import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
 
 /* ------------------------------------------------------------------ */
 /*  Schemas                                                             */
@@ -74,6 +72,59 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminCodeError, setAdminCodeError] = useState("");
+
+  // ── Handle OAuth callback errors from URL ──
+  // When the server-side OAuth flow fails, the callback redirects to
+  // /login?error=xxx. We show an appropriate error message here.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (error) {
+      // Clean the URL to prevent showing the error again on refresh
+      window.history.replaceState({}, "", window.location.pathname);
+
+      let displayError: string;
+      switch (error) {
+        case "google_denied":
+          displayError = locale === "ar"
+            ? "تم رفض الوصول من غوغل. يرجى المحاولة مرة أخرى"
+            : "Google access was denied. Please try again";
+          break;
+        case "redirect_uri_mismatch":
+          displayError = locale === "ar"
+            ? "خطأ في إعدادات المصادقة. يرجى التواصل مع المشرف"
+            : "Authentication configuration error. Please contact the admin";
+          break;
+        case "token_exchange_failed":
+          displayError = locale === "ar"
+            ? "فشل التحقق من غوغل. يرجى المحاولة مرة أخرى"
+            : "Google verification failed. Please try again";
+          break;
+        case "email_not_verified":
+          displayError = locale === "ar"
+            ? "البريد الإلكتروني غير مفعل في غوغل"
+            : "Your Google email is not verified";
+          break;
+        case "session_failed":
+          displayError = locale === "ar"
+            ? "فشل إنشاء الجلسة. يرجى المحاولة مرة أخرى"
+            : "Failed to create session. Please try again";
+          break;
+        default:
+          displayError = locale === "ar"
+            ? "حدث خطأ أثناء تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى"
+            : "An error occurred during Google sign-in. Please try again";
+      }
+      toast.error(displayError, { duration: 7000 });
+    }
+
+    // Show success message if redirected after successful OAuth login
+    const loginSuccess = params.get("login");
+    if (loginSuccess === "success") {
+      window.history.replaceState({}, "", window.location.pathname);
+      toast.success(locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Logged in successfully!", { duration: 3000 });
+    }
+  }, [locale]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -175,107 +226,23 @@ export default function LoginPage() {
     }
   };
 
-  /** Send a Firebase ID token to our server for verification and session creation */
-  const verifyGoogleToken = async (idToken: string) => {
-    const res = await fetch("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
-
-    const data = await res.json().catch(() => ({ success: false, error: "Server error" }));
-
-    if (!res.ok || !data.success) {
-      const errorMsg = data.error || "Google sign-in failed";
-      let displayError: string;
-      if (errorMsg.includes("Token verification failed")) {
-        displayError = locale === "ar" ? "فشل التحقق من الحساب. يرجى المحاولة مرة أخرى" : "Account verification failed. Please try again";
-      } else if (errorMsg.includes("Too many")) {
-        displayError = locale === "ar" ? "محاولات كثيرة. يرجى المحاولة لاحقاً" : "Too many attempts. Please try again later";
-      } else {
-        displayError = locale === "ar" ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى" : "Google sign-in failed. Please try again";
-      }
-      toast.error(displayError, { duration: 5000 });
-      return null;
-    }
-    return data;
-  };
-
-  const onGoogleSignIn = async () => {
+  const onGoogleSignIn = () => {
+    // ── Server-side OAuth 2.0 flow ──
+    // Firebase Client SDK popup/redirect fails due to CORS/COOP issues on Vercel.
+    // Instead, we redirect the user to our server route which initiates
+    // a proper OAuth 2.0 flow with Google. After the user authenticates,
+    // Google redirects back to our callback which sets the session cookie.
+    //
+    // Flow:
+    // 1. User clicks "Sign in with Google"
+    // 2. Browser navigates to /api/auth/google-redirect
+    // 3. Server redirects to Google OAuth consent screen
+    // 4. User authenticates → Google redirects to /api/auth/google-callback
+    // 5. Server verifies, creates session, redirects to homepage
+    // 6. AppShell restores session from cookie on page load
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
-    try {
-      // Step 1: Try popup first (works on desktop)
-      // On mobile, fall back to redirect if popup is blocked
-      const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        // On mobile, use server-side OAuth redirect (more reliable)
-        window.location.href = "/api/auth/google-redirect";
-        return;
-      }
-
-      // Desktop: use popup
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      // Step 2: Get Firebase ID token
-      const idToken = await user.getIdToken();
-
-      // Step 3: Send ID token to server
-      const data = await verifyGoogleToken(idToken);
-      if (!data) return;
-
-      // Step 4: Set user in client state
-      setUser({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        role: data.user.role,
-        avatar: data.user.avatar,
-        phone: data.user.phone,
-      });
-
-      toast.success(t("common.success"));
-      // Use SPA navigation
-      const navigateTarget = data.user.role === "admin" ? "admin" : "home";
-      useAppStore.getState().navigate(navigateTarget);
-    } catch (error: any) {
-      console.error("[Google Sign-In] Error:", error);
-      const errorCode = error?.code || "";
-      if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
-        return; // User cancelled
-      }
-      if (errorCode === "auth/popup-blocked") {
-        // Fallback: use redirect instead
-        try {
-          await signInWithRedirect(auth, googleProvider);
-          return;
-        } catch (redirectError) {
-          toast.error(
-            locale === "ar"
-              ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة وإعادة المحاولة"
-              : "Popup was blocked. Please allow popups and try again",
-            { duration: 7000 }
-          );
-          return;
-        }
-      }
-      if (errorCode === "auth/network-request-failed") {
-        // Firebase SDK can't reach Google servers — use server-side OAuth as fallback
-        console.log("[Google Sign-In] Network error — falling back to server-side OAuth");
-        window.location.href = "/api/auth/google-redirect";
-        return;
-      }
-      toast.error(
-        locale === "ar"
-          ? "حدث خطأ أثناء تسجيل الدخول بغوغل"
-          : "An error occurred during Google sign-in",
-        { duration: 5000 }
-      );
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    window.location.href = "/api/auth/google-redirect";
   };
 
   const ownerName = t("siteOwner.name");
