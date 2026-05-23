@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import {
-  getFirestore,
-} from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 // ═══════════════════════════════════════════════════════════════════════
 //  FIREBASE CONFIGURATION — ENV VAR FIRST, HARDCODED FALLBACK
@@ -36,5 +35,10 @@ if (typeof window !== "undefined") {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
+// Always show account selection even if one account is signed in
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 export default app;

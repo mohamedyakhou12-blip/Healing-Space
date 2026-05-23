@@ -87,7 +87,7 @@ const SESSION_OPTIONS = {
   cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days (reduced from 30 for better security)
     path: "/",
   },

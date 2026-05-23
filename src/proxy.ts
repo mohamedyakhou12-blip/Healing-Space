@@ -30,17 +30,26 @@ const MAX_CONTENT_REQUESTS = 30; // per minute for content CRUD routes
 const MAX_PAYMENT_REQUESTS = 10; // per minute for payment routes
 const MAX_REVIEW_REQUESTS = 15; // per minute for review routes
 
-// Cleanup stale entries every 10 minutes
-setInterval(() => {
+// Cleanup stale entries — lazy cleanup instead of setInterval (leaks in serverless)
+// Clean on every 50th request check
+let cleanupCounter = 0;
+
+function cleanStaleEntries() {
   const now = Date.now();
   for (const [key, entry] of rateLimitMap) {
     if (now - entry.lastReset > RATE_LIMIT_WINDOW * 10) {
       rateLimitMap.delete(key);
     }
   }
-}, 10 * 60 * 1000);
+}
 
 function checkRateLimit(ip: string, max: number): boolean {
+  // Lazy cleanup: run every 50th call
+  cleanupCounter++;
+  if (cleanupCounter % 50 === 0 && rateLimitMap.size > 500) {
+    cleanStaleEntries();
+  }
+
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
 

@@ -26,22 +26,22 @@ const nextConfig: NextConfig = {
           // Restrict framing to same origin only
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           // ── Content Security Policy ──
-          // Removed Google Identity Services and GIS-specific entries since
-          // Google sign-in has been removed. Kept Firebase and Cloudinary entries.
+          // Firebase Auth needs: gstatic.com scripts, googleapis.com styles/fonts,
+          // firebaseapp.com frames, identitytoolkit + securetoken connections
+          // Google Sign-In popup needs: accounts.google.com frames + connections
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // Firebase Auth needs these script sources
-              "script-src 'self' 'unsafe-inline' https://*.gstatic.com https://www.gstatic.com",
+              "script-src 'self' 'unsafe-inline' https://*.gstatic.com https://www.gstatic.com https://apis.google.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",
               "media-src 'self' blob: https:",
               "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com",
-              // Allow Firebase + Cloudinary connections
-              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.cloudinary.com",
-              // Firebase auth handler needs frame source
-              "frame-src 'self' https://*.firebaseapp.com blob:",
+              // Firebase Auth + Google Sign-In + Cloudinary connections
+              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.cloudinary.com https://oauth2.googleapis.com https://apis.google.com",
+              // Firebase auth handler + Google Sign-In popup frames
+              "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com blob:",
               "frame-ancestors 'self'",
               "form-action 'self'",
               "object-src 'none'",

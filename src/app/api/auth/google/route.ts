@@ -39,7 +39,7 @@ const FIREBASE_PROJECT_ID =
 // Google OAuth Client ID — used by Google Identity Services (GIS)
 // GIS JWT tokens have this as their audience instead of the Firebase project ID
 const GOOGLE_OAUTH_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID ||
+  process.env.GOOGLE_OAUTH_CLIENT_ID ||
   "873540723647-0ca7nsrgolgd36nk60m49tn46u4759mn.apps.googleusercontent.com";
 
 // ── Google tokeninfo fallback verification ──
