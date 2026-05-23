@@ -210,9 +210,9 @@ export default function LoginPage() {
       const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 
       if (isMobile) {
-        // Use redirect on mobile — more reliable than popup
-        await signInWithRedirect(auth, googleProvider);
-        return; // Page will reload after redirect
+        // On mobile, use server-side OAuth redirect (more reliable)
+        window.location.href = "/api/auth/google-redirect";
+        return;
       }
 
       // Desktop: use popup
@@ -262,12 +262,9 @@ export default function LoginPage() {
         }
       }
       if (errorCode === "auth/network-request-failed") {
-        toast.error(
-          locale === "ar"
-            ? "خطأ في الشبكة. يرجى التحقق من اتصالك بالإنترنت"
-            : "Network error. Please check your internet connection",
-          { duration: 5000 }
-        );
+        // Firebase SDK can't reach Google servers — use server-side OAuth as fallback
+        console.log("[Google Sign-In] Network error — falling back to server-side OAuth");
+        window.location.href = "/api/auth/google-redirect";
         return;
       }
       toast.error(
