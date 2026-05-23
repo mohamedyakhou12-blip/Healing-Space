@@ -34,7 +34,7 @@ const googleSchema = z.object({
 
 // Our Firebase project ID — used to validate the token audience claim
 const FIREBASE_PROJECT_ID =
-  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-88247";
 
 // Google OAuth Client ID — used by Google Identity Services (GIS)
 // GIS JWT tokens have this as their audience instead of the Firebase project ID

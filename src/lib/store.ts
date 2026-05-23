@@ -114,18 +114,20 @@ interface AppState {
 }
 
 /**
- * Detect if we started on the SPA root page.
- * When the user loads "/" directly, the SPA takes over and renders
- * all pages dynamically via Zustand state. When they load a route
- * page like "/login" or "/admin", Next.js serves a dedicated page.
+ * Detect if SPA mode should be active.
  *
- * This flag determines how navigation works:
- * - SPA mode: use pushState for smooth client-side transitions
- * - Route mode: use full page navigation for reliable page switches
+ * Since vercel.json rewrites ALL routes to the root page "/",
+ * the SPA always handles routing client-side. Therefore SPA mode
+ * should ALWAYS be true when running in the browser.
+ *
+ * Previously this only returned true for pathname === "/", which
+ * broke navigation on any other URL since the SPA root page is
+ * actually served for ALL routes via the rewrite rules.
  */
 function detectSpaMode(): boolean {
   if (typeof window === "undefined") return false;
-  return window.location.pathname === "/";
+  // Always true — the SPA root handles all routes via vercel.json rewrites
+  return true;
 }
 
 export const useAppStore = create<AppState>()((set, get) => ({

@@ -10,6 +10,10 @@ import { useAppStore, type PageName } from "@/lib/store";
  *
  * Uses setState directly instead of navigate() to avoid triggering
  * a URL change (we're already on the correct URL for this route page).
+ *
+ * NOTE: We no longer force _spaMode to false. Since vercel.json rewrites
+ * ALL routes to the SPA root, SPA mode should always be active for
+ * smooth client-side navigation.
  */
 export function SEOPageWrapper({
   page,
@@ -22,8 +26,6 @@ export function SEOPageWrapper({
     // Directly set currentPage without calling navigate() which would
     // try to change the URL (potentially causing a full page reload)
     useAppStore.setState({ currentPage: page });
-    // Also ensure _spaMode is false since we're on a route page
-    useAppStore.setState({ _spaMode: false });
   }, [page]);
 
   return <>{children}</>;

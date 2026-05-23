@@ -27,7 +27,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 import { setStoredAdminCode } from "@/lib/api-helpers";
 import { toast } from "sonner";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
 /* ------------------------------------------------------------------ */
@@ -129,11 +129,11 @@ export default function LoginPage() {
         phone: result.user.phone,
       });
       toast.success(t("common.success"));
-      // Use full page navigation when on a route page like /login
+      // Use SPA navigation for smooth transition
       if (result.user.role === "admin") {
-        window.location.href = "/admin";
+        navigate("admin");
       } else {
-        window.location.href = "/";
+        navigate("home");
       }
     } catch {
       toast.error(t("common.serverError"));
@@ -163,8 +163,8 @@ export default function LoginPage() {
           avatar: undefined,
         });
         toast.success(t("common.success"));
-        // Use full page navigation to /admin page
-        window.location.href = "/admin";
+        // Use SPA navigation for smooth transition
+        navigate("admin");
       } else {
         setAdminCodeError(t("adminAccess.wrongCode"));
       }
@@ -175,40 +175,56 @@ export default function LoginPage() {
     }
   };
 
+  /** Send a Firebase ID token to our server for verification and session creation */
+  const verifyGoogleToken = async (idToken: string) => {
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    const data = await res.json().catch(() => ({ success: false, error: "Server error" }));
+
+    if (!res.ok || !data.success) {
+      const errorMsg = data.error || "Google sign-in failed";
+      let displayError: string;
+      if (errorMsg.includes("Token verification failed")) {
+        displayError = locale === "ar" ? "فشل التحقق من الحساب. يرجى المحاولة مرة أخرى" : "Account verification failed. Please try again";
+      } else if (errorMsg.includes("Too many")) {
+        displayError = locale === "ar" ? "محاولات كثيرة. يرجى المحاولة لاحقاً" : "Too many attempts. Please try again later";
+      } else {
+        displayError = locale === "ar" ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى" : "Google sign-in failed. Please try again";
+      }
+      toast.error(displayError, { duration: 5000 });
+      return null;
+    }
+    return data;
+  };
+
   const onGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
     try {
-      // Step 1: Use Firebase Client SDK to sign in with Google popup
+      // Step 1: Try popup first (works on desktop)
+      // On mobile, fall back to redirect if popup is blocked
+      const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // Use redirect on mobile — more reliable than popup
+        await signInWithRedirect(auth, googleProvider);
+        return; // Page will reload after redirect
+      }
+
+      // Desktop: use popup
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       // Step 2: Get Firebase ID token
       const idToken = await user.getIdToken();
 
-      // Step 3: Send ID token to our server for verification and session creation
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      const data = await res.json().catch(() => ({ success: false, error: "Server error" }));
-
-      if (!res.ok || !data.success) {
-        const errorMsg = data.error || "Google sign-in failed";
-        // Translate common errors
-        let displayError: string;
-        if (errorMsg.includes("Token verification failed")) {
-          displayError = locale === "ar" ? "فشل التحقق من الحساب. يرجى المحاولة مرة أخرى" : "Account verification failed. Please try again";
-        } else if (errorMsg.includes("Too many")) {
-          displayError = locale === "ar" ? "محاولات كثيرة. يرجى المحاولة لاحقاً" : "Too many attempts. Please try again later";
-        } else {
-          displayError = locale === "ar" ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى" : "Google sign-in failed. Please try again";
-        }
-        toast.error(displayError, { duration: 5000 });
-        return;
-      }
+      // Step 3: Send ID token to server
+      const data = await verifyGoogleToken(idToken);
+      if (!data) return;
 
       // Step 4: Set user in client state
       setUser({
@@ -221,28 +237,29 @@ export default function LoginPage() {
       });
 
       toast.success(t("common.success"));
-      // Navigate based on role
-      if (data.user.role === "admin") {
-        window.location.href = "/admin";
-      } else {
-        window.location.href = "/";
-      }
+      // Use SPA navigation
+      const navigateTarget = data.user.role === "admin" ? "admin" : "home";
+      useAppStore.getState().navigate(navigateTarget);
     } catch (error: any) {
       console.error("[Google Sign-In] Error:", error);
-      // Handle specific Firebase errors
       const errorCode = error?.code || "";
       if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
-        // User cancelled - don't show error
-        return;
+        return; // User cancelled
       }
       if (errorCode === "auth/popup-blocked") {
-        toast.error(
-          locale === "ar"
-            ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة وإعادة المحاولة"
-            : "Popup was blocked. Please allow popups and try again",
-          { duration: 7000 }
-        );
-        return;
+        // Fallback: use redirect instead
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          toast.error(
+            locale === "ar"
+              ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة وإعادة المحاولة"
+              : "Popup was blocked. Please allow popups and try again",
+            { duration: 7000 }
+          );
+          return;
+        }
       }
       if (errorCode === "auth/network-request-failed") {
         toast.error(
