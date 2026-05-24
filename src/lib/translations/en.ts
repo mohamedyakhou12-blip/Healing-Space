@@ -51,6 +51,8 @@ const en = {
     latestVideos: "Latest Videos",
     introVideoTitle: "Discover Healing Space",
     videoNotSupported: "Your browser does not support video playback",
+    coachingProgramTitle: "Integrated Healing Program",
+    coachingProgramSubtitle: "A comprehensive journey towards recovery and balance through our integrated program combining psychological, physical, and spiritual healing",
   },
 
   // Courses
@@ -199,6 +201,18 @@ const en = {
     price: "Price",
     perMonth: "per month",
     activate: "Activate",
+    coachingMonthly: "Monthly Coaching Session",
+    coachingWorkshop: "Workshop",
+    coachingExercise: "Exercises",
+    coachingRetreat: "Rebalancing Retreat",
+    coachingQA: "Solutions & Chapters",
+    coachingMeditation: "Meditation",
+    coachingAffirmation: "Positive Affirmations",
+    coachingArtTherapy: "Art Therapy & Fun",
+    coachingMindDoctor: "Mind Doctor",
+    coachingHolistic: "Holistic & Integrative Medicine",
+    coachingBodyMemory: "Body Memory",
+    coachingMedicalHealing: "Medical Healing",
   },
 
   // Payment
@@ -390,6 +404,10 @@ const en = {
     collapseItems: "Hide Items",
     noItemsFound: "No items found",
     fullPlanExcludedItems: "Items excluded from full subscription",
+    fullPlanIncludes: "Full Plan Content",
+    fullPlanIncludesDesc: "Choose which content types are included in the full access plan, then select items to exclude",
+    itemsInPlan: "Items in full subscription",
+    noItemsInType: "No items in this section yet",
   },
 
   // Reviews

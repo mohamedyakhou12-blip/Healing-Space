@@ -51,6 +51,8 @@ const ar = {
     latestVideos: "أحدث الفيديوهات",
     introVideoTitle: "تعرّف على فضاء الشفاء",
     videoNotSupported: "متصفحك لا يدعم تشغيل الفيديو",
+    coachingProgramTitle: "برنامج الشفاء المتكامل",
+    coachingProgramSubtitle: "رحلة شاملة نحو التعافي والتوازن من خلال برنامجنا المتكامل الذي يجمع بين العلاج النفسي والبدني والروحي",
   },
 
   // Courses
@@ -199,6 +201,18 @@ const ar = {
     price: "السعر",
     perMonth: "شهرياً",
     activate: "تفعيل",
+    coachingMonthly: "جلسة شهرية مع مدربة",
+    coachingWorkshop: "ورشة عمل",
+    coachingExercise: "تمارين",
+    coachingRetreat: "رحلة إعادة توازن",
+    coachingQA: "حلول وفصول",
+    coachingMeditation: "تأمل",
+    coachingAffirmation: "تأكيدات إيجابية",
+    coachingArtTherapy: "علاج فني وترفيه",
+    coachingMindDoctor: "طبيب العقل",
+    coachingHolistic: "الطب الشمولي والتكاملي",
+    coachingBodyMemory: "ذاكرة الجسد",
+    coachingMedicalHealing: "شفاء وعلاج طبي",
   },
 
   // Payment
@@ -391,6 +405,10 @@ const ar = {
     collapseItems: "إخفاء العناصر",
     noItemsFound: "لا توجد عناصر",
     fullPlanExcludedItems: "العناصر المستثناة من الاشتراك الكامل",
+    fullPlanIncludes: "محتوى الاشتراك الكامل",
+    fullPlanIncludesDesc: "اختر أنواع المحتوى المشمولة في خطة الوصول الكامل، ثم حدد العناصر التي تريد استثناؤها",
+    itemsInPlan: "العناصر في الاشتراك الكامل",
+    noItemsInType: "لا توجد عناصر في هذا القسم بعد",
     searchContent: "البحث في المحتوى...",
     filterAll: "الكل",
     filterPublished: "منشور",

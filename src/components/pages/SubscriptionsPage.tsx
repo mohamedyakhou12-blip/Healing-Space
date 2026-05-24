@@ -143,6 +143,20 @@ export default function SubscriptionsPage() {
       recommended: true,
       features: [
         ...fullPlanDynamicFeatures,
+        // Coaching program features
+        { ar: "جلسة شهرية مع مدربة", en: "Monthly coaching session", fr: "Séance mensuelle avec coach" },
+        { ar: "ورشة عمل", en: "Workshop", fr: "Atelier" },
+        { ar: "تمارين", en: "Exercises", fr: "Exercices" },
+        { ar: "رحلة إعادة توازن", en: "Rebalancing retreat", fr: "Retraite de rééquilibrage" },
+        { ar: "حلول وفصول", en: "Solutions & chapters", fr: "Solutions et chapitres" },
+        { ar: "تأمل", en: "Meditation", fr: "Méditation" },
+        { ar: "تأكيدات إيجابية", en: "Positive affirmations", fr: "Affirmations positives" },
+        { ar: "علاج فني وترفيه", en: "Art therapy & fun", fr: "Art-thérapie et fun" },
+        { ar: "طبيب العقل", en: "Mind doctor", fr: "Médecin de l'esprit" },
+        { ar: "الطب الشمولي والتكاملي", en: "Holistic & integrative medicine", fr: "Médecine holistique et intégrative" },
+        { ar: "ذاكرة الجسد", en: "Body memory", fr: "Mémoire du corps" },
+        { ar: "شفاء وعلاج طبي", en: "Medical healing", fr: "Guérison et traitement médical" },
+        // Other benefits
         { ar: "شهادات إتمام الدورات", en: "Course completion certificates", fr: "Certificats de complétion" },
         { ar: "دعم فني مخصص", en: "Dedicated support", fr: "Support dédié" },
       ],

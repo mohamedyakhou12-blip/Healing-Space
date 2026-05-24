@@ -21,6 +21,12 @@ const ALLOWED_SETTINGS_KEYS = [
   "socialYoutube", "socialTwitter", "socialTikTok",
   "ogImage", "ogTitle", "ogDescription",
   "maintenanceMode", "registrationEnabled",
+  // Subscription prices (subscription_price_full, subscription_price_courses, etc.)
+  "subscription_price_full", "subscription_price_courses", "subscription_price_articles",
+  "subscription_price_podcasts", "subscription_price_videos", "subscription_price_pdfs",
+  "subscription_price_live",
+  // Full plan content type includes & per-item exclusions
+  "full_plan_includes", "full_plan_excluded_items",
 ];
 
 // Keys that must NEVER be written through this endpoint

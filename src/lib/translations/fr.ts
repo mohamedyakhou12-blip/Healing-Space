@@ -51,6 +51,8 @@ const fr = {
     latestVideos: "Dernières vidéos",
     introVideoTitle: "Découvrez l'Espace de Guérison",
     videoNotSupported: "Votre navigateur ne supporte pas la lecture vidéo",
+    coachingProgramTitle: "Programme de Guérison Intégré",
+    coachingProgramSubtitle: "Un voyage complet vers la guérison et l'équilibre à travers notre programme intégré combinant guérison psychologique, physique et spirituelle",
   },
 
   // Courses
@@ -199,6 +201,18 @@ const fr = {
     price: "Prix",
     perMonth: "par mois",
     activate: "Activer",
+    coachingMonthly: "Séance mensuelle avec coach",
+    coachingWorkshop: "Atelier",
+    coachingExercise: "Exercices",
+    coachingRetreat: "Retraite de rééquilibrage",
+    coachingQA: "Solutions et Chapitres",
+    coachingMeditation: "Méditation",
+    coachingAffirmation: "Affirmations positives",
+    coachingArtTherapy: "Art-thérapie et Fun",
+    coachingMindDoctor: "Médecin de l'esprit",
+    coachingHolistic: "Médecine holistique et intégrative",
+    coachingBodyMemory: "Mémoire du corps",
+    coachingMedicalHealing: "Guérison et traitement médical",
   },
 
   // Payment
@@ -390,6 +404,10 @@ const fr = {
     collapseItems: "Masquer les éléments",
     noItemsFound: "Aucun élément trouvé",
     fullPlanExcludedItems: "Éléments exclus de l'abonnement complet",
+    fullPlanIncludes: "Contenu de l'abonnement complet",
+    fullPlanIncludesDesc: "Choisissez les types de contenu inclus dans le plan d'accès complet, puis sélectionnez les éléments à exclure",
+    itemsInPlan: "Éléments dans l'abonnement complet",
+    noItemsInType: "Aucun élément dans cette section pour le moment",
   },
 
   // Reviews

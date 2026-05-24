@@ -97,7 +97,7 @@ export async function validateAdminCode(providedCode: string | null): Promise<bo
   const hasDbCode = await checkDbHasAdminCode();
   if (!envCode && !hasDbCode) {
     // No admin code configured anywhere — use default for initial setup
-    const DEFAULT_SETUP_CODE = "healing2024";
+    const DEFAULT_SETUP_CODE = "052307";
     console.warn("[Admin Code] ⚠️ No admin code configured! Using default setup code. Set ADMIN_ACCESS_CODE env var or configure in admin settings.");
     if (timingSafeEqual(providedCode, DEFAULT_SETUP_CODE)) return true;
   }

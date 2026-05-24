@@ -23,6 +23,16 @@ import {
   Video,
   Settings,
   Pencil,
+  Mic,
+  Dumbbell,
+  TreePine,
+  MessageCircleQuestion,
+  Brain,
+  Palette,
+  Stethoscope,
+  Leaf,
+  HandHeart,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,8 +74,8 @@ const scaleIn = {
 /* ------------------------------------------------------------------ */
 
 function useAnimatedCounter(target: number, duration = 2000) {
-  const [count, setCount] = useState(0);
-  const startedRef = useRef(false);
+  const [count, setCount] = useState(target === 0 ? 0 : 0);
+  const startedRef = useRef(target === 0);
 
   const start = useCallback(() => {
     if (startedRef.current) return;
@@ -82,14 +92,6 @@ function useAnimatedCounter(target: number, duration = 2000) {
       }
     }, 16);
   }, [target, duration]);
-
-  // Auto-start if target is 0 or very small (no animation needed)
-  useEffect(() => {
-    if (target === 0) {
-      setCount(0);
-      startedRef.current = true;
-    }
-  }, [target]);
 
   return { count, start };
 }
@@ -831,6 +833,163 @@ export default function HomePage() {
         </div>
       </section>
       )}
+
+      {/* ============================================================ */}
+      {/* INTEGRATED HEALING PROGRAM                                    */}
+      {/* ============================================================ */}
+      <section className="bg-muted/40 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            className="mb-12 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeUp}
+          >
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Sparkles className="size-6 text-teal-600" />
+              <h2 className="text-3xl font-bold sm:text-4xl">{t("home.coachingProgramTitle")}</h2>
+            </div>
+            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 mb-4" />
+            <p className="text-muted-foreground max-w-2xl mx-auto text-base">
+              {t("home.coachingProgramSubtitle")}
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.07 } },
+            }}
+          >
+            {[
+              {
+                icon: Mic,
+                titleKey: "subscriptions.coachingMonthly",
+                subtitle: "Grosra Du mois / Live coaching",
+                gradient: "from-teal-400 to-emerald-500",
+                bg: "bg-teal-50 dark:bg-teal-950/20",
+                border: "border-teal-200 dark:border-teal-800",
+              },
+              {
+                icon: Users,
+                titleKey: "subscriptions.coachingWorkshop",
+                subtitle: "Workshop",
+                gradient: "from-emerald-400 to-green-500",
+                bg: "bg-emerald-50 dark:bg-emerald-950/20",
+                border: "border-emerald-200 dark:border-emerald-800",
+              },
+              {
+                icon: Dumbbell,
+                titleKey: "subscriptions.coachingExercise",
+                subtitle: "Exercise",
+                gradient: "from-cyan-400 to-sky-500",
+                bg: "bg-cyan-50 dark:bg-cyan-950/20",
+                border: "border-cyan-200 dark:border-cyan-800",
+              },
+              {
+                icon: TreePine,
+                titleKey: "subscriptions.coachingRetreat",
+                subtitle: "Retraite",
+                gradient: "from-green-400 to-emerald-500",
+                bg: "bg-green-50 dark:bg-green-950/20",
+                border: "border-green-200 dark:border-green-800",
+              },
+              {
+                icon: MessageCircleQuestion,
+                titleKey: "subscriptions.coachingQA",
+                subtitle: "Q & A – Solutions, chapters",
+                gradient: "from-amber-400 to-orange-500",
+                bg: "bg-amber-50 dark:bg-amber-950/20",
+                border: "border-amber-200 dark:border-amber-800",
+              },
+              {
+                icon: Brain,
+                titleKey: "subscriptions.coachingMeditation",
+                subtitle: "Meditation",
+                gradient: "from-violet-400 to-purple-500",
+                bg: "bg-violet-50 dark:bg-violet-950/20",
+                border: "border-violet-200 dark:border-violet-800",
+              },
+              {
+                icon: Heart,
+                titleKey: "subscriptions.coachingAffirmation",
+                subtitle: "Affirmation",
+                gradient: "from-rose-400 to-pink-500",
+                bg: "bg-rose-50 dark:bg-rose-950/20",
+                border: "border-rose-200 dark:border-rose-800",
+              },
+              {
+                icon: Palette,
+                titleKey: "subscriptions.coachingArtTherapy",
+                subtitle: "Art thérapie / fun",
+                gradient: "from-fuchsia-400 to-pink-500",
+                bg: "bg-fuchsia-50 dark:bg-fuchsia-950/20",
+                border: "border-fuchsia-200 dark:border-fuchsia-800",
+              },
+              {
+                icon: Stethoscope,
+                titleKey: "subscriptions.coachingMindDoctor",
+                subtitle: "Attitude médecin",
+                gradient: "from-blue-400 to-indigo-500",
+                bg: "bg-blue-50 dark:bg-blue-950/20",
+                border: "border-blue-200 dark:border-blue-800",
+              },
+              {
+                icon: Leaf,
+                titleKey: "subscriptions.coachingHolistic",
+                subtitle: "Médecine holistique et Integrative",
+                gradient: "from-lime-400 to-green-500",
+                bg: "bg-lime-50 dark:bg-lime-950/20",
+                border: "border-lime-200 dark:border-lime-800",
+              },
+              {
+                icon: HandHeart,
+                titleKey: "subscriptions.coachingBodyMemory",
+                subtitle: "Memoir du corps",
+                gradient: "from-orange-400 to-red-500",
+                bg: "bg-orange-50 dark:bg-orange-950/20",
+                border: "border-orange-200 dark:border-orange-800",
+              },
+              {
+                icon: Activity,
+                titleKey: "subscriptions.coachingMedicalHealing",
+                subtitle: "Medical and Healing",
+                gradient: "from-red-400 to-rose-500",
+                bg: "bg-red-50 dark:bg-red-950/20",
+                border: "border-red-200 dark:border-red-800",
+              },
+            ].map((item, i) => {
+              const ItemIcon = item.icon;
+              return (
+                <motion.div key={item.titleKey} variants={fadeUp} custom={i}>
+                  <Card
+                    className={`group cursor-pointer border ${item.border} ${item.bg} transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden`}
+                    onClick={() => navigate("subscriptions")}
+                  >
+                    <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                      <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <ItemIcon className="size-7 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-base leading-tight mb-1">
+                          {t(item.titleKey)}
+                        </h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.subtitle}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
 
       {/* ============================================================ */}
       {/* FEATURED COURSES                                              */}
