@@ -43,9 +43,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = `api:coachings:${status || "all"}:${limit || "all"}`;
 
     const data = await cached(cacheKey, async () => {
-      const coachings = await db.coaching.findMany({
-        include: { _count: true },
-      });
+      const coachings = await db.coaching.findMany();
       return coachings;
     }, 30_000);
 
