@@ -8,6 +8,7 @@ const fr = {
     videos: "Vidéos",
     pdfs: "E-books",
     live: "En direct",
+    coaching: "Coaching",
     profile: "Profil",
     subscriptions: "Abonnements",
     logout: "Déconnexion",
@@ -131,6 +132,16 @@ const fr = {
     pages: "Pages",
     page: "page",
     pageCount: "pages",
+  },
+
+  // Coaching
+  coaching: {
+    title: "Programme de Guérison Intégré",
+    description:
+      "Un programme complet combinant séances de coaching, ateliers, exercices, méditation, art-thérapie et plus encore pour un voyage complet vers la guérison et l'équilibre.",
+    noCoaching: "Aucun élément de coaching disponible pour le moment",
+    duration: "Durée",
+    startNow: "Commencer",
   },
 
   // Live

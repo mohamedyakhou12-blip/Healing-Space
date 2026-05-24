@@ -18,6 +18,7 @@ const PodcastsPage = dynamic(() => import("@/components/pages/PodcastsPage"));
 const VideosPage = dynamic(() => import("@/components/pages/VideosPage"));
 const PdfsPage = dynamic(() => import("@/components/pages/PdfsPage"));
 const LivePage = dynamic(() => import("@/components/pages/LivePage"));
+const CoachingPage = dynamic(() => import("@/components/pages/CoachingPage"));
 const SubscriptionsPage = dynamic(() => import("@/components/pages/SubscriptionsPage"));
 const PaymentPage = dynamic(() => import("@/components/pages/PaymentPage"));
 const ProfilePage = dynamic(() => import("@/components/pages/ProfilePage"));
@@ -35,6 +36,7 @@ const pageComponents: Record<string, React.ComponentType> = {
   videos: VideosPage,
   pdfs: PdfsPage,
   live: LivePage,
+  coaching: CoachingPage,
   subscriptions: SubscriptionsPage,
   payment: PaymentPage,
   profile: ProfilePage,

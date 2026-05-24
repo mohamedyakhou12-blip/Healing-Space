@@ -13,6 +13,7 @@ import {
   User,
   Shield,
   Leaf,
+  Sparkles,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore, type PageName } from "@/lib/store";
@@ -43,6 +44,7 @@ const navItems: NavItem[] = [
   { page: "videos", labelKey: "nav.videos", icon: PlayCircle },
   { page: "pdfs", labelKey: "nav.pdfs", icon: FileDown },
   { page: "live", labelKey: "nav.live", icon: Radio },
+  { page: "coaching", labelKey: "nav.coaching", icon: Sparkles },
 ];
 
 const secondaryNavItems: NavItem[] = [

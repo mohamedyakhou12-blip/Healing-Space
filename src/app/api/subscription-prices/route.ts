@@ -11,6 +11,7 @@ const DEFAULT_PRICES: Record<string, number> = {
   videos: 500,
   pdfs: 500,
   live: 500,
+  coaching: 500,
 };
 
 // GET /api/subscription-prices — Public endpoint to fetch subscription prices

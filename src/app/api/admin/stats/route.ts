@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
         totalVideos,
         totalPdfs,
         totalLiveSessions,
+        totalCoachings,
         recentPayments,
       ] = await Promise.all([
         db.subscription.findMany({ where: { status: "active" } }),
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
         db.video.count(),
         db.pdfResource.count(),
         db.liveSession.count(),
+        db.coaching.count(),
         db.payment.findMany({ take: 10, include: { user: true } }),
       ]);
 
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest) {
           totalVideos,
           totalPdfs,
           totalLiveSessions,
+          totalCoachings,
         },
         recentPayments,
       };

@@ -8,6 +8,7 @@ const en = {
     videos: "Videos",
     pdfs: "E-books",
     live: "Live",
+    coaching: "Coaching",
     profile: "Profile",
     subscriptions: "Subscriptions",
     logout: "Log Out",
@@ -131,6 +132,16 @@ const en = {
     pages: "Pages",
     page: "page",
     pageCount: "pages",
+  },
+
+  // Coaching
+  coaching: {
+    title: "Integrated Healing Program",
+    description:
+      "A comprehensive program combining coaching sessions, workshops, exercises, meditation, art therapy, and more for a complete journey towards recovery and balance.",
+    noCoaching: "No coaching items available at the moment",
+    duration: "Duration",
+    startNow: "Start Now",
   },
 
   // Live

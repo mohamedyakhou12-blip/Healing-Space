@@ -37,6 +37,7 @@ const VALID_COLLECTIONS = new Set([
   "videos",
   "pdfResources",
   "liveSessions",
+  "coachings",
   "reviews",
   "notifications",
   "purchases",
@@ -107,6 +108,13 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
     "youtubeUrl", "image", "status", "isFree", "scheduledAt",
+    "createdAt", "updatedAt",
+  ]),
+  coachings: new Set([
+    "id", "title", "titleAr", "titleFr", "titleEn",
+    "description", "descriptionAr", "descriptionFr", "descriptionEn",
+    "image", "isFree", "price", "status", "category", "tags",
+    "viewCount", "order", "duration",
     "createdAt", "updatedAt",
   ]),
   reviews: new Set([

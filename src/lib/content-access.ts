@@ -16,16 +16,16 @@
  * - Individual purchases grant permanent access to specific content items
  */
 
-export type SubscriptionType = "full" | "courses" | "articles" | "podcasts" | "videos" | "pdfs" | "live";
-export type ContentType = "courses" | "articles" | "podcasts" | "videos" | "pdfs" | "live";
+export type SubscriptionType = "full" | "courses" | "articles" | "podcasts" | "videos" | "pdfs" | "live" | "coaching";
+export type ContentType = "courses" | "articles" | "podcasts" | "videos" | "pdfs" | "live" | "coaching";
 
-export const ALL_CONTENT_TYPES: ContentType[] = ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+export const ALL_CONTENT_TYPES: ContentType[] = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
 
 /**
  * Get the default set of content types included in the full plan
  */
 export function getDefaultFullPlanIncludes(): ContentType[] {
-  return ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+  return ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
 }
 
 /**
@@ -188,6 +188,7 @@ export function getContentTypeLabel(contentType: ContentType, locale: string): s
     videos: { ar: "الفيديوهات", en: "Videos", fr: "Vidéos" },
     pdfs: { ar: "الكتب الإلكترونية", en: "E-books", fr: "E-books" },
     live: { ar: "البث المباشر", en: "Live Sessions", fr: "Sessions en direct" },
+    coaching: { ar: "كوتشنغ", en: "Coaching", fr: "Coaching" },
   };
   const label = labels[contentType] || labels.courses;
   return label[locale as keyof typeof label] || label.ar;

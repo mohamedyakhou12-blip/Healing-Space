@@ -47,6 +47,7 @@ const DEFAULT_PLAN_PRICES: Record<string, number> = {
   videos: 500,
   pdfs: 500,
   live: 500,
+  coaching: 500,
 };
 
 export default function SubscriptionsPage() {
@@ -94,6 +95,7 @@ export default function SubscriptionsPage() {
       videos: { ar: "جميع الفيديوهات التعليمية", en: "All educational videos", fr: "Toutes les vidéos éducatives" },
       pdfs: { ar: "جميع الكتب الإلكترونية PDF", en: "All e-books in PDF", fr: "Tous les e-books en PDF" },
       live: { ar: "جميع جلسات البث المباشر", en: "All live sessions", fr: "Toutes les sessions en direct" },
+      coaching: { ar: "برنامج الشفاء المتكامل (كوتشنغ)", en: "Integrated Healing Program (Coaching)", fr: "Programme de Guérison Intégré (Coaching)" },
     };
     return labels[type] || { ar: type, en: type, fr: type };
   });
@@ -231,6 +233,18 @@ export default function SubscriptionsPage() {
         { ar: "الوصول لجميع البث المباشر", en: "Access to all live streams", fr: "Accès à tous les directs" },
         { ar: "تسجيلات البث السابق", en: "Past stream recordings", fr: "Enregistrements des directs précédents" },
         { ar: "جلسات تفاعلية حية", en: "Interactive live sessions", fr: "Sessions interactives en direct" },
+      ],
+    },
+    {
+      id: "coaching",
+      icon: Sparkles,
+      nameKey: "nav.coaching",
+      price: planPrice("coaching"),
+      gradient: "from-rose-400 to-pink-600",
+      features: [
+        { ar: "جلسة شهرية مع مدربة", en: "Monthly coaching session", fr: "Séance mensuelle avec coach" },
+        { ar: "ورش عمل وتمارين", en: "Workshops & exercises", fr: "Ateliers et exercices" },
+        { ar: "تأمل وتأكيدات إيجابية", en: "Meditation & affirmations", fr: "Méditation et affirmations" },
       ],
     },
   ];

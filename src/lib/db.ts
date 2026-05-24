@@ -773,6 +773,51 @@ export const db = {
     },
   },
 
+  // --- Coaching ---
+  coaching: {
+    async findUnique(opts: { where: { id: string }; include?: any }) {
+      const coaching = await findById("coachings", opts.where.id);
+      if (!coaching) return null;
+      return coaching;
+    },
+    async findMany(opts?: {
+      orderBy?: { createdAt?: string };
+      include?: any;
+    }) {
+      const results = await findAll("coachings", "createdAt", "desc");
+      if (opts?.include?._count) {
+        const countSelect = opts.include._count === true ? { reviews: true } : (opts.include._count?.select || {});
+        for (const item of results) {
+          item._count = {};
+          if (countSelect.reviews) {
+            item._count.reviews = await countWhere("reviews", [
+              ["coachingId", "==", item.id],
+            ]);
+          }
+        }
+      }
+      return results;
+    },
+    async create({ data }: { data: Record<string, any> }) {
+      return create("coachings", data);
+    },
+    async update({
+      where,
+      data,
+    }: {
+      where: { id: string };
+      data: Record<string, any>;
+    }) {
+      return updateById("coachings", where.id, data);
+    },
+    async delete({ where }: { where: { id: string } }) {
+      await deleteById("coachings", where.id);
+    },
+    async count() {
+      return countAll("coachings");
+    },
+  },
+
   // --- LiveSession ---
   liveSession: {
     async findUnique(opts: { where: { id: string }; include?: any }) {

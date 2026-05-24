@@ -121,7 +121,8 @@ type ContentSubTab =
   | "podcasts"
   | "videos"
   | "pdfs"
-  | "live";
+  | "live"
+  | "coaching";
 
 interface Member {
   id: string;
@@ -223,6 +224,7 @@ const CONTENT_API_CONFIG: Record<ContentSubTab, { endpoint: string; responseKey:
   videos: { endpoint: "/api/videos", responseKey: "videos", contentType: "video" },
   pdfs: { endpoint: "/api/pdfs", responseKey: "pdfs", contentType: "pdf" },
   live: { endpoint: "/api/live", responseKey: "liveSessions", contentType: "live" },
+  coaching: { endpoint: "/api/coachings", responseKey: "coachings", contentType: "coaching" },
 };
 
 // ─── Section Labels Config ─────────────────────────────────────────────────
@@ -238,6 +240,7 @@ const SECTION_LABELS: Record<ContentSubTab, {
   videos: { addNew: "إضافة فيديو", edit: "تعديل الفيديو", noData: "لا توجد فيديوهات بعد", imageLabel: "صورة الفيديو", descriptionLabel: "وصف الفيديو" },
   pdfs: { addNew: "إضافة كتاب PDF", edit: "تعديل الكتاب", noData: "لا توجد كتب PDF بعد", imageLabel: "رفع ملف PDF", descriptionLabel: "وصف الكتاب", acceptTypes: ["application/pdf"] },
   live: { addNew: "إضافة جلسة مباشرة", edit: "تعديل الجلسة", noData: "لا توجد جلسات مباشرة بعد", imageLabel: "صورة الجلسة", descriptionLabel: "وصف الجلسة" },
+  coaching: { addNew: "إضافة كوتشنغ", edit: "تعديل الكوتشنغ", noData: "لا توجد عناصر كوتشنغ بعد", imageLabel: "صورة الكوتشنغ", descriptionLabel: "وصف الكوتشنغ" },
 };
 
 // Helper to normalize raw API item to ContentItem
@@ -1960,6 +1963,8 @@ function ContentView() {
   const [formTags, setFormTags] = useState("");
   // Scheduled publishing
   const [formScheduledAt, setFormScheduledAt] = useState("");
+  // Order (for coaching items)
+  const [formOrder, setFormOrder] = useState(0);
   // SEO fields
   const [formMetaTitleAr, setFormMetaTitleAr] = useState("");
   const [formMetaTitleFr, setFormMetaTitleFr] = useState("");
@@ -1988,6 +1993,7 @@ function ContentView() {
     { key: "videos", labelKey: "nav.videos" },
     { key: "pdfs", labelKey: "nav.pdfs" },
     { key: "live", labelKey: "nav.live" },
+    { key: "coaching", labelKey: "nav.coaching" },
   ];
 
   // ── Fetch content from API ──
@@ -2069,6 +2075,7 @@ function ContentView() {
     setFormContentFr((raw.contentFr as string) || (item as any)?.contentFr || "");
     setFormContentEn((raw.contentEn as string) || (item as any)?.contentEn || "");
     setFormDuration((raw.duration as string) || (item as any)?.duration || "");
+    setFormOrder((raw.order as number) || (item as any)?.order || 0);
     setFormCategory(item?.category || "");
     setFormTags(item?.tags || "");
     setFormScheduledAt(item?.scheduledAt ? new Date(item.scheduledAt).toISOString().slice(0, 16) : "");
@@ -2140,6 +2147,10 @@ function ContentView() {
       }
       if (contentSubTab === "pdfs" && formFileUrl) {
         payload.fileUrl = formFileUrl;
+      }
+      if (contentSubTab === "coaching") {
+        payload.duration = formDuration;
+        payload.order = formOrder;
       }
       if (contentSubTab === "articles") {
         payload.content = formContentAr || formTitleAr;
@@ -2834,14 +2845,28 @@ function ContentView() {
               </>
             )}
 
-            {/* Duration field for videos/podcasts */}
-            {(contentSubTab === "videos" || contentSubTab === "podcasts") && (
+            {/* Duration field for videos/podcasts/coaching */}
+            {(contentSubTab === "videos" || contentSubTab === "podcasts" || contentSubTab === "coaching") && (
               <div className="space-y-1.5">
                 <Label className="text-sm">المدة (Duration)</Label>
                 <Input
                   placeholder="00:30:00"
                   value={formDuration}
                   onChange={(e) => setFormDuration(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Order field for coaching */}
+            {contentSubTab === "coaching" && (
+              <div className="space-y-1.5">
+                <Label className="text-sm">{t("admin.order") || "الترتيب"}</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={formOrder}
+                  onChange={(e) => setFormOrder(parseInt(e.target.value) || 0)}
                 />
               </div>
             )}
@@ -3817,6 +3842,7 @@ function PricesView() {
         videos: t("nav.videos"),
         pdfs: t("nav.pdfs"),
         live: t("nav.live"),
+        coaching: t("nav.coaching"),
       };
 
       const results: Array<{ item: ContentItem; type: ContentSubTab; typeLabel: string }> = [];
@@ -3826,7 +3852,7 @@ function PricesView() {
         const res = await fetch("/api/admin/all-content", { headers: adminHeaders() });
         if (res.ok) {
           const data = await res.json();
-          const tabs: ContentSubTab[] = ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+          const tabs: ContentSubTab[] = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
           const responseKeys: Record<ContentSubTab, string> = {
             courses: "courses",
             articles: "articles",
@@ -3834,6 +3860,7 @@ function PricesView() {
             videos: "videos",
             pdfs: "pdfs",
             live: "liveSessions",
+            coaching: "coachings",
           };
           for (const tab of tabs) {
             const rawItems = data[responseKeys[tab]] || [];

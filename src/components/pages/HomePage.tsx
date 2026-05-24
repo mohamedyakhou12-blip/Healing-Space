@@ -227,6 +227,7 @@ const services: ServiceConfig[] = [
   { key: "videos", icon: PlayCircle, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200", descKey: "videos.description", image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop" },
   { key: "pdfs", icon: FileDown, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", descKey: "pdfs.description", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=250&fit=crop" },
   { key: "live", icon: Radio, color: "text-cyan-600", bg: "bg-cyan-50", border: "border-cyan-200", descKey: "live.description", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
+  { key: "coaching", icon: Sparkles, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", descKey: "coaching.description", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
 ];
 
 /* ------------------------------------------------------------------ */

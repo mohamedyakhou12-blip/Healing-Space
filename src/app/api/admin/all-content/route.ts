@@ -27,13 +27,14 @@ export async function GET(request: NextRequest) {
 
     const data = await cached("api:admin:all-content", async () => {
       // Fetch all content types in parallel
-      const [courses, articles, podcasts, videos, pdfs, liveSessions] = await Promise.all([
+      const [courses, articles, podcasts, videos, pdfs, liveSessions, coachings] = await Promise.all([
         db.course.findMany({ include: { chapters: true } }),
         db.article.findMany({ include: { _count: true } }),
         db.podcast.findMany({ include: { _count: true } }),
         db.video.findMany({ include: { _count: true } }),
         db.pdfResource.findMany(),
         db.liveSession.findMany(),
+        db.coaching.findMany(),
       ]);
 
       // Batch fetch review stats for all content types at once
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
         videos: videosWithStats,
         pdfs,
         liveSessions,
+        coachings,
       };
     }, 15_000); // 15s TTL for admin content
 

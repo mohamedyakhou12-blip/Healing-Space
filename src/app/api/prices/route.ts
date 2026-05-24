@@ -12,6 +12,7 @@ const VALID_CONTENT_TYPES = [
   "video",
   "pdf",
   "live",
+  "coaching",
 ] as const;
 
 type ContentType = (typeof VALID_CONTENT_TYPES)[number];
@@ -29,7 +30,7 @@ const updatePriceSchema = z.object({
 // GET /api/prices — Fetch all content items with their prices
 export async function GET() {
   try {
-    const [courses, articles, podcasts, videos, pdfs, liveSessions] =
+    const [courses, articles, podcasts, videos, pdfs, liveSessions, coachings] =
       await Promise.all([
         db.course.findMany({
           include: { _count: false, chapters: false },
@@ -39,6 +40,7 @@ export async function GET() {
         db.video.findMany({ include: { _count: false } }),
         db.pdfResource.findMany(),
         db.liveSession.findMany(),
+        db.coaching.findMany(),
       ]);
 
     // Normalize to flat price items
@@ -58,6 +60,7 @@ export async function GET() {
       videos: videos.map((v: any) => normalize(v, "video")),
       pdfs: pdfs.map((p: any) => normalize(p, "pdf")),
       liveSessions: liveSessions.map((l: any) => normalize(l, "live")),
+      coachings: coachings.map((c: any) => normalize(c, "coaching")),
     });
   } catch (error) {
     console.error("Fetch prices error:", error);
@@ -126,6 +129,7 @@ export async function PUT(request: NextRequest) {
       video: db.video,
       pdf: db.pdfResource,
       live: db.liveSession,
+      coaching: db.coaching,
     };
 
     const model = collectionMap[contentType];

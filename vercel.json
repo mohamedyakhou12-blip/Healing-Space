@@ -6,6 +6,7 @@
     { "source": "/videos/:path*", "destination": "/" },
     { "source": "/pdfs/:path*", "destination": "/" },
     { "source": "/live/:path*", "destination": "/" },
+    { "source": "/coaching/:path*", "destination": "/" },
     { "source": "/login", "destination": "/" },
     { "source": "/register", "destination": "/" },
     { "source": "/admin/:path*", "destination": "/" },

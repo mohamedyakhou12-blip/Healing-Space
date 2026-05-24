@@ -11,6 +11,7 @@ export type PageName =
   | "videos"
   | "pdfs"
   | "live"
+  | "coaching"
   | "profile"
   | "admin"
   | "login"
@@ -29,6 +30,7 @@ export const PAGE_ROUTES: Record<PageName, string> = {
   videos: "/videos",
   pdfs: "/pdfs",
   live: "/live",
+  coaching: "/coaching",
   subscriptions: "/subscriptions",
   profile: "/profile",
   admin: "/admin",
@@ -48,6 +50,7 @@ export const ROUTE_TO_PAGE: Record<string, PageName> = {
   "/videos": "videos",
   "/pdfs": "pdfs",
   "/live": "live",
+  "/coaching": "coaching",
   "/subscriptions": "subscriptions",
   "/profile": "profile",
   "/admin": "admin",
