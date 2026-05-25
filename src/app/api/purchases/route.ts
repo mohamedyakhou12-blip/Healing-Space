@@ -5,7 +5,7 @@ import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { requireAuth, requireAdmin } from "@/lib/session";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 
-const CONTENT_TYPES = ["courses", "articles", "podcasts", "videos", "pdfs", "live"] as const;
+const CONTENT_TYPES = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"] as const;
 
 const createPurchaseSchema = z.object({
   contentId: z.string().min(1, "Content ID is required"),
@@ -18,17 +18,26 @@ const createPurchaseSchema = z.object({
 });
 
 function validateReceipt(receiptImage: string): string | null {
-  // If it's a URL (from Firebase Storage or other), validate the protocol
+  // If it's a URL (from Cloudinary, Firebase Storage, etc.), validate it comes from a trusted storage provider
   if (receiptImage.startsWith("https://") || receiptImage.startsWith("http://")) {
-    // Allow Firebase Storage URLs and other HTTPS URLs
-    if (receiptImage.includes("firebasestorage.googleapis.com") || receiptImage.includes("storage.googleapis.com")) {
-      return null; // Valid Firebase Storage URL
-    }
-    // Also allow other HTTPS URLs (backward compatibility + external URLs)
+    const trustedHosts = [
+      "firebasestorage.googleapis.com",
+      "storage.googleapis.com",
+      "res.cloudinary.com",
+      "cloudinary.com",
+    ];
     try {
       const url = new URL(receiptImage);
       if (url.protocol !== "https:" && url.protocol !== "http:") {
         return "Invalid receipt URL protocol";
+      }
+      const hostname = url.hostname.toLowerCase();
+      if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.startsWith("10.") || hostname.startsWith("172.16.")) {
+        return "Invalid receipt URL";
+      }
+      const isTrusted = trustedHosts.some(host => hostname === host || hostname.endsWith("." + host));
+      if (!isTrusted) {
+        return "Receipt URL must be from an approved storage provider";
       }
       return null;
     } catch {

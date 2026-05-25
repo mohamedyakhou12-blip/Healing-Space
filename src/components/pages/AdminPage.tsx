@@ -214,6 +214,7 @@ const PLAN_LABELS: Record<string, string> = {
   videos: "الفيديوهات",
   pdfs: "الكتب PDF",
   live: "البث المباشر",
+  coaching: "الكوتشنغ",
 };
 
 // ─── Content API Config ────────────────────────────────────────────────────
@@ -4263,7 +4264,7 @@ function PricesView() {
         >
           {t("admin.allPrices")}
         </button>
-        {(["courses", "articles", "podcasts", "videos", "pdfs", "live"] as ContentSubTab[]).map((type) => (
+        {(["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"] as ContentSubTab[]).map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type)}

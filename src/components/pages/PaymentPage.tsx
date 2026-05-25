@@ -352,13 +352,15 @@ export default function PaymentPage() {
         body: JSON.stringify(bodyData),
       });
 
-      if (!paymentRes.ok) {
-        const paymentErr = await paymentRes.json();
-        throw new Error(paymentErr.error || "Failed to create payment");
+      let paymentData: any;
+      try {
+        paymentData = await safeJsonParse(paymentRes);
+      } catch (parseErr) {
+        throw new Error(parseErr instanceof Error ? parseErr.message : "Failed to process payment response");
       }
-
-      // On success, show submitted state and toast
-      const paymentData = await paymentRes.json();
+      if (!paymentRes.ok) {
+        throw new Error(paymentData.error || "Failed to create payment");
+      }
       setPayments((prev) => [paymentData.payment, ...prev]);
       setSubmitted(true);
 

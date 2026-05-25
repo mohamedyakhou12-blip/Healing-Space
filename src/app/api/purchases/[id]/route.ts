@@ -79,6 +79,7 @@ export async function PUT(
       videos: { ar: "فيديو", fr: "Vidéo", en: "Video" },
       pdfs: { ar: "كتاب إلكتروني", fr: "E-book", en: "E-book" },
       live: { ar: "جلسة مباشرة", fr: "Session en direct", en: "Live Session" },
+      coaching: { ar: "كوتشنغ", fr: "Coaching", en: "Coaching" },
     };
     const contentName = contentTypeNames[existing.contentType] || { ar: "محتوى", fr: "Contenu", en: "Content" };
     const contentTitle = existing.contentTitleAr || existing.contentTitle || contentName.ar;
