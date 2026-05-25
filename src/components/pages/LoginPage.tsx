@@ -66,53 +66,17 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // ── Handle OAuth callback errors from URL ──
+  // ── OAuth callback handling is now done in AppShell.tsx ──
+  // AppShell handles both ?login=success and ?error=xxx parameters
+  // from Google OAuth callbacks, since the redirect goes to / (homepage),
+  // not to /login. This useEffect is kept as a fallback for /login URLs.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
-    if (error) {
-      window.history.replaceState({}, "", window.location.pathname);
-
-      let displayError: string;
-      switch (error) {
-        case "google_denied":
-          displayError = locale === "ar"
-            ? "تم رفض الوصول من غوغل. يرجى المحاولة مرة أخرى"
-            : "Google access was denied. Please try again";
-          break;
-        case "redirect_uri_mismatch":
-          displayError = locale === "ar"
-            ? "خطأ في إعدادات المصادقة. يرجى التواصل مع المشرف"
-            : "Authentication configuration error. Please contact the admin";
-          break;
-        case "token_exchange_failed":
-          displayError = locale === "ar"
-            ? "فشل التحقق من غوغل. يرجى المحاولة مرة أخرى"
-            : "Google verification failed. Please try again";
-          break;
-        case "email_not_verified":
-          displayError = locale === "ar"
-            ? "البريد الإلكتروني غير مفعل في غوغل"
-            : "Your Google email is not verified";
-          break;
-        case "session_failed":
-          displayError = locale === "ar"
-            ? "فشل إنشاء الجلسة. يرجى المحاولة مرة أخرى"
-            : "Failed to create session. Please try again";
-          break;
-        default:
-          displayError = locale === "ar"
-            ? "حدث خطأ أثناء تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى"
-            : "An error occurred during Google sign-in. Please try again";
-      }
-      toast.error(displayError, { duration: 7000 });
-    }
-
-    // Show success message if redirected after successful OAuth login
     const loginSuccess = params.get("login");
-    if (loginSuccess === "success") {
+    if (error || loginSuccess === "success") {
+      // AppShell will handle this, but clean URL here too as fallback
       window.history.replaceState({}, "", window.location.pathname);
-      toast.success(locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Logged in successfully!", { duration: 3000 });
     }
   }, [locale]);
 

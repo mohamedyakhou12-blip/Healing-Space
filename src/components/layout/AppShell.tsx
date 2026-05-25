@@ -37,10 +37,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // ── Restore session on mount ──
   // Check iron-session cookie to see if user is already logged in.
+  // Also handles Google OAuth callback parameters (?login=success, ?error=xxx).
   useEffect(() => {
     let cancelled = false;
 
     async function restoreSession() {
+      // Check for Google OAuth callback parameters
+      const params = new URLSearchParams(window.location.search);
+      const loginSuccess = params.get("login");
+      const oauthError = params.get("error");
+
+      // Clean URL parameters immediately (before any async work)
+      if (loginSuccess === "success" || oauthError) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+
       try {
         const res = await fetch("/api/auth/session");
         if (!res.ok) return;
@@ -95,6 +106,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         // Network error — ignore
       } finally {
         useAppStore.getState().setIsLoadingAuth?.(false);
+      }
+
+      // Show toast for Google OAuth results (after session restoration attempt)
+      const store = useAppStore.getState();
+      if (loginSuccess === "success") {
+        if (store.user) {
+          // Import toast dynamically to avoid circular deps
+          const { toast } = await import("sonner");
+          toast.success(store.locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Logged in successfully!", { duration: 3000 });
+          // Navigate to appropriate page
+          if (store.user.role === "admin") {
+            store.navigate("admin");
+          }
+        } else {
+          const { toast } = await import("sonner");
+          toast.error(store.locale === "ar" ? "فشل تسجيل الدخول بغوغل. يرجى المحاولة مرة أخرى" : "Google sign-in failed. Please try again", { duration: 5000 });
+        }
+      } else if (oauthError) {
+        const { toast } = await import("sonner");
+        let displayError: string;
+        switch (oauthError) {
+          case "google_denied":
+            displayError = store.locale === "ar" ? "تم رفض الوصول من غوغل" : "Google access was denied";
+            break;
+          case "redirect_uri_mismatch":
+            displayError = store.locale === "ar" ? "خطأ في إعدادات المصادقة" : "Authentication configuration error";
+            break;
+          case "token_exchange_failed":
+            displayError = store.locale === "ar" ? "فشل التحقق من غوغل" : "Google verification failed";
+            break;
+          case "session_failed":
+            displayError = store.locale === "ar" ? "فشل إنشاء الجلسة" : "Failed to create session";
+            break;
+          default:
+            displayError = store.locale === "ar" ? "حدث خطأ أثناء تسجيل الدخول بغوغل" : "An error occurred during Google sign-in";
+        }
+        toast.error(displayError, { duration: 5000 });
       }
     }
 

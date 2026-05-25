@@ -8,14 +8,17 @@ import { sanitizeEmail } from "@/lib/sanitize";
  * Google OAuth 2.0 callback — receives the authorization code from Google,
  * exchanges it for user info, creates a session, and redirects to the homepage.
  *
- * This is the PRIMARY auth flow that bypasses all CORS/COOP issues by
- * handling OAuth entirely server-to-server.
+ * ARCHITECTURE DECISION: Instead of returning a 307 redirect (which may lose
+ * Set-Cookie headers on some CDN/proxy layers like Vercel), we return a 200
+ * HTML page that:
+ *   1. Contains the Set-Cookie header (guaranteed to be stored by the browser)
+ *   2. Uses JavaScript to redirect to the homepage
  *
- * CRITICAL FIX: We use getIronSession(request, response, config) to set the
- * session cookie DIRECTLY on the NextResponse.redirect() response object.
- * Using setUserSession() (which calls cookies().set()) does NOT work because
- * cookies set via the next/headers cookies() API are NOT included in
- * explicitly created NextResponse objects.
+ * This approach is proven reliable — browsers always respect Set-Cookie on
+ * 200 responses, while 307 redirects may have the cookie silently dropped
+ * by CDN layers or browser cookie jar handling.
+ *
+ * The inline script is allowed by our CSP (script-src includes 'unsafe-inline').
  */
 
 const GOOGLE_CLIENT_ID =
@@ -82,6 +85,75 @@ function getBaseUrl(): string {
   return "http://localhost:3000";
 }
 
+/**
+ * Generate an HTML page that redirects the user after session creation.
+ * This is used instead of NextResponse.redirect() to ensure the Set-Cookie
+ * header is reliably delivered to the browser.
+ */
+function htmlRedirect(url: string, isError: boolean = false): string {
+  const bgColor = isError ? "#fef2f2" : "#f0fdf4";
+  const textColor = isError ? "#991b1b" : "#166534";
+  const message = isError
+    ? "حدث خطأ أثناء تسجيل الدخول بغوغل. يُعاد توجيهك..."
+    : "تم تسجيل الدخول بنجاح! يُعاد توجيهك...";
+  const messageEn = isError
+    ? "An error occurred during Google sign-in. Redirecting..."
+    : "Login successful! Redirecting...";
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting...</title>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: ${bgColor};
+      color: ${textColor};
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid ${textColor}33;
+      border-top-color: ${textColor};
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+    p { margin: 0; color: ${textColor}99; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h2>${message}</h2>
+    <p>${messageEn}</p>
+  </div>
+  <script>
+    // Small delay to ensure the browser processes the Set-Cookie header
+    setTimeout(function() {
+      window.location.replace("${url.replace(/"/g, "&quot;")}");
+    }, 500);
+  </script>
+</body>
+</html>`;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -90,12 +162,22 @@ export async function GET(request: NextRequest) {
   // User denied access
   if (error) {
     console.error("[Google Callback] OAuth error:", error);
-    return NextResponse.redirect(new URL(`/login?error=google_denied`, getBaseUrl()));
+    const redirectUrl = `/login?error=google_denied`;
+    const response = new NextResponse(htmlRedirect(`${getBaseUrl()}${redirectUrl}`, true), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+    return response;
   }
 
   if (!code) {
     console.error("[Google Callback] No authorization code received");
-    return NextResponse.redirect(new URL(`/login?error=no_code`, getBaseUrl()));
+    const redirectUrl = `/login?error=no_code`;
+    const response = new NextResponse(htmlRedirect(`${getBaseUrl()}${redirectUrl}`, true), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+    return response;
   }
 
   try {
@@ -124,9 +206,17 @@ export async function GET(request: NextRequest) {
           "[Google Callback] REDIRECT URI MISMATCH! The URI", redirectUri,
           "must be added in Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client > Authorized redirect URIs"
         );
-        return NextResponse.redirect(new URL(`/login?error=redirect_uri_mismatch`, getBaseUrl()));
+        const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=redirect_uri_mismatch`, true), {
+          status: 200,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+        return response;
       }
-      return NextResponse.redirect(new URL(`/login?error=token_exchange_failed`, getBaseUrl()));
+      const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=token_exchange_failed`, true), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return response;
     }
 
     const tokens: GoogleTokenResponse = await tokenResponse.json();
@@ -139,7 +229,11 @@ export async function GET(request: NextRequest) {
 
     if (!userInfoResponse.ok) {
       console.error("[Google Callback] Failed to get user info:", userInfoResponse.status);
-      return NextResponse.redirect(new URL(`/login?error=user_info_failed`, getBaseUrl()));
+      const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=user_info_failed`, true), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return response;
     }
 
     const userInfo: GoogleUserInfo = await userInfoResponse.json();
@@ -147,7 +241,11 @@ export async function GET(request: NextRequest) {
 
     if (!userInfo.email || !userInfo.email_verified) {
       console.error("[Google Callback] Missing or unverified email");
-      return NextResponse.redirect(new URL(`/login?error=email_not_verified`, getBaseUrl()));
+      const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=email_not_verified`, true), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return response;
     }
 
     // Step 3: Find or create user in database
@@ -198,43 +296,48 @@ export async function GET(request: NextRequest) {
       isNewUser = true;
     }
 
-    // Step 4: Create the redirect response FIRST, then set session cookie on it
+    // Step 4: Create session and redirect via HTML page
     const role = user.role === "admin" ? "admin" : "user";
     const redirectPath = role === "admin" ? "/admin" : "/";
-    const redirectUrl = new URL(redirectPath + "?login=success", getBaseUrl());
+    const redirectUrl = `${baseUrl}${redirectPath}?login=success`;
 
     console.log("[Google Callback] Login successful:", email, "role:", role);
 
-    // ── CRITICAL FIX: Set session cookie on the redirect response ──
-    // We must use getIronSession(request, response, config) so that
-    // iron-session sets the Set-Cookie header directly on our
-    // NextResponse.redirect() response object. Using setUserSession()
-    // (which calls cookies().set()) does NOT work because those cookies
-    // are not included in explicitly created NextResponse objects.
+    // ── Set session cookie on an HTML response (NOT a 307 redirect) ──
+    // Returning an HTML page with Set-Cookie header is more reliable than
+    // NextResponse.redirect() because browsers always process Set-Cookie
+    // on 200 responses, while 307 redirects may lose the cookie on some
+    // CDN/proxy layers (e.g., Vercel's edge network).
     try {
-      const response = NextResponse.redirect(redirectUrl);
+      const htmlContent = htmlRedirect(redirectUrl, false);
+      const response = new NextResponse(htmlContent, {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
 
-      // Use iron-session with Request + Response objects directly
-      // This ensures the session cookie is set on our redirect response
+      // Set the session cookie directly on this response
       const session = await getIronSession(request, response, SESSION_OPTIONS);
-      // Cast to any to bypass TypeScript module augmentation issue:
-      // The IronSessionData interface is declared in session.ts but
-      // TypeScript doesn't see it here because getIronSession(request, response, config)
-      // returns IronSession<object> without the module augmentation.
       (session as any).userId = user.id;
       (session as any).userRole = role;
       (session as any).isAdmin = role === "admin";
       await session.save();
 
-      console.log("[Google Callback] Session cookie set on redirect response");
-
+      console.log("[Google Callback] Session cookie set on HTML response for:", email);
       return response;
     } catch (sessionError) {
       console.error("[Google Callback] Failed to set session:", sessionError);
-      return NextResponse.redirect(new URL(`/login?error=session_failed`, getBaseUrl()));
+      const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=session_failed`, true), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return response;
     }
   } catch (error) {
     console.error("[Google Callback] Unhandled error:", error);
-    return NextResponse.redirect(new URL(`/login?error=unknown`, getBaseUrl()));
+    const response = new NextResponse(htmlRedirect(`${getBaseUrl()}/login?error=unknown`, true), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+    return response;
   }
 }
