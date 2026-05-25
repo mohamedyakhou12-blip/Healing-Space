@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff, Heart, Sparkles, Leaf, Shield, ArrowRight, KeyRound } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Heart, Sparkles, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,12 +39,6 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const adminSchema = z.object({
-  code: z.string().min(1, "يرجى إدخال الكود"),
-});
-
-type AdminFormValues = z.infer<typeof adminSchema>;
-
 /* ------------------------------------------------------------------ */
 /*  Animation                                                          */
 /* ------------------------------------------------------------------ */
@@ -60,6 +54,7 @@ const fadeUp = {
 
 /* ================================================================== */
 /*  LoginPage                                                          */
+/*  Admin logs in via email: Admine@gmail.com with password = admin code */
 /* ================================================================== */
 
 export default function LoginPage() {
@@ -70,17 +65,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [adminCodeError, setAdminCodeError] = useState("");
 
   // ── Handle OAuth callback errors from URL ──
-  // When the server-side OAuth flow fails, the callback redirects to
-  // /login?error=xxx. We show an appropriate error message here.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
     if (error) {
-      // Clean the URL to prevent showing the error again on refresh
       window.history.replaceState({}, "", window.location.pathname);
 
       let displayError: string;
@@ -131,11 +121,6 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  const adminForm = useForm<AdminFormValues>({
-    resolver: zodResolver(adminSchema),
-    defaultValues: { code: "" },
-  });
-
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
@@ -179,6 +164,11 @@ export default function LoginPage() {
         avatar: result.user.avatar,
         phone: result.user.phone,
       });
+      // If admin login, store the password as admin code in localStorage
+      // so that adminHeaders() sends it via X-Admin-Code for API calls
+      if (result.user.role === "admin") {
+        setStoredAdminCode(data.password);
+      }
       toast.success(t("common.success"));
       // Use SPA navigation for smooth transition
       if (result.user.role === "admin") {
@@ -193,53 +183,7 @@ export default function LoginPage() {
     }
   };
 
-  const onAdminSubmit = async (data: AdminFormValues) => {
-    setIsLoading(true);
-    setAdminCodeError("");
-    try {
-      const res = await fetch("/api/auth/verify-admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: data.code }),
-      });
-      const result = await res.json().catch(() => ({ valid: false }));
-
-      if (result.valid) {
-        setStoredAdminCode(data.code);
-        setUser({
-          id: "admin-session",
-          name: t("siteOwner.name"),
-          email: "admin@healingspace.com",
-          role: "admin",
-          avatar: undefined,
-        });
-        toast.success(t("common.success"));
-        // Use SPA navigation for smooth transition
-        navigate("admin");
-      } else {
-        setAdminCodeError(t("adminAccess.wrongCode"));
-      }
-    } catch {
-      setAdminCodeError(t("common.serverError"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const onGoogleSignIn = () => {
-    // ── Server-side OAuth 2.0 flow ──
-    // Firebase Client SDK popup/redirect fails due to CORS/COOP issues on Vercel.
-    // Instead, we redirect the user to our server route which initiates
-    // a proper OAuth 2.0 flow with Google. After the user authenticates,
-    // Google redirects back to our callback which sets the session cookie.
-    //
-    // Flow:
-    // 1. User clicks "Sign in with Google"
-    // 2. Browser navigates to /api/auth/google-redirect
-    // 3. Server redirects to Google OAuth consent screen
-    // 4. User authenticates → Google redirects to /api/auth/google-callback
-    // 5. Server verifies, creates session, redirects to homepage
-    // 6. AppShell restores session from cookie on page load
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
     window.location.href = "/api/auth/google-redirect";
@@ -317,14 +261,12 @@ export default function LoginPage() {
               <Heart className="size-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold">
-              {isAdminMode ? t("adminAccess.title") : t("auth.login")}
+              {t("auth.login")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {isAdminMode ? t("adminAccess.description") : (
-                <>
-                  {t("home.heroSubtitle")} — {ownerName}
-                </>
-              )}
+              <>
+                {t("home.heroSubtitle")} — {ownerName}
+              </>
             </p>
           </motion.div>
 
@@ -333,240 +275,137 @@ export default function LoginPage() {
             <Card className="border-0 shadow-xl">
               <CardHeader className="pb-2" />
               <CardContent className="pt-0">
-                <AnimatePresence mode="wait">
-                  {/* ADMIN LOGIN MODE */}
-                  {isAdminMode ? (
-                    <motion.div
-                      key="admin"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.email")}</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                type="email"
+                                placeholder="example@email.com"
+                                className="ps-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center justify-between">
+                            <FormLabel>{t("auth.password")}</FormLabel>
+                            <button
+                              type="button"
+                              className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline"
+                              onClick={() => {
+                                toast.info(
+                                  locale === "ar" ? "لإعادة تعيين كلمة المرور، يرجى التواصل معنا عبر البريد الإلكتروني أو وسائل التواصل الاجتماعي"
+                                  : "To reset your password, please contact us via email or social media",
+                                  { duration: 8000 }
+                                );
+                              }}
+                            >
+                              {t("auth.forgotPassword")}
+                            </button>
+                          </div>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                className="pe-10 ps-10"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      type="submit"
+                      className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-500 py-5 text-base font-semibold shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30"
+                      disabled={isLoading}
                     >
-                      <div className="mb-6 flex justify-center">
-                        <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-                          <Shield className="size-8 text-white" />
-                        </div>
-                      </div>
-
-                      <Form {...adminForm}>
-                        <form onSubmit={adminForm.handleSubmit(onAdminSubmit)} className="space-y-5">
-                          <FormField
-                            control={adminForm.control}
-                            name="code"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="flex items-center gap-2">
-                                  <KeyRound className="size-4 text-amber-500" />
-                                  {t("adminAccess.code")}
-                                </FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                      type="text"
-                                      placeholder={t("adminAccess.codePlaceholder")}
-                                      className="ps-10 text-center text-lg tracking-widest font-mono"
-                                      maxLength={10}
-                                      {...field}
-                                    />
-                                  </div>
-                                </FormControl>
-                                {adminCodeError && (
-                                  <p className="mt-1 text-sm text-destructive">{adminCodeError}</p>
-                                )}
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Button
-                            type="submit"
-                            className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-5 text-base font-semibold shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <span className="flex items-center gap-2">
-                                <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                {t("common.loading")}
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-2">
-                                <Shield className="size-4" />
-                                {t("adminAccess.submit")}
-                              </span>
-                            )}
-                          </Button>
-                        </form>
-                      </Form>
-                    </motion.div>
-                  ) : (
-                    /* MEMBER LOGIN MODE */
-                    <motion.div
-                      key="member"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                    >
-                      <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                          <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t("auth.email")}</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Mail className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                      type="email"
-                                      placeholder="example@email.com"
-                                      className="ps-10"
-                                      {...field}
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                              <FormItem>
-                                <div className="flex items-center justify-between">
-                                  <FormLabel>{t("auth.password")}</FormLabel>
-                                  <button
-                                    type="button"
-                                    className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline"
-                                    onClick={() => {
-                                    toast.info(
-                                      locale === "ar" ? "لإعادة تعيين كلمة المرور، يرجى التواصل معنا عبر البريد الإلكتروني أو وسائل التواصل الاجتماعي"
-                                      : "To reset your password, please contact us via email or social media",
-                                      { duration: 8000 }
-                                    );
-                                  }}
-                                  >
-                                    {t("auth.forgotPassword")}
-                                  </button>
-                                </div>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                      type={showPassword ? "text" : "password"}
-                                      placeholder="••••••••"
-                                      className="pe-10 ps-10"
-                                      {...field}
-                                    />
-                                    <button
-                                      type="button"
-                                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                      onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                                    </button>
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Button
-                            type="submit"
-                            className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-500 py-5 text-base font-semibold shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <span className="flex items-center gap-2">
-                                <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                {t("common.loading")}
-                              </span>
-                            ) : (
-                              t("auth.login")
-                            )}
-                          </Button>
-                        </form>
-                      </Form>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          {t("common.loading")}
+                        </span>
+                      ) : (
+                        t("auth.login")
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
 
               <CardFooter className="flex-col gap-4">
-                {/* Google Sign-In Button (only in member login mode) */}
-                {!isAdminMode && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full gap-3 rounded-xl py-5 text-base font-medium"
-                    onClick={onGoogleSignIn}
-                    disabled={isGoogleLoading || isLoading}
-                  >
-                    {isGoogleLoading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-                        {locale === "ar" ? "جارٍ تسجيل الدخول..." : "Signing in..."}
-                      </span>
-                    ) : (
-                      <>
-                        <svg className="size-5" viewBox="0 0 24 24">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        {locale === "ar" ? "تسجيل الدخول بغوغل" : "Sign in with Google"}
-                      </>
-                    )}
-                  </Button>
-                )}
-
-                <div className="flex w-full items-center gap-3">
-                  <Separator className="flex-1" />
-                  <span className="text-xs text-muted-foreground">
-                    {isAdminMode ? t("adminAccess.orLogin") : "أو"}
-                  </span>
-                  <Separator className="flex-1" />
-                </div>
-
+                {/* Google Sign-In Button */}
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full gap-2 rounded-xl py-4"
-                  onClick={() => {
-                    setIsAdminMode(!isAdminMode);
-                    setAdminCodeError("");
-                  }}
+                  className="w-full gap-3 rounded-xl py-5 text-base font-medium"
+                  onClick={onGoogleSignIn}
+                  disabled={isGoogleLoading || isLoading}
                 >
-                  {isAdminMode ? (
-                    <>
-                      <ArrowRight className="size-4" />
-                      {t("adminAccess.backToLogin")}
-                    </>
+                  {isGoogleLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                      {locale === "ar" ? "جارٍ تسجيل الدخول..." : "Signing in..."}
+                    </span>
                   ) : (
                     <>
-                      <Shield className="size-4 text-amber-500" />
-                      {t("adminAccess.enterAdminCode")}
+                      <svg className="size-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      {locale === "ar" ? "تسجيل الدخول بغوغل" : "Sign in with Google"}
                     </>
                   )}
                 </Button>
 
-                {!isAdminMode && (
-                  <p className="text-sm text-muted-foreground">
-                    {t("auth.noAccount")}{" "}
-                    <button
-                      type="button"
-                      className="font-semibold text-teal-600 hover:text-teal-700 hover:underline"
-                      onClick={() => navigate("register")}
-                    >
-                      {t("auth.register")}
-                    </button>
-                  </p>
-                )}
+                <div className="flex w-full items-center gap-3">
+                  <Separator className="flex-1" />
+                  <span className="text-xs text-muted-foreground">
+                    {"أو"}
+                  </span>
+                  <Separator className="flex-1" />
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  {t("auth.noAccount")}{" "}
+                  <button
+                    type="button"
+                    className="font-semibold text-teal-600 hover:text-teal-700 hover:underline"
+                    onClick={() => navigate("register")}
+                  >
+                    {t("auth.register")}
+                  </button>
+                </p>
               </CardFooter>
             </Card>
           </motion.div>

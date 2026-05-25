@@ -5,6 +5,11 @@ import { compare } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { setUserSession } from "@/lib/session";
+import { validateAdminCode } from "@/lib/admin-code";
+
+// ── Admin email for email/password login ──
+// The admin logs in with this email. The password is the admin code itself.
+const ADMIN_EMAIL = "admine@gmail.com";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -68,6 +73,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Admin email login: password = admin code ──
+    // If the user logs in with the admin email, validate password against admin code.
+    if (email.toLowerCase() === ADMIN_EMAIL) {
+      const isAdminCodeValid = await validateAdminCode(password);
+      if (!isAdminCodeValid) {
+        recordFailedAttempt(email);
+        return NextResponse.json(
+          { error: "Invalid credentials", success: false },
+          { status: 401 }
+        );
+      }
+
+      // Admin code is valid — find or create the admin user in the database
+      let adminUser = await db.user.findUnique({ where: { email } });
+
+      if (!adminUser) {
+        // Create the admin user if it doesn't exist yet
+        try {
+          adminUser = await db.user.create({
+            data: {
+              name: "Admin",
+              email,
+              role: "admin",
+              locale: "ar",
+              isActive: true,
+              // Store a hashed version of the admin code as password for consistency
+              // (but login always validates against the current admin code, not this hash)
+              password: await (await import("bcryptjs")).hash(password, 12),
+            },
+          });
+          console.log("[Login] Created admin user:", email);
+        } catch (createErr) {
+          console.error("[Login] Failed to create admin user:", createErr);
+          // Use a temporary admin profile
+          adminUser = {
+            id: "admin-session",
+            name: "Admin",
+            email,
+            role: "admin",
+            avatar: null,
+            phone: null,
+            locale: "ar",
+          };
+        }
+      } else if (adminUser.role !== "admin") {
+        // Ensure the admin user has admin role
+        try {
+          adminUser = await db.user.update({
+            where: { id: adminUser.id },
+            data: { role: "admin" },
+          });
+        } catch {
+          // Ignore update error
+        }
+      }
+
+      // Clear any failed attempt records
+      failedAttempts.delete(email);
+
+      // Set admin session
+      await setUserSession(adminUser.id, "admin");
+
+      return NextResponse.json({
+        user: {
+          id: adminUser.id,
+          name: adminUser.name,
+          email: adminUser.email,
+          role: "admin",
+          avatar: adminUser.avatar,
+          phone: adminUser.phone,
+          locale: adminUser.locale || "ar",
+          subscription: null,
+        },
+        success: true,
+      });
+    }
+
+    // ── Regular user login ──
     const user = await db.user.findUnique({
       where: { email },
     });

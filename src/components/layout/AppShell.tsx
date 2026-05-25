@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               store.setUser({
                 id: data.userId,
                 name: data.role === "admin" ? "Admin" : "User",
-                email: data.role === "admin" ? "admin@healingspace.com" : "",
+                email: data.role === "admin" ? "Admine@gmail.com" : "",
                 role: (data.role as "user" | "admin") || "user",
                 avatar: undefined,
                 phone: undefined,

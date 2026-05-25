@@ -5239,7 +5239,7 @@ function SettingsView() {
         </CardContent>
       </Card>
 
-      {/* ─── Security: Change Admin Code ─── */}
+      {/* ─── Security: Change Admin Password ─── */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">

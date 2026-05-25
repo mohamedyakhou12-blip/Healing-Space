@@ -62,7 +62,7 @@ export async function GET() {
       user: {
         id: userId,
         name: isAdmin ? "Admin" : (userId.includes("@") ? userId.split("@")[0] : "User"),
-        email: isAdmin ? "admin@healingspace.com" : "",
+        email: isAdmin ? "Admine@gmail.com" : "",
         role: role as "user" | "admin",
         avatar: null,
         phone: null,

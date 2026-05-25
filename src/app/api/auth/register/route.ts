@@ -46,6 +46,16 @@ export async function POST(request: NextRequest) {
     name = sanitizeName(name);
     email = sanitizeEmail(email);
 
+    // Prevent registration with the admin email
+    if (email.toLowerCase() === "admine@gmail.com") {
+      // Hash the password anyway to make timing consistent
+      await hash(password, 12);
+      return NextResponse.json(
+        { error: "Registration failed. Please try with different details.", success: false },
+        { status: 409 }
+      );
+    }
+
     // Validate sanitized values are not empty
     if (!name || name.length < 2) {
       return NextResponse.json(
