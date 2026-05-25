@@ -100,6 +100,7 @@ export async function directCloudinaryUpload(
       videos: "healing-space/videos",
       pdfs: "healing-space/pdfs",
       live: "healing-space/live",
+      coaching: "healing-space/coaching",
       cover: "healing-space/covers",
       general: "healing-space/content",
       receipts: "healing-space/receipts",

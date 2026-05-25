@@ -27,13 +27,29 @@ const PUBLIC_KEYS = new Set([
   "hero_subtitle_fr",
   "hero_image",
   "individualPurchasesEnabled",
-  "subscription_price_full", // Public — shown on pricing page
+  // All subscription prices are public — shown on pricing page
+  "subscription_price_full",
+  "subscription_price_courses",
+  "subscription_price_articles",
+  "subscription_price_podcasts",
+  "subscription_price_videos",
+  "subscription_price_pdfs",
+  "subscription_price_live",
+  "subscription_price_coaching",
+  // CCP payment info — needed on payment page for all users
+  "ccpNumber",
+  "ccpHolderName",
+  "ccpWilaya",
+  // Social links
   "whatsapp_number",
   "whatsapp_link",
   "facebook_link",
   "instagram_link",
   "youtube_link",
   "tiktok_link",
+  // Full plan config — needed for content access checks on client
+  "full_plan_includes",
+  "full_plan_excluded_items",
 ]);
 
 export async function GET() {

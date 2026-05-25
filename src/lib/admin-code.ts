@@ -66,19 +66,16 @@ export function hasAdminCode(): boolean {
 export async function validateAdminCode(providedCode: string | null): Promise<boolean> {
   if (!providedCode) return false;
 
-  // 1. Check database (authoritative source)
+  // 1. Check database (authoritative source) — targeted query for efficiency
   try {
     const { db } = await import("@/lib/db");
-    const settings: any[] = await db.siteSetting.findMany();
-    if (Array.isArray(settings)) {
-      const codeRecord = settings.find(
-        (s: any) => s && s.key === "admin_access_code"
-      );
-      // If a code record exists in DB, use ONLY the DB value.
-      // This prevents any old code from still working after a change.
-      if (codeRecord && codeRecord.value) {
-        return timingSafeEqual(codeRecord.value, providedCode);
-      }
+    const codeRecord = await db.siteSetting.findUnique({
+      where: { key: "admin_access_code" },
+    });
+    // If a code record exists in DB, use ONLY the DB value.
+    // This prevents any old code from still working after a change.
+    if (codeRecord && codeRecord.value) {
+      return timingSafeEqual(codeRecord.value, providedCode);
     }
   } catch (dbError) {
     console.warn("[Admin Code] DB query failed, falling back to env var:", dbError instanceof Error ? dbError.message : String(dbError));
@@ -112,13 +109,10 @@ export async function validateAdminCode(providedCode: string | null): Promise<bo
 async function checkDbHasAdminCode(): Promise<boolean> {
   try {
     const { db } = await import("@/lib/db");
-    const settings: any[] = await db.siteSetting.findMany();
-    if (Array.isArray(settings)) {
-      const codeRecord = settings.find(
-        (s: any) => s && s.key === "admin_access_code"
-      );
-      return !!codeRecord && !!codeRecord.value;
-    }
+    const codeRecord = await db.siteSetting.findUnique({
+      where: { key: "admin_access_code" },
+    });
+    return !!codeRecord && !!codeRecord.value;
   } catch {
     // DB unavailable
   }

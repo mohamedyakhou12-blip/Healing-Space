@@ -45,13 +45,12 @@ export async function PUT(request: NextRequest) {
         create: { key: "admin_access_code", value: newCode },
       });
 
-      // Verify the save by reading back from DB
-      const settings: any[] = await db.siteSetting.findMany();
-      const found = Array.isArray(settings)
-        ? settings.find((s: any) => s && s.key === "admin_access_code" && s.value === newCode)
-        : null;
+      // Verify the save by reading back from DB (targeted query)
+      const found = await db.siteSetting.findUnique({
+        where: { key: "admin_access_code" },
+      });
 
-      if (!found) {
+      if (!found || found.value !== newCode) {
         return NextResponse.json({
           error: "Database save could not be verified",
         }, { status: 500 });

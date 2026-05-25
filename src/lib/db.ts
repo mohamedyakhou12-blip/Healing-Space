@@ -1037,6 +1037,9 @@ export const db = {
     async findMany(opts?: { orderBy?: { key?: string } }) {
       return findAll("siteSettings", "key", "asc");
     },
+    async findUnique({ where }: { where: { key: string } }) {
+      return findUnique("siteSettings", "key", where.key);
+    },
     async upsert({
       where,
       update,
