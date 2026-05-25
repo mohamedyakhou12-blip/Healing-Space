@@ -16,6 +16,7 @@ const createPaymentSchema = z.object({
     "videos",
     "pdfs",
     "live",
+    "coaching",
   ]),
   amount: z.number().positive("Amount must be positive").max(REQUEST_LIMITS.MAX_PRICE, "Amount exceeds maximum allowed"),
   receiptImage: z.string().min(1, "Receipt image URL is required"),
@@ -276,6 +277,7 @@ export async function PUT(request: NextRequest) {
         videos: { ar: "الفيديوهات", fr: "Vidéos", en: "Videos" },
         pdfs: { ar: "الكتب", fr: "E-books", en: "E-books" },
         live: { ar: "الجلسات المباشرة", fr: "Sessions en direct", en: "Live Sessions" },
+        coaching: { ar: "الكوتشنغ", fr: "Coaching", en: "Coaching" },
       };
       const planLabel = planNames[existing.subscriptionType] || { ar: existing.subscriptionType, fr: existing.subscriptionType, en: existing.subscriptionType };
 

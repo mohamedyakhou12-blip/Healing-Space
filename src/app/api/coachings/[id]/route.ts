@@ -39,7 +39,6 @@ export async function GET(
 
     const coaching = await db.coaching.findUnique({
       where: { id },
-      include: { _count: true },
     });
 
     if (!coaching) {

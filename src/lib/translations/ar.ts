@@ -209,6 +209,7 @@ const ar = {
     videosOnly: "الفيديوهات فقط",
     pdfsOnly: "الكتب الإلكترونية فقط",
     liveOnly: "البث المباشر فقط",
+    coachingOnly: "الكوتشنغ فقط",
     price: "السعر",
     perMonth: "شهرياً",
     activate: "تفعيل",

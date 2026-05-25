@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cloudinary } from "@/lib/cloudinary";
-import { requireAdmin } from "@/lib/session";
+import { requireAdmin, requireAuth } from "@/lib/session";
 import { validateAdminCode } from "@/lib/admin-code";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
@@ -15,10 +15,11 @@ import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
  * 2. Client uploads file directly to Cloudinary via XHR (with real progress)
  * 3. Cloudinary returns the URL — client uses it directly
  *
- * AUTH: Accepts EITHER:
+ * AUTH: Accepts:
  * - Session-based admin auth (iron-session cookie with isAdmin=true), OR
  * - Valid admin code via X-Admin-Code header
- * This ensures uploads work from both the AdminPage and HomepageCustomizerPage.
+ * - For the "healing-space/receipts" folder ONLY: any authenticated user session
+ * This ensures uploads work from AdminPage, HomepageCustomizerPage, and PaymentPage.
  */
 export async function POST(request: NextRequest) {
   // Rate limiting: max 20 signature requests per minute per IP
@@ -30,16 +31,44 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── Auth: accept EITHER session-based admin OR valid admin code ──
+  // ── Auth: accept EITHER session-based admin, valid admin code, or authenticated user for receipts ──
   const adminId = await requireAdmin();
   const adminCode = request.headers.get("X-Admin-Code");
   const codeValid = await validateAdminCode(adminCode);
 
-  if (!adminId && !codeValid) {
+  const isAdmin = !!adminId || codeValid;
+
+  // Parse the body early to check the folder for receipt uploads by regular users
+  let body: { folder?: string; resourceType?: string };
+  try {
+    body = await request.json();
+  } catch {
     return NextResponse.json(
-      { error: "Admin access required. Please verify your admin code or log in again.", success: false },
-      { status: 401 }
+      { error: "Invalid request body", success: false },
+      { status: 400 }
     );
+  }
+
+  const { folder = "healing-space/content", resourceType = "auto" } = body;
+  const isReceiptFolder = folder === "healing-space/receipts";
+
+  // Regular (non-admin) users can only get signatures for the receipts folder
+  let userId: string | null = null;
+  if (!isAdmin) {
+    if (!isReceiptFolder) {
+      return NextResponse.json(
+        { error: "Admin access required for this folder. Please verify your admin code or log in again.", success: false },
+        { status: 401 }
+      );
+    }
+    // Check if user is authenticated (any logged-in user can upload receipts)
+    userId = await requireAuth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Please log in to upload receipts.", success: false },
+        { status: 401 }
+      );
+    }
   }
 
   try {
@@ -51,12 +80,6 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-
-    const body = await request.json();
-    const { folder = "healing-space/content", resourceType = "auto" } = body as {
-      folder?: string;
-      resourceType?: string;
-    };
 
     // Validate folder name to prevent directory traversal
     if (folder.includes("..") || folder.includes("//") || !/^[\w-\/]+$/.test(folder)) {

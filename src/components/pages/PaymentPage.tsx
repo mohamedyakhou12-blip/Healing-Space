@@ -24,6 +24,7 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import { shouldUseDirectUpload, directCloudinaryUpload } from "@/lib/cloudinary-client";
 
 interface PaymentRecord {
   id: string;
@@ -48,6 +49,7 @@ const planNames: Record<string, { ar: string; en: string; fr: string }> = {
   videos: { ar: "الفيديوهات فقط", en: "Videos Only", fr: "Vidéos uniquement" },
   pdfs: { ar: "الكتب الإلكترونية فقط", en: "E-books Only", fr: "E-books uniquement" },
   live: { ar: "البث المباشر فقط", en: "Live Only", fr: "En direct uniquement" },
+  coaching: { ar: "الكوتشنغ فقط", en: "Coaching Only", fr: "Coaching uniquement" },
 };
 
 const DEFAULT_PLAN_PRICES: Record<string, number> = {
@@ -58,6 +60,7 @@ const DEFAULT_PLAN_PRICES: Record<string, number> = {
   videos: 500,
   pdfs: 500,
   live: 500,
+  coaching: 500,
 };
 
 const DEFAULT_CCP = "12345 67890 12";
@@ -196,6 +199,35 @@ export default function PaymentPage() {
     fetchData();
   }, [user]);
 
+  /**
+   * Helper: safely parse a response that might be HTML (e.g., Vercel body limit error).
+   * Returns the parsed JSON, or throws a localized error if the response is HTML.
+   */
+  const safeJsonParse = useCallback(async (res: Response): Promise<Record<string, unknown>> => {
+    const text = await res.text();
+    // Detect HTML error pages (Vercel returns HTML when body limit is exceeded)
+    const trimmed = text.trim();
+    if (trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html") || trimmed.startsWith("<HTML")) {
+      const htmlError = locale === "ar"
+        ? "الملف كبير جداً للرفع المباشر. يرجى استخدام ملف أصغر أو الاتصال بالدعم."
+        : locale === "fr"
+          ? "Fichier trop volumineux pour un téléchargement direct. Veuillez utiliser un fichier plus petit ou contacter le support."
+          : "File too large for direct upload. Please use a smaller file or contact support.";
+      throw new Error(htmlError);
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(
+        locale === "ar"
+          ? "حدث خطأ غير متوقع أثناء معالجة الاستجابة"
+          : locale === "fr"
+            ? "Erreur inattendue lors du traitement de la réponse"
+            : "Unexpected error while processing the response"
+      );
+    }
+  }, [locale]);
+
   const handleFileSelect = useCallback(async (file: File) => {
     // Allow images and PDFs for receipts
     if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
@@ -211,31 +243,54 @@ export default function PaymentPage() {
 
     setReceiptFile(file);
     setIsUploadingReceipt(true);
+
+    // Determine resource type for Cloudinary: "image" for images, "raw" for PDFs
+    const resourceType = file.type === "application/pdf" ? "raw" : "image";
+
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "receipt");
+      // ── For large files (>= 3MB): use direct Cloudinary upload ──
+      // This bypasses Vercel's serverless function body size limit (~4.5MB on Hobby plan).
+      // The file goes directly from the browser to Cloudinary's servers.
+      if (shouldUseDirectUpload(file.size)) {
+        const result = await directCloudinaryUpload(
+          file,
+          {
+            folder: "healing-space/receipts",
+            resourceType,
+            authMode: "user", // Use session-based user auth (not admin)
+          },
+        );
+        setReceiptPreview(result.url);
+      } else {
+        // ── For small files (< 3MB): use server-mediated upload ──
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("type", "receipt");
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Upload failed");
+        if (!res.ok) {
+          const err = await safeJsonParse(res);
+          throw new Error((err.error as string) || "Upload failed");
+        }
+
+        const data = await safeJsonParse(res);
+        setReceiptPreview(data.url as string);
       }
-
-      const data = await res.json();
-      setReceiptPreview(data.url); // Store the Firebase Storage URL
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : (locale === "ar" ? "فشل رفع الملف" : locale === "fr" ? "Échec du téléchargement" : "Upload failed"));
+      const message = error instanceof Error ? error.message : (
+        locale === "ar" ? "فشل رفع الملف" : locale === "fr" ? "Échec du téléchargement" : "Upload failed"
+      );
+      toast.error(message);
       setReceiptPreview(null);
       setReceiptFile(null);
     } finally {
       setIsUploadingReceipt(false);
     }
-  }, [locale]);
+  }, [locale, safeJsonParse]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

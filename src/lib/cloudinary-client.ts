@@ -61,6 +61,12 @@ export interface DirectUploadOptions {
   resourceType?: string;
   /** Content type for folder mapping (e.g., "videos", "courses") */
   contentType?: string;
+  /**
+   * Auth mode for the signature request.
+   * - "admin": Sends admin code header (default, for content uploads)
+   * - "user": No admin header, uses session-based user auth (for receipt uploads)
+   */
+  authMode?: "admin" | "user";
 }
 
 /**
@@ -79,7 +85,7 @@ export async function directCloudinaryUpload(
   options: DirectUploadOptions = {},
   onProgress?: (percent: number) => void
 ): Promise<DirectUploadResult> {
-  const { folder = "healing-space/content", resourceType: overrideResourceType, contentType } = options;
+  const { folder = "healing-space/content", resourceType: overrideResourceType, contentType, authMode = "admin" } = options;
 
   // Determine resource type from file MIME
   const resourceType = overrideResourceType || getResourceType(file.type || "application/octet-stream");
@@ -96,14 +102,20 @@ export async function directCloudinaryUpload(
       live: "healing-space/live",
       cover: "healing-space/covers",
       general: "healing-space/content",
+      receipts: "healing-space/receipts",
     };
     effectiveFolder = folderMap[contentType] || folder;
   }
 
   // Step 1: Get signed upload parameters from our server
+  // Use admin headers only for admin auth mode; user mode relies on session cookie
+  const headers: Record<string, string> = authMode === "admin"
+    ? getAdminHeaders()
+    : { "Content-Type": "application/json" };
+
   const signRes = await fetch("/api/cloudinary/signature", {
     method: "POST",
-    headers: getAdminHeaders(),
+    headers,
     body: JSON.stringify({
       folder: effectiveFolder,
       resourceType,
@@ -111,8 +123,18 @@ export async function directCloudinaryUpload(
   });
 
   if (!signRes.ok) {
-    const err = await signRes.json().catch(() => ({})) as { error?: string };
-    throw new Error(err.error || "Authorization failed. Please verify your admin code.");
+    let err: { error?: string } = {};
+    try {
+      const text = await signRes.text();
+      // Detect HTML error pages (e.g., Vercel body limit exceeded)
+      if (text.trim().startsWith("<!") || text.trim().startsWith("<html")) {
+        throw new Error("Server error: request was rejected. If uploading a large file, please try a smaller one.");
+      }
+      err = JSON.parse(text);
+    } catch (parseErr) {
+      if (parseErr instanceof Error && parseErr.message.startsWith("Server error")) throw parseErr;
+    }
+    throw new Error(err.error || "Authorization failed. Please verify your credentials.");
   }
 
   const signData = await signRes.json();

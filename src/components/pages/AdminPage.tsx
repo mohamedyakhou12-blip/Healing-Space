@@ -291,7 +291,7 @@ const sidebarItems: { key: AdminTab; icon: typeof LayoutDashboard; labelKey: str
   { key: "purchases", icon: ShoppingBag, labelKey: "admin.individualPurchases" },
   { key: "content", icon: FileText, labelKey: "admin.content" },
   { key: "homepage", icon: BookOpen, labelKey: "admin.homepageEditor" },
-  { key: "prices", icon: CreditCard, labelKey: "admin.prices" },
+  { key: "prices", icon: Banknote, labelKey: "admin.prices" },
   { key: "settings", icon: Settings, labelKey: "admin.settings" },
 ];
 
@@ -3694,6 +3694,7 @@ const SUBSCRIPTION_PLANS: Array<{ id: string; labelKey: string; icon: typeof Cro
   { id: "videos", labelKey: "subscriptions.videosOnly", icon: Video, gradient: "from-rose-400 to-pink-600" },
   { id: "pdfs", labelKey: "subscriptions.pdfsOnly", icon: FileDown, gradient: "from-amber-400 to-yellow-600" },
   { id: "live", labelKey: "subscriptions.liveOnly", icon: Radio, gradient: "from-teal-400 to-emerald-600" },
+  { id: "coaching", labelKey: "subscriptions.coachingOnly", icon: Star, gradient: "from-indigo-400 to-blue-600" },
 ];
 
 const DEFAULT_SUB_PRICES: Record<string, number> = {
@@ -3704,6 +3705,7 @@ const DEFAULT_SUB_PRICES: Record<string, number> = {
   videos: 500,
   pdfs: 500,
   live: 500,
+  coaching: 500,
 };
 
 function PricesView() {
@@ -3723,7 +3725,7 @@ function PricesView() {
   const [savingSubPrice, setSavingSubPrice] = useState(false);
 
   // ── Full plan content types ──
-  const ALL_CONTENT_TYPES = ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+  const ALL_CONTENT_TYPES = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
   const [fullPlanIncludes, setFullPlanIncludes] = useState<string[]>(ALL_CONTENT_TYPES);
   const [savingFullPlanIncludes, setSavingFullPlanIncludes] = useState(false);
 

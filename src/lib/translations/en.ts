@@ -209,6 +209,7 @@ const en = {
     videosOnly: "Videos Only",
     pdfsOnly: "E-books Only",
     liveOnly: "Live Only",
+    coachingOnly: "Coaching Only",
     price: "Price",
     perMonth: "per month",
     activate: "Activate",

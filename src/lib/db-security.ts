@@ -119,7 +119,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
   ]),
   reviews: new Set([
     "id", "userId", "rating", "comment",
-    "courseId", "articleId", "podcastId", "videoId",
+    "courseId", "articleId", "podcastId", "videoId", "coachingId",
     "createdAt", "updatedAt",
   ]),
   notifications: new Set([

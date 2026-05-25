@@ -14,6 +14,7 @@ const createSubscriptionSchema = z.object({
     "videos",
     "pdfs",
     "live",
+    "coaching",
   ]),
   status: z.enum(["active", "expired", "cancelled"]).default("active"),
   endDate: z.string().datetime().optional(),
