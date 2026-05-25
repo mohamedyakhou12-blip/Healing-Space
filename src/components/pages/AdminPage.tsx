@@ -61,6 +61,7 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Sparkles,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -3964,7 +3965,7 @@ function PricesView() {
         <CardContent>
           {subPricesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[...Array(7)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <Skeleton key={i} className="h-24 rounded-lg" />
               ))}
             </div>
@@ -4082,9 +4083,9 @@ function PricesView() {
           {/* Checkboxes for each content type */}
           <div className="space-y-3">
             {ALL_CONTENT_TYPES.map((type) => {
-              const typeLabels: Record<string, string> = { courses: t("nav.courses"), articles: t("nav.articles"), podcasts: t("nav.podcasts"), videos: t("nav.videos"), pdfs: t("nav.pdfs"), live: t("nav.live") };
-              const typeIcons: Record<string, typeof BookOpen> = { courses: BookOpen, articles: FileText, podcasts: Headphones, videos: Video, pdfs: FileDown, live: Radio };
-              const typeGradients: Record<string, string> = { courses: "from-emerald-400 to-teal-600", articles: "from-cyan-400 to-sky-600", podcasts: "from-violet-400 to-purple-600", videos: "from-rose-400 to-pink-600", pdfs: "from-amber-400 to-yellow-600", live: "from-teal-400 to-emerald-600" };
+              const typeLabels: Record<string, string> = { courses: t("nav.courses"), articles: t("nav.articles"), podcasts: t("nav.podcasts"), videos: t("nav.videos"), pdfs: t("nav.pdfs"), live: t("nav.live"), coaching: t("nav.coaching") };
+              const typeIcons: Record<string, typeof BookOpen> = { courses: BookOpen, articles: FileText, podcasts: Headphones, videos: Video, pdfs: FileDown, live: Radio, coaching: Sparkles };
+              const typeGradients: Record<string, string> = { courses: "from-emerald-400 to-teal-600", articles: "from-cyan-400 to-sky-600", podcasts: "from-violet-400 to-purple-600", videos: "from-rose-400 to-pink-600", pdfs: "from-amber-400 to-yellow-600", live: "from-teal-400 to-emerald-600", coaching: "from-indigo-400 to-blue-600" };
               const isChecked = fullPlanIncludes.includes(type);
               const TypeIcon = typeIcons[type];
               const isExpanded = expandedType === type;
