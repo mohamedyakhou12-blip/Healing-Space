@@ -81,7 +81,7 @@ function getSessionSecret(): string {
   return "dev-only-fallback-secret-do-not-use-in-prod-32ch";
 }
 
-const SESSION_OPTIONS = {
+export const SESSION_OPTIONS = {
   password: getSessionSecret(),
   cookieName: "healing_session",
   cookieOptions: {
