@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getIronSession } from "iron-session";
 import { sanitizeEmail } from "@/lib/sanitize";
-import { setUserSession } from "@/lib/session";
+import { SESSION_OPTIONS } from "@/lib/session";
 
 /**
  * GET /api/auth/google-callback
@@ -8,12 +9,13 @@ import { setUserSession } from "@/lib/session";
  * Google OAuth 2.0 callback — receives the authorization code from Google,
  * exchanges it for user info, creates a session, and redirects to the homepage.
  *
- * ARCHITECTURE: Uses setUserSession() from session.ts (same as admin login)
- * to ensure the session cookie is set using the exact same mechanism that
- * works reliably on Vercel. After setting the session, we return a redirect.
+ * ARCHITECTURE DECISION: Returns a 200 HTML page with JS redirect instead of
+ * a 307 redirect. This ensures the Set-Cookie header is reliably delivered
+ * to the browser. On Vercel's CDN, 307 redirects may lose Set-Cookie headers.
  *
- * If NextResponse.redirect() loses the Set-Cookie on some CDN layers,
- * we fall back to an HTML page with meta-refresh + JS redirect.
+ * Session is set using getIronSession(request, response, SESSION_OPTIONS)
+ * with SESSION_OPTIONS imported from session.ts — this eliminates the
+ * duplication that previously caused session cookie mismatches.
  */
 
 const GOOGLE_CLIENT_ID =
@@ -52,6 +54,79 @@ interface GoogleUserInfo {
   picture?: string;
 }
 
+/**
+ * Generate an HTML page that redirects the user.
+ * Uses 200 + JS redirect to guarantee Set-Cookie is delivered.
+ */
+function htmlRedirect(url: string, isError: boolean = false, errorDetail?: string): string {
+  const bgColor = isError ? "#fef2f2" : "#f0fdf4";
+  const textColor = isError ? "#991b1b" : "#166534";
+  const message = isError
+    ? "حدث خطأ أثناء تسجيل الدخول بغوغل. يُعاد توجيهك..."
+    : "تم تسجيل الدخول بنجاح! يُعاد توجيهك...";
+  const messageEn = isError
+    ? "An error occurred during Google sign-in. Redirecting..."
+    : "Login successful! Redirecting...";
+
+  // Show error detail if available (for debugging)
+  const errorInfo = errorDetail
+    ? `<p style="margin-top:8px;font-size:0.8rem;color:${textColor}88;">${errorDetail}</p>`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting...</title>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: ${bgColor};
+      color: ${textColor};
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid ${textColor}33;
+      border-top-color: ${textColor};
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+    p { margin: 0; color: ${textColor}99; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h2>${message}</h2>
+    <p>${messageEn}</p>
+    ${errorInfo}
+  </div>
+  <script>
+    setTimeout(function() {
+      window.location.replace("${url.replace(/"/g, "&quot;")}");
+    }, 500);
+  </script>
+</body>
+</html>`;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -62,12 +137,20 @@ export async function GET(request: NextRequest) {
   // User denied access
   if (error) {
     console.error("[Google Callback] OAuth error:", error);
-    return NextResponse.redirect(`${baseUrl}/login?error=google_denied`);
+    const response = new NextResponse(
+      htmlRedirect(`${baseUrl}/login?error=google_denied`, true),
+      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
+    return response;
   }
 
   if (!code) {
     console.error("[Google Callback] No authorization code received");
-    return NextResponse.redirect(`${baseUrl}/login?error=no_code`);
+    const response = new NextResponse(
+      htmlRedirect(`${baseUrl}/login?error=no_code`, true),
+      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
+    return response;
   }
 
   try {
@@ -76,8 +159,8 @@ export async function GET(request: NextRequest) {
     // Step 1: Exchange authorization code for tokens
     console.log("[Google Callback] Exchanging code for tokens...");
     console.log("[Google Callback] redirect_uri:", redirectUri);
-    console.log("[Google Callback] client_id:", GOOGLE_CLIENT_ID ? "SET" : "EMPTY");
-    console.log("[Google Callback] client_secret:", GOOGLE_CLIENT_SECRET ? "SET" : "EMPTY");
+    console.log("[Google Callback] client_id:", GOOGLE_CLIENT_ID ? "SET (" + GOOGLE_CLIENT_ID.substring(0, 10) + "...)" : "EMPTY");
+    console.log("[Google Callback] client_secret:", GOOGLE_CLIENT_SECRET ? "SET (length: " + GOOGLE_CLIENT_SECRET.length + ")" : "EMPTY");
 
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -94,20 +177,27 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error("[Google Callback] Token exchange failed:", tokenResponse.status, errorText);
+
+      let errorType = "token_exchange_failed";
+      let detail = `HTTP ${tokenResponse.status}`;
+
       if (errorText.includes("redirect_uri_mismatch")) {
+        errorType = "redirect_uri_mismatch";
+        detail = `redirect_uri mismatch — ${redirectUri} must be in Google Cloud Console`;
         console.error(
           "[Google Callback] REDIRECT URI MISMATCH! The URI", redirectUri,
           "must be added in Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client > Authorized redirect URIs"
         );
-        return NextResponse.redirect(`${baseUrl}/login?error=redirect_uri_mismatch`);
+      } else if (errorText.includes("invalid_client")) {
+        detail = "Invalid client — check GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET";
+        console.error("[Google Callback] INVALID CLIENT!");
       }
-      if (errorText.includes("invalid_client")) {
-        console.error(
-          "[Google Callback] INVALID CLIENT! Check GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET env vars."
-        );
-        return NextResponse.redirect(`${baseUrl}/login?error=token_exchange_failed`);
-      }
-      return NextResponse.redirect(`${baseUrl}/login?error=token_exchange_failed`);
+
+      const response = new NextResponse(
+        htmlRedirect(`${baseUrl}/login?error=${errorType}`, true, detail),
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+      );
+      return response;
     }
 
     const tokens: GoogleTokenResponse = await tokenResponse.json();
@@ -120,7 +210,11 @@ export async function GET(request: NextRequest) {
 
     if (!userInfoResponse.ok) {
       console.error("[Google Callback] Failed to get user info:", userInfoResponse.status);
-      return NextResponse.redirect(`${baseUrl}/login?error=user_info_failed`);
+      const response = new NextResponse(
+        htmlRedirect(`${baseUrl}/login?error=user_info_failed`, true),
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+      );
+      return response;
     }
 
     const userInfo: GoogleUserInfo = await userInfoResponse.json();
@@ -128,7 +222,11 @@ export async function GET(request: NextRequest) {
 
     if (!userInfo.email || !userInfo.email_verified) {
       console.error("[Google Callback] Missing or unverified email");
-      return NextResponse.redirect(`${baseUrl}/login?error=email_not_verified`);
+      const response = new NextResponse(
+        htmlRedirect(`${baseUrl}/login?error=email_not_verified`, true),
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+      );
+      return response;
     }
 
     // Step 3: Find or create user in database
@@ -180,84 +278,47 @@ export async function GET(request: NextRequest) {
       isNewUser = true;
     }
 
-    // Step 4: Create session using the SAME mechanism as admin login
+    // Step 4: Create session and redirect via HTML page
     const role = user.role === "admin" ? "admin" : "user";
     const redirectPath = role === "admin" ? "/admin" : "/";
     const redirectUrl = `${baseUrl}${redirectPath}?login=success`;
 
     console.log("[Google Callback] Login successful:", email, "role:", role, "userId:", user.id);
 
+    // ── Set session cookie on an HTML response ──
+    // Using getIronSession(request, response, SESSION_OPTIONS) with
+    // SESSION_OPTIONS imported from session.ts (not duplicated).
+    // The 200 HTML response guarantees the Set-Cookie header is delivered.
     try {
-      // Use the SAME setUserSession() that works for admin login.
-      // This uses cookies() from next/headers under the hood, which is the
-      // proven reliable way to set cookies on Vercel.
-      await setUserSession(user.id, role as "user" | "admin");
+      const htmlContent = htmlRedirect(redirectUrl, false);
+      const response = new NextResponse(htmlContent, {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
 
-      console.log("[Google Callback] Session set successfully via setUserSession()");
+      // Set the session cookie on this HTML response
+      const session = await getIronSession(request, response, SESSION_OPTIONS);
+      (session as any).userId = user.id;
+      (session as any).userRole = role;
+      (session as any).isAdmin = role === "admin";
+      await session.save();
 
-      // Return a redirect — the Set-Cookie header should be preserved
-      // because setUserSession() uses cookies() which Next.js applies
-      // to the returned response.
-      const response = NextResponse.redirect(redirectUrl);
+      console.log("[Google Callback] Session cookie set on HTML response for:", email);
       return response;
     } catch (sessionError) {
       console.error("[Google Callback] Failed to set session:", sessionError);
-
-      // FALLBACK: If setUserSession() + redirect doesn't work,
-      // try the HTML redirect approach with getIronSession directly
-      try {
-        const { getIronSession } = await import("iron-session");
-        const { SESSION_OPTIONS } = await import("@/lib/session");
-
-        const htmlContent = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Redirecting...</title>
-  <style>
-    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #f0fdf4; color: #166534; }
-    .container { text-align: center; padding: 2rem; }
-    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #16653433; border-top-color: #166534; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
-    p { margin: 0; color: #16653499; font-size: 0.9rem; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="spinner"></div>
-    <h2>\u062A\u0645 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644 \u0628\u0646\u062C\u0627\u062D! \u064A\u064F\u0639\u0627\u062F \u062A\u0648\u062C\u064A\u0647\u0643...</h2>
-    <p>Login successful! Redirecting...</p>
-  </div>
-  <script>
-    setTimeout(function() {
-      window.location.replace("${redirectUrl.replace(/"/g, "&quot;")}");
-    }, 500);
-  </script>
-</body>
-</html>`;
-
-        const htmlResponse = new NextResponse(htmlContent, {
-          status: 200,
-          headers: { "Content-Type": "text/html; charset=utf-8" },
-        });
-
-        const session = await getIronSession(request, htmlResponse, SESSION_OPTIONS);
-        (session as any).userId = user.id;
-        (session as any).userRole = role;
-        (session as any).isAdmin = role === "admin";
-        await session.save();
-
-        console.log("[Google Callback] Session set via fallback getIronSession()");
-        return htmlResponse;
-      } catch (fallbackError) {
-        console.error("[Google Callback] Fallback session also failed:", fallbackError);
-        return NextResponse.redirect(`${baseUrl}/login?error=session_failed`);
-      }
+      const response = new NextResponse(
+        htmlRedirect(`${baseUrl}/login?error=session_failed`, true, String(sessionError)),
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+      );
+      return response;
     }
   } catch (error) {
     console.error("[Google Callback] Unhandled error:", error);
-    return NextResponse.redirect(`${baseUrl}/login?error=unknown`);
+    const response = new NextResponse(
+      htmlRedirect(`${baseUrl}/login?error=unknown`, true, String(error)),
+      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
+    return response;
   }
 }
