@@ -36,6 +36,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup } from "firebase/auth";
 import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
@@ -151,13 +153,65 @@ export default function RegisterPage() {
     }
   };
 
-  const onGoogleSignIn = () => {
-    // ── Server-side OAuth 2.0 flow ──
-    // Firebase Client SDK popup/redirect fails due to CORS/COOP issues on Vercel.
-    // Instead, redirect to server route which handles the full OAuth flow.
+  const onGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
-    window.location.href = "/api/auth/google-redirect";
+    try {
+      // Use Firebase Client SDK popup — no server-side client secret needed
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Get the Firebase ID token to send to our server for verification
+      const idToken = await user.getIdToken();
+
+      // Send the ID token to our server to verify and create a session
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Server error");
+      }
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Google sign-in failed");
+      }
+
+      // Update the app store with the user data
+      setUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: data.user.avatar,
+        phone: data.user.phone,
+      });
+
+      toast.success(locale === "ar" ? "تم إنشاء الحساب بنجاح! مرحباً بك" : "Account created successfully! Welcome");
+
+      // Navigate to homepage
+      if (data.user.role === "admin") {
+        navigate("admin");
+      } else {
+        navigate("home");
+      }
+    } catch (error: any) {
+      console.error("[Google Sign-In] Error:", error);
+      // Ignore popup-closed-by-user errors
+      if (error?.code === "auth/popup-closed-by-user" || error?.code === "auth/cancelled-popup-request") {
+        return;
+      }
+      const displayError = locale === "ar"
+        ? "حدث خطأ أثناء التسجيل بغوغل. يرجى المحاولة مرة أخرى"
+        : "An error occurred during Google sign-up. Please try again";
+      toast.error(displayError, { duration: 5000 });
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
