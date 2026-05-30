@@ -196,7 +196,9 @@ export async function directCloudinaryUpload(
     formData.append("timestamp", signData.timestamp.toString());
     formData.append("signature", signData.signature);
     formData.append("folder", signData.folder);
-    formData.append("resource_type", signData.resourceType);
+    // NOTE: resource_type is NOT sent as a body parameter — it's determined
+    // by the upload URL path (e.g., /video/upload vs /image/upload).
+    // Sending it in the body causes "Invalid Signature" errors.
     formData.append("use_filename", "true");
     formData.append("unique_filename", "true");
 

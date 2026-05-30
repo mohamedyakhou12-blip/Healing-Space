@@ -101,13 +101,14 @@ export async function POST(request: NextRequest) {
     const timestamp = Math.round(Date.now() / 1000);
 
     // Build upload params for the signature
+    // NOTE: resource_type and overwrite are NOT included in the signature.
+    // Cloudinary treats resource_type as a URL path parameter (not a body parameter),
+    // so including it in the signature causes "Invalid Signature" errors.
     const uploadParams: Record<string, string | number> = {
       timestamp,
       folder,
-      resource_type: resourceType,
       use_filename: "true",
       unique_filename: "true",
-      overwrite: "false",
     };
 
     // Generate the signature

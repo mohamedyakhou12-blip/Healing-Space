@@ -5515,7 +5515,7 @@ function HomepageCustomizer() {
         formData.append("timestamp", signData.timestamp.toString());
         formData.append("signature", signData.signature);
         formData.append("folder", signData.folder);
-        formData.append("resource_type", signData.resourceType);
+        // NOTE: resource_type is NOT a body param — it's in the URL path
         formData.append("use_filename", "true");
         formData.append("unique_filename", "true");
 

@@ -58,8 +58,8 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "createdAt", "updatedAt",
   ]),
   payments: new Set([
-    "id", "userId", "amount", "ccp", "receiptUrl", "status",
-    "adminNote", "type", "planType", "createdAt", "updatedAt",
+    "id", "userId", "amount", "ccp", "ccpNumber", "receiptUrl", "receiptImage", "status",
+    "adminNote", "type", "planType", "subscriptionType", "createdAt", "updatedAt",
   ]),
   courses: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
