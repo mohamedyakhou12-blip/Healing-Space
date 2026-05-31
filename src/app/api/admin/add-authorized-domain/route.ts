@@ -160,7 +160,7 @@ async function getAccessToken(serviceAccount: {
 }): Promise<string | null> {
   try {
     const now = Math.floor(Date.now() / 1000);
-    const scope = "https://www.googleapis.com/auth/firebase";
+    const scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/firebase";
 
     // Create JWT header and payload
     const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
