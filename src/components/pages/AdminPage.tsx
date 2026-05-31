@@ -1943,6 +1943,8 @@ function ContentView() {
   const [formVideoUrl, setFormVideoUrl] = useState("");
   const [formAudioUrl, setFormAudioUrl] = useState("");
   const [formFileUrl, setFormFileUrl] = useState("");
+  const [formStreamUrl, setFormStreamUrl] = useState("");
+  const [formZoomUrl, setFormZoomUrl] = useState("");
   const [formContentAr, setFormContentAr] = useState("");
   const [formContentFr, setFormContentFr] = useState("");
   const [formContentEn, setFormContentEn] = useState("");
@@ -2149,6 +2151,10 @@ function ContentView() {
       }
       if (contentSubTab === "pdfs" && formFileUrl) {
         payload.fileUrl = formFileUrl;
+      }
+      if (contentSubTab === "live") {
+        if (formStreamUrl) payload.streamUrl = formStreamUrl;
+        if (formZoomUrl) payload.zoomUrl = formZoomUrl;
       }
       if (contentSubTab === "coaching") {
         payload.duration = formDuration;
@@ -2822,6 +2828,34 @@ function ContentView() {
                   dir="ltr"
                 />
               </div>
+            )}
+
+            {/* Stream URL field for Live Sessions */}
+            {contentSubTab === "live" && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">
+                    رابط البث (Stream URL)
+                  </Label>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=... أو رابط البث المباشر"
+                    value={formStreamUrl}
+                    onChange={(e) => setFormStreamUrl(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">
+                    رابط اجتماع Zoom (Zoom Meeting URL)
+                  </Label>
+                  <Input
+                    placeholder="https://zoom.us/j/..."
+                    value={formZoomUrl}
+                    onChange={(e) => setFormZoomUrl(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+              </>
             )}
 
             {/* Article content fields - Rich Text Editor */}
@@ -5239,7 +5273,7 @@ function SettingsView() {
         </CardContent>
       </Card>
 
-      {/* ─── Security: Change Admin Password ─── */}
+      {/* ─── Security: Change Admin Code ─── */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -5515,7 +5549,7 @@ function HomepageCustomizer() {
         formData.append("timestamp", signData.timestamp.toString());
         formData.append("signature", signData.signature);
         formData.append("folder", signData.folder);
-        formData.append("resource_type", signData.resourceType);
+        // NOTE: resource_type is NOT a body param — it's in the URL path
         formData.append("use_filename", "true");
         formData.append("unique_filename", "true");
 

@@ -58,13 +58,15 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "createdAt", "updatedAt",
   ]),
   payments: new Set([
-    "id", "userId", "amount", "ccp", "receiptUrl", "status",
-    "adminNote", "type", "planType", "createdAt", "updatedAt",
+    "id", "userId", "amount", "ccp", "ccpNumber", "receiptUrl", "receiptImage", "status",
+    "adminNote", "type", "planType", "subscriptionType", "createdAt", "updatedAt",
   ]),
   courses: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "image", "status", "isFree", "price", "duration", "instructor",
+    "image", "thumbnail", "status", "isFree", "price", "duration", "instructor",
+    "category", "tags", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   courseChapters: new Set([
@@ -84,37 +86,51 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
     "content", "contentAr", "contentFr", "contentEn",
-    "image", "status", "isFree", "createdAt", "updatedAt",
+    "image", "thumbnail", "status", "isFree", "price",
+    "excerpt", "excerptAr", "excerptFr", "excerptEn", "author", "readTime",
+    "category", "tags", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
+    "createdAt", "updatedAt",
   ]),
   podcasts: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "audioUrl", "image", "status", "isFree", "episode", "duration",
+    "audioUrl", "image", "thumbnail", "status", "isFree", "price", "episode", "duration",
+    "category", "tags", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   videos: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "videoUrl", "image", "status", "isFree", "duration",
+    "videoUrl", "image", "thumbnail", "status", "isFree", "price", "duration",
+    "category", "tags", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   pdfResources: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "pdfUrl", "image", "status", "isFree", "pages",
+    "pdfUrl", "fileUrl", "image", "thumbnail", "status", "isFree", "price",
+    "pages", "pageCount", "fileSize",
+    "category", "tags", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   liveSessions: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "youtubeUrl", "image", "status", "isFree", "scheduledAt",
+    "youtubeUrl", "streamUrl", "zoomUrl", "image", "thumbnail", "status", "isFree", "price", "scheduledAt",
+    "category", "tags",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   coachings: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "image", "isFree", "price", "status", "category", "tags",
-    "viewCount", "order", "duration",
+    "image", "thumbnail", "isFree", "price", "status", "category", "tags",
+    "viewCount", "order", "duration", "scheduledAt",
+    "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
   ]),
   reviews: new Set([
@@ -130,7 +146,8 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
   ]),
   purchases: new Set([
     "id", "userId", "contentId", "contentType", "amount",
-    "ccp", "receiptUrl", "status", "adminNote",
+    "ccp", "ccpNumber", "receiptUrl", "receiptImage", "status", "adminNote",
+    "contentTitle", "contentTitleAr",
     "createdAt", "updatedAt",
   ]),
   siteSettings: new Set([
@@ -269,6 +286,17 @@ export function sanitizeFirestoreData(
 
     // Validate field name against whitelist
     if (allowedFields && !allowedFields.has(key)) {
+      if (process.env.NODE_ENV === "development") {
+        console.error(
+          `[DB SECURITY] BLOCKED: Field "${key}" is NOT in the whitelist for collection "${collection}". ` +
+          `Data was NOT saved. Add "${key}" to COLLECTION_FIELDS in db-security.ts or fix the API.`
+        );
+        // In development, throw to make the bug visible immediately
+        throw new Error(
+          `[DB SECURITY] Field "${key}" is not whitelisted for collection "${collection}". ` +
+          `Add it to COLLECTION_FIELDS in db-security.ts or fix the API route.`
+        );
+      }
       console.warn(
         `[DB SECURITY] Skipping unrecognized field "${key}" in collection "${collection}". ` +
         `Field not in whitelist.`
