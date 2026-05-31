@@ -309,10 +309,10 @@ export default function HomepageCustomizerPage() {
         });
         if (!res.ok) { toast.error(locale === "ar" ? "فشل الإضافة" : "Failed to add"); return; }
       } else if (sliderDialog.slider) {
-        const res = await fetch("/api/sliders", {
+        const res = await fetch(`/api/sliders/${sliderDialog.slider.id}`, {
           method: "PUT",
           headers: { ...adminHeaders(), "Content-Type": "application/json" },
-          body: JSON.stringify({ id: sliderDialog.slider.id, ...sliderForm }),
+          body: JSON.stringify(sliderForm),
         });
         if (!res.ok) { toast.error(locale === "ar" ? "فشل التحديث" : "Failed to update"); return; }
       }

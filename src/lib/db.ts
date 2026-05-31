@@ -580,7 +580,8 @@ export const db = {
       const batch = adminDb.batch();
       for (const item of data) {
         const ref = adminDb.collection("courseLessons").doc();
-        batch.set(ref, addTimestamps(item));
+        const sanitized = sanitizeFirestoreData("courseLessons", item);
+        batch.set(ref, addTimestamps(sanitized));
       }
       await batch.commit();
     },

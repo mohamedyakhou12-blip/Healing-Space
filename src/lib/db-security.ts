@@ -120,7 +120,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
   liveSessions: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "youtubeUrl", "streamUrl", "zoomUrl", "image", "thumbnail", "status", "isFree", "price", "scheduledAt",
+    "youtubeUrl", "streamUrl", "zoomUrl", "image", "thumbnail", "status", "isFree", "price", "duration", "scheduledAt",
     "category", "tags",
     "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",
