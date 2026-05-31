@@ -81,6 +81,7 @@ export function isCSRFExemptPath(path: string): boolean {
     "/api/auth/session",             // Session check (GET only, but just in case)
     "/api/upload",                   // File uploads use FormData + admin code auth (not CSRF token)
     "/api/cloudinary/signature",     // Cloudinary signed upload params (JSON + admin auth)
+    "/api/admin/add-authorized-domain", // Admin setup endpoint (adds Firebase authorized domain)
   ];
   return exemptPaths.some((exempt) => path.startsWith(exempt));
 }
