@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 
 const updateCoachingSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -16,6 +17,11 @@ const updateCoachingSchema = z.object({
   descriptionAr: z.string().min(1).max(5000).optional(),
   descriptionFr: z.string().min(1).max(5000).optional(),
   descriptionEn: z.string().min(1).max(5000).optional(),
+  content: z.string().max(100000).optional(),
+  contentAr: z.string().max(100000).optional(),
+  contentFr: z.string().max(100000).optional(),
+  contentEn: z.string().max(100000).optional(),
+  videoUrl: z.string().max(2000).optional(),
   image: z.string().max(500).optional(),
   duration: z.string().max(50).optional(),
   order: z.number().int().min(0).max(99999).optional(),
@@ -103,9 +109,19 @@ export async function PUT(
       return NextResponse.json({ error: "Coaching not found" }, { status: 404 });
     }
 
+    // Sanitize content fields
+    const sanitizedData: Record<string, unknown> = { ...parsed.data };
+    if (parsed.data.content) sanitizedData.content = sanitizeHtml(parsed.data.content);
+    if (parsed.data.contentAr) sanitizedData.contentAr = sanitizeHtml(parsed.data.contentAr);
+    if (parsed.data.contentFr) sanitizedData.contentFr = sanitizeHtml(parsed.data.contentFr);
+    if (parsed.data.contentEn) sanitizedData.contentEn = sanitizeHtml(parsed.data.contentEn);
+    if (parsed.data.videoUrl && !isUrlSafe(parsed.data.videoUrl)) {
+      sanitizedData.videoUrl = "";
+    }
+
     const updated = await db.coaching.update({
       where: { id },
-      data: parsed.data,
+      data: sanitizedData,
     });
 
     notifyGoogleUpdate("coachings");

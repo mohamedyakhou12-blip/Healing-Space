@@ -128,7 +128,8 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
   coachings: new Set([
     "id", "title", "titleAr", "titleFr", "titleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
-    "image", "thumbnail", "isFree", "price", "status", "category", "tags",
+    "content", "contentAr", "contentFr", "contentEn",
+    "videoUrl", "image", "thumbnail", "isFree", "price", "status", "category", "tags",
     "viewCount", "order", "duration", "scheduledAt",
     "metaTitleAr", "metaTitleFr", "metaTitleEn", "metaDescAr", "metaDescFr", "metaDescEn", "ogImage",
     "createdAt", "updatedAt",

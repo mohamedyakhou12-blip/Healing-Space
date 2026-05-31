@@ -18,6 +18,11 @@ const createCoachingSchema = z.object({
   descriptionAr: z.string().min(1, "Arabic description is required").max(REQUEST_LIMITS.MAX_DESCRIPTION_LENGTH),
   descriptionFr: z.string().min(1, "French description is required").max(REQUEST_LIMITS.MAX_DESCRIPTION_LENGTH),
   descriptionEn: z.string().min(1, "English description is required").max(REQUEST_LIMITS.MAX_DESCRIPTION_LENGTH),
+  content: z.string().max(REQUEST_LIMITS.MAX_CONTENT_LENGTH || 100000).optional(),
+  contentAr: z.string().max(REQUEST_LIMITS.MAX_CONTENT_LENGTH || 100000).optional(),
+  contentFr: z.string().max(REQUEST_LIMITS.MAX_CONTENT_LENGTH || 100000).optional(),
+  contentEn: z.string().max(REQUEST_LIMITS.MAX_CONTENT_LENGTH || 100000).optional(),
+  videoUrl: z.string().max(2000).optional(),
   image: z.string().max(500).optional(),
   duration: z.string().max(50).optional(),
   order: z.number().int().min(0).max(99999).optional(),
@@ -115,6 +120,11 @@ export async function POST(request: NextRequest) {
         descriptionAr: sanitizeHtml(parsed.data.descriptionAr),
         descriptionFr: sanitizeHtml(parsed.data.descriptionFr),
         descriptionEn: sanitizeHtml(parsed.data.descriptionEn),
+        content: parsed.data.content ? sanitizeHtml(parsed.data.content) : undefined,
+        contentAr: parsed.data.contentAr ? sanitizeHtml(parsed.data.contentAr) : undefined,
+        contentFr: parsed.data.contentFr ? sanitizeHtml(parsed.data.contentFr) : undefined,
+        contentEn: parsed.data.contentEn ? sanitizeHtml(parsed.data.contentEn) : undefined,
+        videoUrl: parsed.data.videoUrl && isUrlSafe(parsed.data.videoUrl) ? parsed.data.videoUrl : parsed.data.videoUrl ? "" : undefined,
       },
     });
 

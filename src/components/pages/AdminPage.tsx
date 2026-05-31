@@ -2170,6 +2170,11 @@ function ContentView() {
       if (contentSubTab === "coaching") {
         payload.duration = formDuration;
         payload.order = formOrder;
+        if (formVideoUrl) payload.videoUrl = formVideoUrl;
+        payload.content = formContentAr || formTitleAr;
+        payload.contentAr = formContentAr || formTitleAr;
+        payload.contentFr = formContentFr || formContentAr || formTitleAr;
+        payload.contentEn = formContentEn || formContentAr || formTitleAr;
       }
       if (contentSubTab === "articles") {
         payload.content = formContentAr || formTitleAr;
@@ -2811,6 +2816,28 @@ function ContentView() {
               </div>
             )}
 
+            {/* Video URL field for coaching (optional) */}
+            {contentSubTab === "coaching" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-rose-700 flex items-center gap-2">
+                  <Video className="size-4" />
+                  رابط فيديو الكوتشينغ (اختياري)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  أضف فيديو يوتيوب أو فيديو مباشر لعنصر الكوتشينغ. إذا لم تضف فيديو، سيتم عرض المحتوى النصي فقط.
+                </p>
+                <FileUploadComponent
+                  value={formVideoUrl}
+                  onChange={setFormVideoUrl}
+                  label={locale === "ar" ? "رفع فيديو أو إدخال رابط" : "Upload video or enter URL"}
+                  placeholder="https://www.youtube.com/watch?v=... أو https://res.cloudinary.com/.../video.mp4"
+                  uploadType="content"
+                  contentType="videos"
+                  maxSizeMB={500}
+                />
+              </div>
+            )}
+
             {/* Audio URL field (required) */}
             {contentSubTab === "podcasts" && (
               <div className="space-y-1.5">
@@ -2885,6 +2912,38 @@ function ContentView() {
                         else setFormContentEn(html);
                       }}
                       placeholder={lang === "ar" ? "اكتب المحتوى بالعربية..." : lang === "fr" ? "Contenu en français..." : "Content in English..."}
+                      dir={lang === "ar" ? "rtl" : "ltr"}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* Coaching content fields - Rich Text Editor */}
+            {contentSubTab === "coaching" && (
+              <>
+                <div className="space-y-2 mb-2">
+                  <Label className="text-sm font-semibold text-teal-700 flex items-center gap-2">
+                    <FileText className="size-4" />
+                    محتوى الكوتشينغ (اختياري)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    أضف محتوى نصي مفصل يظهر للمستخدم عند الضغط على "ابدأ الآن". يمكن أن يكون تمارين، نصائح، أو محتوى تفاعلي.
+                  </p>
+                </div>
+                {(["ar", "fr", "en"] as const).map((lang) => (
+                  <div key={`coaching-content-${lang}`} className="space-y-1.5">
+                    <Label className="text-sm">
+                      المحتوى {lang === "ar" ? "(عربي)" : lang === "fr" ? "(فرنسي)" : "(إنجليزي)"}
+                    </Label>
+                    <RichTextEditor
+                      value={lang === "ar" ? formContentAr : lang === "fr" ? formContentFr : formContentEn}
+                      onChange={(html) => {
+                        if (lang === "ar") setFormContentAr(html);
+                        else if (lang === "fr") setFormContentFr(html);
+                        else setFormContentEn(html);
+                      }}
+                      placeholder={lang === "ar" ? "اكتب محتوى الكوتشينغ بالعربية..." : lang === "fr" ? "Contenu du coaching en français..." : "Coaching content in English..."}
                       dir={lang === "ar" ? "rtl" : "ltr"}
                     />
                   </div>
