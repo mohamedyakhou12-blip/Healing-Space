@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { requireAuth, getSession } from "@/lib/session";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeName, sanitizeUrl } from "@/lib/sanitize";
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").optional(),
@@ -53,7 +54,7 @@ export async function GET() {
     // FALLBACK: User not found in DB or DB is unavailable.
     // Return a profile based on the session data so the user can still be logged in.
     const session = await getSession();
-    const isAdmin = session.isAdmin || userId === "admin-session" || userId.startsWith("admin-");
+    const isAdmin = session.isAdmin === true;
     const role = session.userRole || (isAdmin ? "admin" : "user");
 
     console.log("[Profile] Using session-based fallback profile for:", userId, "role:", role);
@@ -115,9 +116,16 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Sanitize user inputs before saving
+    const sanitizedData: Record<string, unknown> = {};
+    if (parsed.data.name) sanitizedData.name = sanitizeName(parsed.data.name);
+    if (parsed.data.phone) sanitizedData.phone = parsed.data.phone.replace(/[^0-9+\s-]/g, "");
+    if (parsed.data.avatar) sanitizedData.avatar = sanitizeUrl(parsed.data.avatar);
+    if (parsed.data.locale) sanitizedData.locale = parsed.data.locale;
+
     const updatedUser = await db.user.update({
       where: { id: userId },
-      data: parsed.data,
+      data: sanitizedData,
     });
 
     return NextResponse.json({

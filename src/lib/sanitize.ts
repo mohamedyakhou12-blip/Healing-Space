@@ -48,11 +48,24 @@ export function sanitizeCCP(ccp: string): string {
  */
 export function sanitizeUrl(url: string): string {
   if (typeof url !== "string") return "";
-  const trimmed = url.trim().toLowerCase();
-  if (trimmed.startsWith("javascript:") || trimmed.startsWith("data:text/html") || trimmed.startsWith("vbscript:")) {
-    return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  try {
+    // Use URL parser to detect dangerous protocols (handles encoding bypasses)
+    const parsed = new URL(trimmed);
+    const dangerousProtocols = ["javascript:", "vbscript:", "data:"];
+    if (dangerousProtocols.includes(parsed.protocol)) {
+      return "";
+    }
+    return trimmed;
+  } catch {
+    // Not a valid URL — check raw string for dangerous protocols
+    const lowered = trimmed.toLowerCase();
+    if (lowered.startsWith("javascript:") || lowered.startsWith("vbscript:") || lowered.startsWith("data:text/html")) {
+      return "";
+    }
+    return trimmed;
   }
-  return url.trim();
 }
 
 /**
@@ -80,7 +93,7 @@ export function sanitizeFileName(name: string): string {
  * Validate that a string is a valid content type identifier
  */
 export function isValidContentType(type: string): boolean {
-  const validTypes = ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+  const validTypes = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
   return validTypes.includes(type);
 }
 

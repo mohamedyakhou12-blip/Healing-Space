@@ -199,6 +199,11 @@ const SEED_COACHINGS = [
 ];
 
 export async function POST(request: NextRequest) {
+  // Block seed endpoints in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Seed endpoints are disabled in production" }, { status: 403 });
+  }
+
   try {
     // Verify admin access (session + admin code)
     const sessionAdminId = await requireAdmin();
