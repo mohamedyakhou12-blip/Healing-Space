@@ -43,7 +43,10 @@ export async function GET(request: NextRequest) {
       if (!adminId) status = "published";
     }
 
-    const cacheKey = `api:articles:${status || "all"}:${limit || "all"}`;
+      // SECURITY: Non-admin users can only see published content
+      const sessionAdminId = await requireAdmin();
+      const effectiveStatus = sessionAdminId ? status : (status || "published");
+    const cacheKey = `api:articles:${effectiveStatus || "all"}:${limit || "all"}`;
 
     const data = await cached(cacheKey, async () => {
       const articles = await db.article.findMany({

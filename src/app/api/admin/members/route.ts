@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { validateAdminCode } from "@/lib/admin-code";
 import { requireAdmin } from "@/lib/session";
+import { z } from "zod";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
+const updateMemberSchema = z.object({
+  userId: z.string().min(1).max(200),
+  isActive: z.boolean(),
+});
 export async function GET(request: NextRequest) {
   try {
     // Verify admin session first (primary auth)
@@ -104,10 +109,11 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { userId, isActive } = body;
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    const parsed = updateMemberSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input", success: false }, { status: 400 });
     }
+    const { userId, isActive } = parsed.data;
 
     const user = await db.user.update({
       where: { id: userId },

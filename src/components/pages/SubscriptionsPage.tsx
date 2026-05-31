@@ -329,7 +329,7 @@ export default function SubscriptionsPage() {
                   <div className="mb-4">
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold">{plan.price.toLocaleString()}</span>
-                      <span className="text-muted-foreground text-sm">DA</span>
+                      <span className="text-muted-foreground text-sm">{t("common.currency")}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{t("subscriptions.perMonth")}</p>
                   </div>

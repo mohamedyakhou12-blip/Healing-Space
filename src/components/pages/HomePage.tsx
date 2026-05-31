@@ -715,6 +715,7 @@ export default function HomePage() {
                       src={`${introVideoUrl}${introVideoUrl.includes('?') ? '&' : '?'}autoplay=1&rel=0`}
                       title={t("home.introVideoTitle")}
                       className="absolute inset-0 h-full w-full"
+                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
                       allow="autoplay; encrypted-media; picture-in-picture"
                       allowFullScreen
                     />

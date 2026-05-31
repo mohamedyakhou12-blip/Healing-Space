@@ -38,7 +38,10 @@ export async function GET(request: NextRequest) {
       const adminId = await requireAdmin();
       if (!adminId) status = "published";
     }
-    const cacheKey = `api:videos:${status || "all"}:${limit || "all"}`;
+      // SECURITY: Non-admin users can only see published content
+      const sessionAdminId = await requireAdmin();
+      const effectiveStatus = sessionAdminId ? status : (status || "published");
+    const cacheKey = `api:videos:${effectiveStatus || "all"}:${limit || "all"}`;
 
     const data = await cached(cacheKey, async () => {
       const videos = await db.video.findMany({

@@ -40,6 +40,14 @@ export async function GET(
       return NextResponse.json({ error: "PDF not found" }, { status: 404 });
     }
 
+    // SECURITY: Non-admin users cannot view draft content
+    if (pdf.status === "draft") {
+      const adminId = await requireAdmin();
+      if (!adminId) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+    }
+
     return NextResponse.json({ pdf });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

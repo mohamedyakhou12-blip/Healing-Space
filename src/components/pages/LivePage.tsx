@@ -196,7 +196,7 @@ export default function LivePage() {
   useEffect(() => {
     cachedFetch<any>('/api/live', 60_000)
       .then(data => {
-        const sessions = (data.sessions || [])
+        const sessions = (data.liveSessions || [])
           .filter((s: any) => s.status === 'published' || s.status === 'live' || s.status === 'upcoming' || s.status === 'ended')
           .map((s: any, i: number) => ({
             id: s.id,

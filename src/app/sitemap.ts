@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/pdfs", priority: 0.8, changeFrequency: "weekly" as const },
     { path: "/live", priority: 0.7, changeFrequency: "weekly" as const },
     { path: "/subscriptions", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/coaching", priority: 0.8, changeFrequency: "weekly" as const },
   ];
 
   return routes.map((route) => ({

@@ -34,6 +34,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
+import { toast } from "sonner";
 
 interface Lesson {
   id: string;
@@ -653,7 +654,7 @@ export default function CoursesPage() {
                     </div>
                   )}
                   {course.enrolled && course.progress < 100 && (
-                    <Button className="w-full" size="lg">
+                    <Button className="w-full" size="lg" onClick={() => toast.info(locale === "ar" ? "سيتم تفعيل التسجيل قريباً" : locale === "fr" ? "L'inscription sera bientôt disponible" : "Enrollment will be available soon")}>
                       <Play className="h-4 w-4 me-2" />
                       {t("courses.continue")}
                     </Button>
@@ -665,7 +666,7 @@ export default function CoursesPage() {
                     </Button>
                   )}
                   {course.isFree && !course.enrolled && (
-                    <Button className="w-full" size="lg">
+                    <Button className="w-full" size="lg" onClick={() => toast.info(locale === "ar" ? "سيتم تفعيل التسجيل قريباً" : locale === "fr" ? "L'inscription sera bientôt disponible" : "Enrollment will be available soon")}>
                       {t("courses.enroll")}
                     </Button>
                   )}
@@ -871,17 +872,17 @@ export default function CoursesPage() {
                         </div>
                       )}
                       {!course.enrolled && course.isFree && (
-                        <Button className="w-full" size="sm">
+                        <Button className="w-full" size="sm" onClick={() => toast.info(locale === "ar" ? "سيتم تفعيل التسجيل قريباً" : locale === "fr" ? "L'inscription sera bientôt disponible" : "Enrollment will be available soon")}>
                           {t("courses.enroll")}
                         </Button>
                       )}
                       {!course.enrolled && !course.isFree && course.price === 0 && (
-                        <Button className="w-full" size="sm">
+                        <Button className="w-full" size="sm" onClick={() => toast.info(locale === "ar" ? "سيتم تفعيل التسجيل قريباً" : locale === "fr" ? "L'inscription sera bientôt disponible" : "Enrollment will be available soon")}>
                           {t("courses.enroll")}
                         </Button>
                       )}
                       {course.enrolled && course.progress < 100 && (
-                        <Button className="w-full" size="sm" variant="secondary">
+                        <Button className="w-full" size="sm" variant="secondary" onClick={() => toast.info(locale === "ar" ? "سيتم تفعيل التسجيل قريباً" : locale === "fr" ? "L'inscription sera bientôt disponible" : "Enrollment will be available soon")}>
                           {t("courses.continue")}
                         </Button>
                       )}

@@ -480,6 +480,9 @@ const en = {
     rating: "Rating",
     of: "of",
     serverError: "Server error. Please try again.",
+    allRightsReserved: "All rights reserved",
+    madeWithCare: "Made with care for your wellbeing",
+    sidebarQuote: "Healing begins from within, and growth never stops.",
   },
 } as const;
 

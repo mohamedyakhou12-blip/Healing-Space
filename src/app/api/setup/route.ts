@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/session";
+import { validateAdminCode } from "@/lib/admin-code";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 /**
@@ -116,6 +118,17 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication for setup status
+    const sessionAdminId = await requireAdmin();
+    if (!sessionAdminId) {
+      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
+    }
+
+    const adminCode = request.headers.get("X-Admin-Code");
+    if (!(await validateAdminCode(adminCode))) {
+      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    }
+
     let dbHasCode = false;
     let dbError: string | null = null;
 

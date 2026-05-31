@@ -85,18 +85,15 @@ export async function validateAdminCode(providedCode: string | null): Promise<bo
   const effectiveCode = getEnvCode();
   if (effectiveCode.length > 0 && timingSafeEqual(providedCode, effectiveCode)) return true;
 
-  // 3. Last resort: if no admin code is configured anywhere (neither DB nor env var),
-  //    allow a default code for initial setup. This ensures the admin can always
-  //    access the dashboard at least once to configure a proper code.
-  //    IMPORTANT: After the admin sets a code via the settings page, this default
-  //    will no longer be accepted because the DB check (step 1) will find the record.
+  // SECURITY: No default/fallback admin code.
+  // Previously a hardcoded "052307" was used as a fallback, which is a known backdoor.
+  // If no admin code is configured in DB or env var, admin access is DENIED.
+  // To set up admin access for the first time, set the ADMIN_ACCESS_CODE env var
+  // or use the /api/setup endpoint.
   const envCode = getEnvCode();
   const hasDbCode = await checkDbHasAdminCode();
   if (!envCode && !hasDbCode) {
-    // No admin code configured anywhere — use default for initial setup
-    const DEFAULT_SETUP_CODE = "052307";
-    console.warn("[Admin Code] ⚠️ No admin code configured! Using default setup code. Set ADMIN_ACCESS_CODE env var or configure in admin settings.");
-    if (timingSafeEqual(providedCode, DEFAULT_SETUP_CODE)) return true;
+    console.error("[Admin Code] No admin code configured anywhere. Admin access DENIED. Set ADMIN_ACCESS_CODE env var.");
   }
 
   return false;

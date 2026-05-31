@@ -51,9 +51,11 @@ export async function GET(request: NextRequest) {
       orderBy: { key: "asc" },
     });
 
-    // Convert to key-value object
+    // Convert to key-value object (filter out sensitive keys)
+    const SENSITIVE_KEYS = ["admin_access_code"];
     const settingsMap: Record<string, string> = {};
     for (const setting of settings) {
+      if (SENSITIVE_KEYS.includes(setting.key)) continue;
       settingsMap[setting.key] = setting.value;
     }
 

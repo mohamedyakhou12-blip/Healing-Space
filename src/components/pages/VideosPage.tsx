@@ -237,6 +237,7 @@ export default function VideosPage() {
                   src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1&rel=0`}
                   title={localizedText(selectedVideo.title)}
                   className="absolute inset-0 h-full w-full"
+                  sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
                   allow="autoplay; encrypted-media; picture-in-picture"
                   allowFullScreen
                 />

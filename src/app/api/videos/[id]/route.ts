@@ -43,6 +43,14 @@ export async function GET(
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
+    // SECURITY: Non-admin users cannot view draft content
+    if (video.status === "draft") {
+      const adminId = await requireAdmin();
+      if (!adminId) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+    }
+
     return NextResponse.json({ video });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

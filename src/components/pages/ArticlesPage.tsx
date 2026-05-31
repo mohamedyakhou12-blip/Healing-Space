@@ -452,7 +452,7 @@ export default function ArticlesPage() {
                 <h3 className="font-semibold">{t("reviews.writeReview")}</h3>
                 <div className="flex justify-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-7 w-7 text-amber-400 fill-amber-400 cursor-pointer hover:scale-110 transition-transform" />
+                    <Star key={star} className={`h-7 w-7 cursor-pointer hover:scale-110 transition-transform ${star <= Math.round(article.rating) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />
                   ))}
                 </div>
               </CardContent>

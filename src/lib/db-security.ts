@@ -154,9 +154,10 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "id", "key", "value", "createdAt", "updatedAt",
   ]),
   sliders: new Set([
-    "id", "image", "title", "titleAr", "titleFr", "titleEn",
+    "id", "image", "imageUrl", "title", "titleAr", "titleFr", "titleEn",
     "subtitle", "subtitleAr", "subtitleFr", "subtitleEn",
-    "order", "link", "isActive",
+    "description", "descriptionAr", "descriptionFr", "descriptionEn",
+    "order", "link", "isActive", "buttonText", "buttonTextAr", "buttonTextFr", "buttonTextEn",
     "createdAt", "updatedAt",
   ]),
 };

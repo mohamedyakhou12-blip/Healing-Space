@@ -165,11 +165,11 @@ export function Footer() {
         {/* Copyright */}
         <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-start">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} {t("home.heroTitle")} — {t("siteOwner.name")}. All rights reserved.
+            &copy; {new Date().getFullYear()} {t("home.heroTitle")} — {t("siteOwner.name")}. {t("common.allRightsReserved")}
           </p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground/70">
             <Leaf className="size-3 text-primary/40" />
-            Made with care for your wellbeing
+            {t("common.madeWithCare")}
           </p>
         </div>
       </div>

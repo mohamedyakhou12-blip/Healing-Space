@@ -480,6 +480,9 @@ const fr = {
     rating: "Évaluation",
     of: "de",
     serverError: "Erreur serveur. Veuillez réessayer.",
+    allRightsReserved: "Tous droits réservés",
+    madeWithCare: "Fait avec soin pour votre bien-être",
+    sidebarQuote: "La guérison commence de l'intérieur, et la croissance ne s'arrête jamais.",
   },
 } as const;
 

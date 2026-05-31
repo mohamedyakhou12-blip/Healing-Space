@@ -168,7 +168,7 @@ function SidebarNav({
         <div className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-primary/5 to-accent/10 p-3">
           <Leaf className="size-4 shrink-0 text-primary/60" />
           <p className="text-[11px] leading-relaxed text-muted-foreground/80">
-            &quot;الشفاء يبدأ من الداخل، والنمو لا يتوقف.&quot;
+            {t("common.sidebarQuote")}
           </p>
         </div>
       </div>
@@ -191,6 +191,7 @@ export function SidebarDesktop() {
 
 /* ── Mobile Sidebar (Sheet overlay) ── */
 export function SidebarMobile() {
+  const { t } = useTranslation();
   const { sidebarOpen, setSidebarOpen, locale } = useAppStore();
   const isRtl = locale === "ar";
 
@@ -210,7 +211,7 @@ export function SidebarMobile() {
             <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Leaf className="size-4" />
             </div>
-            <span className="gradient-text">فضاء الشفاء</span>
+            <span className="gradient-text">{t("home.heroTitle")}</span>
           </SheetTitle>
           <SheetDescription className="sr-only">Navigation menu</SheetDescription>
         </SheetHeader>

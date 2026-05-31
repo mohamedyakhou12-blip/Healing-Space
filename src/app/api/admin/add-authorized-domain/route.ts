@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, firebaseReady } from "@/lib/firebase-admin";
+import { firebaseReady } from "@/lib/firebase-admin";
+import { requireAdmin } from "@/lib/session";
+import { validateAdminCode } from "@/lib/admin-code";
 
 /**
  * POST /api/admin/add-authorized-domain
@@ -13,6 +15,16 @@ import { adminAuth, firebaseReady } from "@/lib/firebase-admin";
  */
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication (double-check: session + admin code)
+    const sessionAdminId = await requireAdmin();
+    if (!sessionAdminId) {
+      return NextResponse.json({ error: "Unauthorized — admin session required", success: false }, { status: 401 });
+    }
+    const adminCode = request.headers.get("X-Admin-Code");
+    if (!(await validateAdminCode(adminCode))) {
+      return NextResponse.json({ error: "Unauthorized — invalid admin code", success: false }, { status: 401 });
+    }
+
     if (!firebaseReady) {
       return NextResponse.json(
         {

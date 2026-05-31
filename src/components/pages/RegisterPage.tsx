@@ -43,24 +43,24 @@ import { toast } from "sonner";
 /*  Schema                                                             */
 /* ------------------------------------------------------------------ */
 
-const registerSchema = z
+const makeRegisterSchema = (locale: string) => z
   .object({
-    name: z.string().min(2, "الاسم يجب أن يكون حرفين على الأقل"),
-    email: z.string().email("يرجى إدخال بريد إلكتروني صحيح"),
+    name: z.string().min(2, locale === "ar" ? "الاسم يجب أن يكون حرفين على الأقل" : locale === "fr" ? "Le nom doit comporter au moins 2 caractères" : "Name must be at least 2 characters"),
+    email: z.string().email(locale === "ar" ? "يرجى إدخال بريد إلكتروني صحيح" : locale === "fr" ? "Veuillez entrer un email valide" : "Please enter a valid email"),
     phone: z.string().optional(),
     password: z.string()
-      .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
-      .regex(/[A-Z]/, "يجب أن تحتوي على حرف كبير")
-      .regex(/[a-z]/, "يجب أن تحتوي على حرف صغير")
-      .regex(/[0-9]/, "يجب أن تحتوي على رقم"),
+      .min(8, locale === "ar" ? "كلمة المرور يجب أن تكون 8 أحرف على الأقل" : locale === "fr" ? "Le mot de passe doit contenir au moins 8 caractères" : "Password must be at least 8 characters")
+      .regex(/[A-Z]/, locale === "ar" ? "يجب أن تحتوي على حرف كبير" : locale === "fr" ? "Doit contenir une majuscule" : "Must contain an uppercase letter")
+      .regex(/[a-z]/, locale === "ar" ? "يجب أن تحتوي على حرف صغير" : locale === "fr" ? "Doit contenir une minuscule" : "Must contain a lowercase letter")
+      .regex(/[0-9]/, locale === "ar" ? "يجب أن تحتوي على رقم" : locale === "fr" ? "Doit contenir un chiffre" : "Must contain a number"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "كلمتا المرور غير متطابقتين",
+    message: locale === "ar" ? "كلمتا المرور غير متطابقتين" : locale === "fr" ? "Les mots de passe ne correspondent pas" : "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = z.infer<ReturnType<typeof makeRegisterSchema>>;
 
 /* ------------------------------------------------------------------ */
 /*  Animation                                                          */
@@ -90,7 +90,7 @@ export default function RegisterPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(makeRegisterSchema(locale)),
     defaultValues: {
       name: "",
       email: "",
@@ -142,11 +142,11 @@ export default function RegisterPage() {
         avatar: result.user.avatar,
         phone: result.user.phone,
       });
-      toast.success("تم إنشاء الحساب بنجاح! مرحباً بك");
+      toast.success(t("auth.registerSuccess"));
       // Use full page navigation
-      window.location.href = "/";
+      navigate("home");
     } catch {
-      toast.error("حدث خطأ في الاتصال بالخادم");
+      toast.error(t("common.serverError"));
     } finally {
       setIsLoading(false);
     }
@@ -243,14 +243,14 @@ export default function RegisterPage() {
             custom={1}
             className="mb-4 text-3xl font-bold leading-tight"
           >
-            انضم إلى مجتمع الشفاء
+            {locale === "ar" ? "انضم إلى مجتمع الشفاء" : locale === "fr" ? "Rejoignez la communauté de guérison" : "Join the Healing Community"}
           </motion.h2>
           <motion.p
             variants={fadeUp}
             custom={2}
             className="text-lg leading-relaxed text-white/85"
           >
-            أنشئ حسابك الآن واحصل على وصول فوري إلى مكتبة واسعة من المحتوى التعليمي والعلاجي المتميز.
+            {locale === "ar" ? "أنشئ حسابك الآن واحصل على وصول فوري إلى مكتبة واسعة من المحتوى التعليمي والعلاجي المتميز." : locale === "fr" ? "Créez votre compte maintenant et accédez instantanément à une vaste bibliothèque de contenu éducatif et thérapeutique." : "Create your account now and get instant access to a vast library of premium educational and therapeutic content."}
           </motion.p>
           <motion.div
             variants={fadeUp}
@@ -259,11 +259,11 @@ export default function RegisterPage() {
           >
             <div className="flex items-center gap-2">
               <Sparkles className="size-5" />
-              <span className="text-sm">محتوى حصري</span>
+              <span className="text-sm">{locale === "ar" ? "محتوى حصري" : locale === "fr" ? "Contenu exclusif" : "Exclusive content"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Leaf className="size-5" />
-              <span className="text-sm">دعم متواصل</span>
+              <span className="text-sm">{locale === "ar" ? "دعم متواصل" : locale === "fr" ? "Support continu" : "Ongoing support"}</span>
             </div>
           </motion.div>
         </motion.div>
@@ -284,7 +284,7 @@ export default function RegisterPage() {
             </div>
             <h1 className="text-2xl font-bold">{t("auth.register")}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              ابدأ رحلة التعافي والتغيير
+              {locale === "ar" ? "ابدأ رحلة التعافي والتغيير" : locale === "fr" ? "Commencez votre voyage de guérison" : "Start your healing journey"}
             </p>
           </motion.div>
 
@@ -350,7 +350,7 @@ export default function RegisterPage() {
                           <FormLabel>
                             {t("auth.phone")}{" "}
                             <span className="text-xs text-muted-foreground">
-                              (اختياري)
+                              ({locale === "ar" ? "اختياري" : locale === "fr" ? "facultatif" : "optional"})
                             </span>
                           </FormLabel>
                           <FormControl>

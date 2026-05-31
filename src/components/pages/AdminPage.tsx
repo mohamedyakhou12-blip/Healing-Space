@@ -111,6 +111,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { adminHeaders, adminFormDataHeaders, setStoredAdminCode } from "@/lib/api-helpers";
 import { cachedFetch } from "@/lib/client-cache";
+// ─── HTML Sanitization ──────────────────────────────────────────────────────────
+
+function sanitizeDisplayHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '')
+    .replace(/(href|src)\s*=\s*["']?\s*(javascript\s*:|data\s*:\s*text\/html)[^"'>]*/gi, '$1=""');
+}
+
+
 import { directCloudinaryUpload, shouldUseDirectUpload } from "@/lib/cloudinary-client";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -3094,7 +3105,7 @@ function ContentView() {
                   {getPreviewItem()?.descriptionAr || getPreviewItem()?.description}
                 </p>
                 {contentSubTab === "articles" && formContentAr && (
-                  <div className="text-xs leading-relaxed prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: formContentAr }} />
+                  <div className="text-xs leading-relaxed prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeDisplayHtml(formContentAr) }} />
                 )}
                 <div className="flex items-center gap-2">
                   <Badge className={getPreviewItem()?.status === "published" ? "bg-emerald-100 text-emerald-700 border-0" : "bg-amber-100 text-amber-700 border-0"}>

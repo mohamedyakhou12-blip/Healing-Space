@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseStatus, firebaseReady, adminDb } from "@/lib/firebase-admin";
 import { requireAdmin } from "@/lib/session";
+import { validateAdminCode } from "@/lib/admin-code";
 
 export async function GET(request: NextRequest) {
   // Verify admin session first (primary auth)
   const sessionAdminId = await requireAdmin();
   if (!sessionAdminId) {
     return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
+  }
+
+  // Secondary check: admin code header
+  const adminCode = request.headers.get("X-Admin-Code");
+  if (!(await validateAdminCode(adminCode))) {
+    return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
   }
 
   const results: Record<string, unknown> = {};

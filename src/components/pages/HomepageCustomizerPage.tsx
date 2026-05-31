@@ -11,6 +11,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 import { directCloudinaryUpload } from "@/lib/cloudinary-client";
 import { toast } from "sonner";
+import { adminHeaders, adminFormDataHeaders } from "@/lib/api-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,16 +37,7 @@ interface Slider {
   link?: string;
 }
 
-/* ─── Helper: Admin headers ─── */
-function adminHeaders(): Record<string, string> {
-  const code = typeof window !== "undefined" ? localStorage.getItem("healing_space_admin_code") || "" : "";
-  return { "Content-Type": "application/json", "x-admin-code": code };
-}
 
-function adminFormDataHeaders(): Record<string, string> {
-  const code = typeof window !== "undefined" ? localStorage.getItem("healing_space_admin_code") || "" : "";
-  return { "x-admin-code": code };
-}
 
 const emptyTrilingual = (): Trilingual => ({ ar: "", fr: "", en: "" });
 
@@ -70,6 +62,41 @@ const DEFAULT_SECTIONS: { key: SectionKey; labelAr: string; labelEn: string; def
   { key: "stats", labelAr: "الإحصائيات", labelEn: "Statistics", defaultVisible: true },
   { key: "testimonials", labelAr: "آراء المستخدمين", labelEn: "Testimonials", defaultVisible: true },
 ];
+
+/* ─── Trilingual input component (standalone) ─── */
+function TrilingualInput({ label, value, onChange, placeholder, isTextarea = false }: {
+  label: string; value: Trilingual; onChange: (v: Trilingual) => void;
+  placeholder?: Trilingual; isTextarea?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-semibold text-teal-700 dark:text-teal-400">{label}</Label>
+      {(["ar", "fr", "en"] as const).map((lang) => (
+        <div key={lang} className="space-y-1">
+          <Label className="text-xs text-muted-foreground">
+            {lang === "ar" ? "العربية" : lang === "fr" ? "Français" : "English"}
+          </Label>
+          {isTextarea ? (
+            <Textarea
+              value={value[lang]}
+              onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
+              placeholder={placeholder?.[lang] || ""}
+              dir={lang === "ar" ? "rtl" : "ltr"}
+              rows={3}
+            />
+          ) : (
+            <Input
+              value={value[lang]}
+              onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
+              placeholder={placeholder?.[lang] || ""}
+              dir={lang === "ar" ? "rtl" : "ltr"}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /*  HomepageCustomizerPage                                           */
@@ -321,38 +348,7 @@ export default function HomepageCustomizerPage() {
     }
   };
 
-  // ─── Trilingual input helper ───
-  const TrilingualInput = ({ label, value, onChange, placeholder, isTextarea = false }: {
-    label: string; value: Trilingual; onChange: (v: Trilingual) => void;
-    placeholder?: Trilingual; isTextarea?: boolean;
-  }) => (
-    <div className="space-y-2">
-      <Label className="text-sm font-semibold text-teal-700 dark:text-teal-400">{label}</Label>
-      {(["ar", "fr", "en"] as const).map((lang) => (
-        <div key={lang} className="space-y-1">
-          <Label className="text-xs text-muted-foreground">
-            {lang === "ar" ? "العربية" : lang === "fr" ? "Français" : "English"}
-          </Label>
-          {isTextarea ? (
-            <Textarea
-              value={value[lang]}
-              onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
-              placeholder={placeholder?.[lang] || ""}
-              dir={lang === "ar" ? "rtl" : "ltr"}
-              rows={3}
-            />
-          ) : (
-            <Input
-              value={value[lang]}
-              onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
-              placeholder={placeholder?.[lang] || ""}
-              dir={lang === "ar" ? "rtl" : "ltr"}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
+
 
   /* ─── Tab config ─── */
   const tabs: { key: CustomizerTab; labelAr: string; labelEn: string; icon: React.ElementType; color: string }[] = [
@@ -370,6 +366,19 @@ export default function HomepageCustomizerPage() {
         <div className="text-center space-y-4">
           <Loader2 className="size-10 animate-spin text-teal-600 mx-auto" />
           <p className="text-muted-foreground">{locale === "ar" ? "جارٍ تحميل الإعدادات..." : "Loading settings..."}</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  /* ─── Admin auth guard ─── */
+  if (!isAdmin || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">غير مصرح</h2>
+          <p className="text-muted-foreground">يجب تسجيل الدخول كمسؤول للوصول لهذه الصفحة</p>
         </div>
       </div>
     );

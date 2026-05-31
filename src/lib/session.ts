@@ -49,28 +49,15 @@ function getSessionSecret(): string {
     return "build-phase-temporary-secret-do-not-use-at-runtime";
   }
 
-  // In production without SESSION_SECRET, derive a stable secret from
-  // other available env vars so sessions work consistently across cold starts.
-  // This is NOT ideal but prevents the app from crashing entirely.
+  // SECURITY: In production, SESSION_SECRET MUST be set.
+  // Deriving from NEXT_PUBLIC_ vars is a CRITICAL vulnerability because
+  // those vars are embedded in the client-side JavaScript bundle.
+  // Any attacker could compute the session secret and forge admin cookies.
   if (process.env.NODE_ENV === "production") {
-    // Try to derive from Firebase project ID + API key (both are stable and available)
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
-    const derived = `hs-session-${projectId}-${apiKey}-derived-key-at-least-32-chars`;
-    if (derived.length >= 32) {
-      console.warn(
-        "[SESSION] ⚠️ SESSION_SECRET not set! Deriving from project config. " +
-        "This is less secure — set SESSION_SECRET env var for proper security."
-      );
-      return derived;
-    }
-
-    // Last resort fallback — this should never happen but prevents crash
-    console.error(
-      "[SESSION] ⚠️ SESSION_SECRET not set and cannot derive! Using insecure fallback. " +
-      "SET SESSION_SECRET env var immediately!"
+    throw new Error(
+      "[SECURITY] SESSION_SECRET env var is REQUIRED in production. " +
+      "Generate one with: openssl rand -base64 32"
     );
-    return "production-fallback-secret-please-set-env-var-32ch";
   }
 
   // In development only, use a fixed fallback for convenience

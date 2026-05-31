@@ -39,7 +39,10 @@ export async function GET(request: NextRequest) {
       const adminId = await requireAdmin();
       if (!adminId) status = "published";
     }
-    const cacheKey = `api:live:${status || "all"}:${limit || "all"}`;
+      // SECURITY: Non-admin users can only see published content
+      const sessionAdminId = await requireAdmin();
+      const effectiveStatus = sessionAdminId ? status : (status || "published");
+    const cacheKey = `api:live:${effectiveStatus || "all"}:${limit || "all"}`;
 
     const data = await cached(cacheKey, async () => {
       return await db.liveSession.findMany();

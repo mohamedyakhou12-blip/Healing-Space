@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { validateAdminCode } from "@/lib/admin-code";
 import { requireAdmin } from "@/lib/session";
@@ -198,12 +198,17 @@ const SEED_COACHINGS = [
   },
 ];
 
-export async function GET() {
+export async function POST(request: NextRequest) {
   try {
-    // Verify admin access
+    // Verify admin access (session + admin code)
     const sessionAdminId = await requireAdmin();
     if (!sessionAdminId) {
       return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
+    }
+
+    const adminCode = request.headers.get("X-Admin-Code");
+    if (!(await validateAdminCode(adminCode))) {
+      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
     }
 
     let created = 0;

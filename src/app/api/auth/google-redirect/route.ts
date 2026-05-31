@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     access_type: "offline",
     prompt: "select_account",
     // State parameter to prevent CSRF
-    state: Buffer.from(Date.now().toString()).toString("base64"),
+    state: crypto.randomUUID(),
   });
 
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

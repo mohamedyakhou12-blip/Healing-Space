@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
@@ -39,6 +39,7 @@ interface PodcastEpisode {
   isFree: boolean;
   price: number;
   gradient: string;
+  audioUrl?: string;
 }
 
 const GRADIENTS = [
@@ -200,9 +201,11 @@ export default function PodcastsPage() {
   const { navigate } = useAppStore();
   const individualPurchasesEnabled = useAppStore((s) => s.individualPurchasesEnabled);
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingEpisode, setPlayingEpisode] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
   const [apiEpisodes, setApiEpisodes] = useState<PodcastEpisode[] | null>(null);
@@ -275,7 +278,7 @@ export default function PodcastsPage() {
     setPurchaseDialogOpen(true);
   };
 
-  const handlePlay = (episode: PodcastEpisode) => {
+  const handlePlayPause = (episode: PodcastEpisode) => {
     if (!canAccessContentById(userWithSub, 'podcasts', episode.id, episode.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems)) {
       if (individualPurchasesEnabled) {
         openPurchaseDialog(episode);
@@ -283,28 +286,49 @@ export default function PodcastsPage() {
       return;
     }
 
-    if (playingEpisode === episode.id) {
-      setIsPlaying(!isPlaying);
+    if (!episode.audioUrl) {
+      toast.info(locale === "ar" ? "هذه الحلقة غير متاحة حالياً" : locale === "fr" ? "Cet épisode n'est pas encore disponible" : "This episode is not available yet");
+      return;
+    }
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+
+    if (playingEpisode === episode.id && isPlaying) {
+      setIsPlaying(false);
     } else {
+      audioRef.current = new Audio(episode.audioUrl);
+      audioRef.current.ontimeupdate = () => {
+        setCurrentTime(audioRef.current!.currentTime);
+      };
+      audioRef.current.ondurationchange = () => {
+        setAudioDuration(audioRef.current!.duration);
+      };
+      audioRef.current.onended = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+      audioRef.current.play().catch(() => {
+        toast.info(locale === "ar" ? "هذه الحلقة غير متاحة حالياً" : locale === "fr" ? "Cet épisode n'est pas encore disponible" : "This episode is not available yet");
+      });
+      setIsPlaying(true);
       setPlayingEpisode(episode.id);
       setCurrentTime(0);
-      setIsPlaying(true);
-      // Show a toast that the podcast audio is not yet available
-      toast.info(
-        locale === "ar" ? "البودكاست سيكون متاحاً قريباً. ترقبوا الحلقات القادمة!" : locale === "fr" ? "Le podcast sera bientôt disponible. Restez à l'écoute!" : "Podcast audio will be available soon. Stay tuned!",
-        { duration: 5000 }
-      );
     }
   };
 
   const handleSeek = (value: number[]) => {
-    if (activeEpisode) {
+    if (audioRef.current && audioDuration > 0) {
+      audioRef.current.currentTime = value[0] * audioDuration;
+      setCurrentTime(value[0] * audioDuration);
+    } else if (activeEpisode) {
       setCurrentTime(value[0] * activeEpisode.durationSeconds);
     }
   };
 
   const progress = activeEpisode
-    ? currentTime / activeEpisode.durationSeconds
+    ? (audioDuration > 0 ? currentTime / audioDuration : currentTime / (activeEpisode.durationSeconds || 1))
     : 0;
 
   return (
@@ -377,7 +401,7 @@ export default function PodcastsPage() {
                     </span>
                     <button
                       className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors backdrop-blur-sm"
-                      onClick={() => handlePlay(episode)}
+                      onClick={() => handlePlayPause(episode)}
                       aria-label={isPlaying && playingEpisode === episode.id ? t("podcasts.pause") : t("podcasts.play")}
                     >
                       {!canAccessContentById(userWithSub, 'podcasts', episode.id, episode.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems) ? (
@@ -497,7 +521,15 @@ export default function PodcastsPage() {
 
                 <button
                   className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center transition-colors"
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => {
+                    if (isPlaying) {
+                      audioRef.current?.pause();
+                      setIsPlaying(false);
+                    } else {
+                      audioRef.current?.play();
+                      setIsPlaying(true);
+                    }
+                  }}
                   aria-label={isPlaying ? t("podcasts.pause") : t("podcasts.play")}
                 >
                   {isPlaying ? (
@@ -526,7 +558,7 @@ export default function PodcastsPage() {
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{formatTime(currentTime)}</span>
-                  <span>{activeEpisode.duration}</span>
+                  <span>{audioDuration > 0 ? formatTime(audioDuration) : activeEpisode.duration}</span>
                 </div>
               </div>
 
@@ -534,7 +566,12 @@ export default function PodcastsPage() {
               <div className="hidden md:flex items-center gap-2">
                 <button
                   className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
-                  onClick={() => setIsMuted(!isMuted)}
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    if (audioRef.current) {
+                      audioRef.current.muted = !isMuted;
+                    }
+                  }}
                   aria-label={t("podcasts.volume")}
                 >
                   {isMuted || volume === 0 ? (
@@ -550,6 +587,9 @@ export default function PodcastsPage() {
                   onValueChange={(v) => {
                     setVolume(v[0]);
                     setIsMuted(v[0] === 0);
+                    if (audioRef.current) {
+                      audioRef.current.volume = v[0] / 100;
+                    }
                   }}
                   className="w-20"
                 />
@@ -559,9 +599,14 @@ export default function PodcastsPage() {
               <button
                 className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors text-muted-foreground"
                 onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current = null;
+                  }
                   setPlayingEpisode(null);
                   setIsPlaying(false);
                   setCurrentTime(0);
+                  setAudioDuration(0);
                 }}
                 aria-label={t("common.close")}
               >

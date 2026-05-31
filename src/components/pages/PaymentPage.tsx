@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
@@ -148,6 +148,8 @@ export default function PaymentPage() {
     })();
   }, []);
   const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -565,15 +567,8 @@ export default function PaymentPage() {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => {
-                  if (isUploadingReceipt) return; // Don't open file picker during upload
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = "image/*,.pdf";
-                  input.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) handleFileSelect(file);
-                  };
-                  input.click();
+                  if (isUploadingReceipt) return;
+                  fileInputRef.current?.click();
                 }}
                 className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
                   isDragOver
@@ -751,6 +746,9 @@ export default function PaymentPage() {
           </Card>
         </motion.div>
       )}
+
+      {/* Hidden file input for receipt upload */}
+      <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file); }} />
 
       {/* Payment History */}
       <Card>

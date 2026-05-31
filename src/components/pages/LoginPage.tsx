@@ -33,12 +33,12 @@ import { toast } from "sonner";
 /*  Schemas                                                             */
 /* ------------------------------------------------------------------ */
 
-const loginSchema = z.object({
-  email: z.string().email("يرجى إدخال بريد إلكتروني صحيح"),
-  password: z.string().min(1, "يرجى إدخال كلمة المرور"),
+const makeLoginSchema = (locale: string) => z.object({
+  email: z.string().email(locale === "ar" ? "يرجى إدخال بريد إلكتروني صحيح" : locale === "fr" ? "Veuillez entrer un email valide" : "Please enter a valid email"),
+  password: z.string().min(1, locale === "ar" ? "يرجى إدخال كلمة المرور" : locale === "fr" ? "Veuillez entrer le mot de passe" : "Please enter the password"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.infer<ReturnType<typeof makeLoginSchema>>;
 
 /* ------------------------------------------------------------------ */
 /*  Animation                                                          */
@@ -82,7 +82,7 @@ export default function LoginPage() {
   }, [locale]);
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(makeLoginSchema(locale)),
     defaultValues: { email: "", password: "" },
   });
 
@@ -277,11 +277,11 @@ export default function LoginPage() {
           >
             <div className="flex items-center gap-2">
               <Sparkles className="size-5" />
-              <span className="text-sm">1000+ طالب</span>
+              <span className="text-sm">{locale === "ar" ? "1000+ طالب" : locale === "fr" ? "1000+ étudiants" : "1000+ students"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Leaf className="size-5" />
-              <span className="text-sm">50+ دورة</span>
+              <span className="text-sm">{locale === "ar" ? "50+ دورة" : locale === "fr" ? "50+ cours" : "50+ courses"}</span>
             </div>
           </motion.div>
         </motion.div>
@@ -431,7 +431,7 @@ export default function LoginPage() {
                 <div className="flex w-full items-center gap-3">
                   <Separator className="flex-1" />
                   <span className="text-xs text-muted-foreground">
-                    {"أو"}
+                    {t("common.or")}
                   </span>
                   <Separator className="flex-1" />
                 </div>

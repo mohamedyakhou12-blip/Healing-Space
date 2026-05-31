@@ -50,6 +50,14 @@ export async function GET(
       );
     }
 
+    // SECURITY: Non-admin users cannot view draft content
+    if (course.status === "draft") {
+      const adminId = await requireAdmin();
+      if (!adminId) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+    }
+
     const reviews = (course as any).reviews || [];
     const avgRating =
       reviews.length > 0

@@ -524,6 +524,9 @@ const ar = {
     rating: "التقييم",
     of: "من",
     serverError: "خطأ في الخادم. يرجى المحاولة مرة أخرى.",
+    allRightsReserved: "جميع الحقوق محفوظة",
+    madeWithCare: "صُنع بعناية لرفاهيتك",
+    sidebarQuote: "الشفاء يبدأ من الداخل، والنمو لا يتوقف.",
   },
 } as const;
 

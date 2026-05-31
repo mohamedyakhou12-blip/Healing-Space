@@ -284,7 +284,6 @@ export async function POST(request: NextRequest) {
     // ── Find or create the user in database ──
     let user: any;
     let isNewUser = false;
-    let dbAvailable = true;
 
     try {
       // Check by email first
@@ -325,20 +324,11 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (dbError) {
-      console.error("[Google Auth] Database error during user lookup/create:", dbError);
-      // FALLBACK: If database is not available, create a temporary user from token data
-      // This allows Google sign-in to work even when Firestore is misconfigured
-      console.warn("[Google Auth] Using token-based fallback (no database) for:", email);
-      dbAvailable = false;
-      user = {
-        id: uid,
-        name: name,
-        email: email,
-        role: "user",
-        avatar: photoURL || null,
-        phone: phone || null,
-      };
-      isNewUser = true;
+      console.error("[Google Auth] Database error:", dbError);
+      return NextResponse.json(
+        { error: "Service temporarily unavailable. Please try again.", success: false },
+        { status: 503 }
+      );
     }
 
     // ── Set the server session (iron-session cookie) ──

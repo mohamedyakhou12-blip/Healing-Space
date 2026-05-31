@@ -286,14 +286,11 @@ export async function GET(request: NextRequest) {
       }
     } catch (dbError) {
       console.error("[Google Callback] Database error:", dbError);
-      user = {
-        id: userInfo.sub,
-        name: userInfo.name || email.split("@")[0],
-        email,
-        role: "user",
-        avatar: userInfo.picture || null,
-      };
-      isNewUser = true;
+      const response = new NextResponse(htmlRedirect(`${baseUrl}/login?error=service_unavailable`, true), {
+        status: 503,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return response;
     }
 
     // Step 4: Create session and redirect via HTML page
