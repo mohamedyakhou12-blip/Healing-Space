@@ -29,8 +29,13 @@ import { sanitizeEmail } from "@/lib/sanitize";
 // ═══════════════════════════════════════════════════════════════════════
 
 const googleSchema = z.object({
-  idToken: z.string().min(1, "Firebase ID token is required"),
-});
+  idToken: z.string().optional(),
+  credential: z.string().optional(),
+  accessToken: z.string().optional(),
+}).refine(
+  (data) => data.idToken || data.credential || data.accessToken,
+  { message: "One of idToken, credential, or accessToken is required" }
+);
 
 // Our Firebase project ID — used to validate the token audience claim
 const FIREBASE_PROJECT_ID =
@@ -148,10 +153,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { idToken } = parsed.data;
+    const { idToken, credential, accessToken } = parsed.data;
 
-    // ── Verify the Firebase ID token ──
-    // Strategy: Try Admin SDK first (most secure), fall back to tokeninfo
+    // ── Determine which token to verify ──
+    // GIS sends 'credential' (JWT), Firebase SDK sends 'idToken',
+    // OAuth2 token client sends 'accessToken' (prefixed with 'access_token:')
+    const tokenToVerify = idToken || credential || "";
+    const isAccessToken = accessToken?.startsWith("access_token:");
+
+    // ── Verify the token ──
     let uid: string;
     let email: string;
     let name: string;
@@ -159,10 +169,46 @@ export async function POST(request: NextRequest) {
     let phone: string | undefined;
     let verificationMethod: string;
 
-    if (firebaseReady) {
+    if (isAccessToken && accessToken) {
+      // ── ACCESS TOKEN FLOW (GIS OAuth2 token client fallback) ──
+      // Exchange access token for user info via Google userinfo endpoint
+      const token = accessToken.replace("access_token:", "");
+      console.log("[Google Auth] Verifying via access token...");
+      try {
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!userInfoRes.ok) {
+          return NextResponse.json(
+            { error: "Failed to verify Google access token", success: false },
+            { status: 401 }
+          );
+        }
+        const userInfo = await userInfoRes.json();
+        if (!userInfo.email || !userInfo.email_verified) {
+          return NextResponse.json(
+            { error: "Google account email not verified", success: false },
+            { status: 401 }
+          );
+        }
+        uid = userInfo.sub;
+        email = userInfo.email;
+        name = userInfo.name || email.split("@")[0];
+        photoURL = userInfo.picture || undefined;
+        phone = undefined;
+        verificationMethod = "access-token-userinfo";
+      } catch (err) {
+        console.error("[Google Auth] Access token verification failed:", err);
+        return NextResponse.json(
+          { error: "Failed to verify Google access token", success: false },
+          { status: 401 }
+        );
+      }
+    } else if (firebaseReady && tokenToVerify) {
       // ── PRIMARY: Firebase Admin SDK verification ──
       try {
-        const decodedToken = await adminAuth.verifyIdToken(idToken, true); // checkRevoked = true
+        const decodedToken = await adminAuth.verifyIdToken(tokenToVerify, true);
         uid = decodedToken.uid;
         email = decodedToken.email || "";
         name = decodedToken.name || email.split("@")[0];
@@ -186,15 +232,9 @@ export async function POST(request: NextRequest) {
             { status: 401 }
           );
         }
-        if (errorCode === "auth/argument-error") {
-          return NextResponse.json(
-            { error: "Invalid authentication token. Please try again.", success: false },
-            { status: 401 }
-          );
-        }
 
-        // Admin SDK failed for other reason — try tokeninfo fallback
-        const tokenInfoResult = await verifyViaTokenInfo(idToken);
+        // Admin SDK failed — try tokeninfo fallback
+        const tokenInfoResult = await verifyViaTokenInfo(tokenToVerify);
         if (!tokenInfoResult) {
           return NextResponse.json(
             { error: "Token verification failed. Please try again.", success: false },
@@ -208,19 +248,13 @@ export async function POST(request: NextRequest) {
         phone = undefined;
         verificationMethod = "tokeninfo-fallback";
       }
-    } else {
+    } else if (tokenToVerify) {
       // ── FALLBACK: Google tokeninfo verification ──
-      // Admin SDK is not configured (missing FIREBASE_SERVICE_ACCOUNT_KEY).
-      // Use Google's tokeninfo endpoint to verify the token.
       console.warn("[Google Auth] Firebase Admin SDK not configured. Using tokeninfo fallback.");
-
-      const tokenInfoResult = await verifyViaTokenInfo(idToken);
+      const tokenInfoResult = await verifyViaTokenInfo(tokenToVerify);
       if (!tokenInfoResult) {
         return NextResponse.json(
-          {
-            error: "فشل التحقق من الرمز. يرجى المحاولة مرة أخرى.",
-            success: false,
-          },
+          { error: "فشل التحقق من الرمز. يرجى المحاولة مرة أخرى.", success: false },
           { status: 401 }
         );
       }
@@ -230,6 +264,11 @@ export async function POST(request: NextRequest) {
       photoURL = tokenInfoResult.photoURL;
       phone = undefined;
       verificationMethod = "tokeninfo";
+    } else {
+      return NextResponse.json(
+        { error: "No valid token provided", success: false },
+        { status: 400 }
+      );
     }
 
     if (!email) {

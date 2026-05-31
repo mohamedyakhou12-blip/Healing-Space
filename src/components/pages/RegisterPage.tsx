@@ -36,8 +36,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
-import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup, getIdToken } from "firebase/auth";
+import { signInWithGoogleGIS } from "@/lib/google-gis";
 import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
@@ -157,18 +156,16 @@ export default function RegisterPage() {
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
     try {
-      // Step 1: Open Google sign-in popup via Firebase Client SDK
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+      const credential = await signInWithGoogleGIS();
+      const isAccessToken = credential.startsWith("access_token:");
+      const body = isAccessToken
+        ? { accessToken: credential }
+        : { credential };
 
-      // Step 2: Get the Firebase ID token to verify on the server
-      const idToken = await getIdToken(user);
-
-      // Step 3: Send ID token to our server to create a session
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -182,7 +179,6 @@ export default function RegisterPage() {
         throw new Error(data.error || "Google sign-in failed");
       }
 
-      // Step 4: Set user in store and navigate
       setUser({
         id: data.user.id,
         name: data.user.name,
@@ -201,17 +197,10 @@ export default function RegisterPage() {
       }
     } catch (error: any) {
       console.error("Google sign-in error:", error);
-      const errorCode = error?.code || "";
-      if (errorCode === "auth/unauthorized-domain") {
-        toast.error(
-          locale === "ar"
-            ? "هذا النطاق غير مصرح به. يرجى إضافة نطاق الموقع في إعدادات Firebase"
-            : "This domain is not authorized. Please add it in Firebase Console settings",
-          { duration: 8000 }
-        );
-      } else if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
-        // User closed the popup — no error needed
-      } else if (errorCode === "auth/popup-blocked") {
+      const msg = error?.message || "";
+      if (msg.includes("popup-closed-by-user") || msg.includes("cancelled")) {
+        // User closed
+      } else if (msg.includes("popup-blocked") || msg.includes("not available")) {
         toast.error(
           locale === "ar"
             ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة في المتصفح"
@@ -219,11 +208,10 @@ export default function RegisterPage() {
           { duration: 8000 }
         );
       } else {
-        const msg = error?.message || "";
         toast.error(
           locale === "ar"
-            ? `فشل تسجيل الدخول بغوغل: ${msg}`
-            : `Google sign-in failed: ${msg}`,
+            ? `فشل التسجيل بغوغل: ${msg}`
+            : `Google sign-up failed: ${msg}`,
           { duration: 5000 }
         );
       }
