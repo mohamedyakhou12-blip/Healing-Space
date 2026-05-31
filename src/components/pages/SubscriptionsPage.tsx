@@ -51,7 +51,7 @@ const DEFAULT_PLAN_PRICES: Record<string, number> = {
 };
 
 export default function SubscriptionsPage() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation();
   const { navigate, pageParams, user } = useAppStore();
 
   // ── Fetch subscription prices + fullPlanIncludes from API ──
@@ -255,6 +255,7 @@ export default function SubscriptionsPage() {
 
   return (
     <motion.div
+      dir={dir}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto"

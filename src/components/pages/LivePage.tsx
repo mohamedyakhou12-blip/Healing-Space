@@ -167,7 +167,7 @@ function CountdownTimer({ targetDate }: { targetDate: Date }) {
 }
 
 export default function LivePage() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation();
   const { navigate } = useAppStore();
   const individualPurchasesEnabled = useAppStore((s) => s.individualPurchasesEnabled);
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
@@ -477,6 +477,7 @@ export default function LivePage() {
 
   return (
     <motion.div
+      dir={dir}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 p-4 md:p-6 lg:p-8 max-w-5xl mx-auto"

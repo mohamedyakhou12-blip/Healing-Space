@@ -104,7 +104,7 @@ function formatRelativeTime(dateStr: string, locale: string): string {
 }
 
 export default function NotificationsPage() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation();
   const { user, navigate } = useAppStore();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -199,6 +199,7 @@ export default function NotificationsPage() {
 
   return (
     <motion.div
+      dir={dir}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 p-4 md:p-6 lg:p-8 max-w-3xl mx-auto"

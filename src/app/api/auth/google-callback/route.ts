@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { sanitizeEmail } from "@/lib/sanitize";
+import { setUserSession } from "@/lib/session";
 
 /**
  * GET /api/auth/google-callback
@@ -28,33 +29,17 @@ const GOOGLE_CLIENT_ID =
 const GOOGLE_CLIENT_SECRET =
   process.env.GOOGLE_OAUTH_CLIENT_SECRET || "";
 
-// ── Session config (must match session.ts) ──
-function getSessionSecret(): string {
-  if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 32) {
-    return process.env.SESSION_SECRET;
-  }
-  if (process.env.NEXT_PHASE === "phase-production-build") {
-    return "build-phase-temporary-secret-do-not-use-at-runtime";
-  }
-  if (process.env.NODE_ENV === "production") {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
-    return `hs-session-${projectId}-${apiKey}-derived-key-at-least-32-chars`;
-  }
-  return "dev-only-fallback-secret-do-not-use-in-prod-32ch";
-}
-
-const SESSION_OPTIONS = {
-  password: getSessionSecret(),
-  cookieName: "healing_session",
-  cookieOptions: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  },
-};
+// ── Session config imported from session.ts ──
+// SECURITY: We NO LONGER duplicate the session secret here.
+// The previous implementation derived the session secret from NEXT_PUBLIC_ vars
+// in production, which is a CRITICAL vulnerability because those values are
+// embedded in the client-side JavaScript bundle. Any attacker could forge
+// admin session cookies.
+// Now we use setUserSession() from session.ts which uses the secure secret.
+// However, since this route returns an HTML response (not a redirect),
+// we need to set the cookie manually using iron-session with the same
+// config as session.ts. We import the config through getSession().
+import { cookies } from "next/headers";
 
 interface GoogleTokenResponse {
   access_token: string;
@@ -300,24 +285,18 @@ export async function GET(request: NextRequest) {
 
     console.log("[Google Callback] Login successful:", email, "role:", role);
 
-    // ── Set session cookie on an HTML response (NOT a 307 redirect) ──
-    // Returning an HTML page with Set-Cookie header is more reliable than
-    // NextResponse.redirect() because browsers always process Set-Cookie
-    // on 200 responses, while 307 redirects may lose the cookie on some
-    // CDN/proxy layers (e.g., Vercel's edge network).
+    // ── Set session cookie ──
+    // SECURITY: Use setUserSession from session.ts which uses the properly
+    // protected session secret (throws in production if SESSION_SECRET is missing).
+    // After setting the session, we create the HTML redirect response.
     try {
+      await setUserSession(user.id, role);
+
       const htmlContent = htmlRedirect(redirectUrl, false);
       const response = new NextResponse(htmlContent, {
         status: 200,
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
-
-      // Set the session cookie directly on this response
-      const session = await getIronSession(request, response, SESSION_OPTIONS);
-      (session as any).userId = user.id;
-      (session as any).userRole = role;
-      (session as any).isAdmin = role === "admin";
-      await session.save();
 
       console.log("[Google Callback] Session cookie set on HTML response for:", email);
       return response;

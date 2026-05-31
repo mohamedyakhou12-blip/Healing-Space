@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { requireAuth } from "@/lib/session";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml } from "@/lib/html-sanitize";
 
 const createReviewSchema = z.object({
   rating: z.number().int().min(1).max(5, "Rating must be between 1 and 5"),
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
         where: { id: existingReview.id },
         data: {
           rating: parsed.data.rating,
-          comment: parsed.data.comment,
+          comment: sanitizeHtml(parsed.data.comment || ""),
         },
         include: { user: true },
       });
@@ -142,6 +143,7 @@ export async function POST(request: NextRequest) {
     const review = await db.review.create({
       data: {
         ...parsed.data,
+        comment: sanitizeHtml(parsed.data.comment || ""),
         userId,
       },
       include: { user: true },

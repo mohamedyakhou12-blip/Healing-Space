@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 
 const updateCourseSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -126,9 +127,16 @@ export async function PUT(
       );
     }
 
+    // Sanitize description fields to prevent stored XSS
+    const sanitizedData: Record<string, unknown> = { ...parsed.data };
+    if (parsed.data.description) sanitizedData.description = sanitizeHtml(parsed.data.description);
+    if (parsed.data.descriptionAr) sanitizedData.descriptionAr = sanitizeHtml(parsed.data.descriptionAr);
+    if (parsed.data.descriptionFr) sanitizedData.descriptionFr = sanitizeHtml(parsed.data.descriptionFr);
+    if (parsed.data.descriptionEn) sanitizedData.descriptionEn = sanitizeHtml(parsed.data.descriptionEn);
+
     const updated = await db.course.update({
       where: { id },
-      data: parsed.data,
+      data: sanitizedData,
       include: { chapters: true },
     });
 

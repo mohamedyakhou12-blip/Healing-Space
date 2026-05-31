@@ -96,7 +96,7 @@ const mockVideos: VideoItem[] = [
 ];
 
 export default function VideosPage() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation();
   const { navigate } = useAppStore();
   const individualPurchasesEnabled = useAppStore((s) => s.individualPurchasesEnabled);
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
@@ -202,7 +202,12 @@ export default function VideosPage() {
     />
 
     {loading ? (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      <motion.div
+        dir={dir}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto"
+      >
         <div className="space-y-2">
           <div className="h-10 w-64 bg-muted animate-pulse rounded" />
           <div className="h-5 w-96 bg-muted animate-pulse rounded" />
@@ -220,6 +225,7 @@ export default function VideosPage() {
       </motion.div>
     ) : selectedVideo ? (
       <motion.div
+        dir={dir}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto"
@@ -303,7 +309,7 @@ export default function VideosPage() {
         </div>
       </motion.div>
     ) : (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      <motion.div dir={dir} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold">{t("videos.title")}</h1>
           <p className="text-muted-foreground text-base max-w-2xl">{t("videos.description")}</p>

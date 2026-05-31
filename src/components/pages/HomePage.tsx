@@ -394,8 +394,11 @@ export default function HomePage() {
   const checkScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+    // RTL: scrollLeft is negative, so we need to adjust the logic
+    const isRtl = dir === "rtl";
+    const scrollPos = Math.abs(el.scrollLeft);
+    setCanScrollLeft(isRtl ? scrollPos + el.clientWidth < el.scrollWidth - 10 : scrollPos > 0);
+    setCanScrollRight(isRtl ? scrollPos > 0 : scrollPos + el.clientWidth < el.scrollWidth - 10);
   };
 
   useEffect(() => {
@@ -517,8 +520,12 @@ export default function HomePage() {
     const el = scrollRef.current;
     if (!el) return;
     const amount = 320;
+    // RTL: In RTL mode, "left" visually means scrolling forward (positive),
+    // and "right" means scrolling backward (negative). We negate the amount.
+    const isRtl = dir === "rtl";
+    const scrollAmount = isRtl ? -amount : amount;
     el.scrollBy({
-      left: direction === "left" ? -amount : amount,
+      left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
     });
     setTimeout(checkScroll, 350);

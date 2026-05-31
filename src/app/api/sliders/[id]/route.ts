@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 
 const updateSliderSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -60,7 +61,22 @@ export async function PUT(
       );
     }
 
-    const data = { ...parsed.data };
+    const data: Record<string, unknown> = { ...parsed.data };
+    // Sanitize description fields to prevent stored XSS
+    if (parsed.data.description) data.description = sanitizeHtml(parsed.data.description);
+    if (parsed.data.descriptionAr) data.descriptionAr = sanitizeHtml(parsed.data.descriptionAr);
+    if (parsed.data.descriptionFr) data.descriptionFr = sanitizeHtml(parsed.data.descriptionFr);
+    if (parsed.data.descriptionEn) data.descriptionEn = sanitizeHtml(parsed.data.descriptionEn);
+    // Validate URL fields
+    if (parsed.data.link && !isUrlSafe(parsed.data.link)) {
+      data.link = "";
+    }
+    if (parsed.data.image && !isUrlSafe(parsed.data.image)) {
+      data.image = "";
+    }
+    if (parsed.data.imageUrl && !isUrlSafe(parsed.data.imageUrl)) {
+      data.imageUrl = "";
+    }
     // Support both 'image' and 'imageUrl' from frontend
     if (data.imageUrl && !data.image) {
       data.image = data.imageUrl;

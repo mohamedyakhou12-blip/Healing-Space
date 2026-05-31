@@ -6,12 +6,17 @@ import { requireAdmin } from "@/lib/session";
 import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 
 const updateArticleSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   titleAr: z.string().min(1).max(200).optional(),
   titleFr: z.string().min(1).max(200).optional(),
   titleEn: z.string().min(1).max(200).optional(),
+  description: z.string().max(5000).optional(),
+  descriptionAr: z.string().max(5000).optional(),
+  descriptionFr: z.string().max(5000).optional(),
+  descriptionEn: z.string().max(5000).optional(),
   content: z.string().min(1).max(50000).optional(),
   contentAr: z.string().min(1).max(50000).optional(),
   contentFr: z.string().min(1).max(50000).optional(),
@@ -105,9 +110,23 @@ export async function PUT(
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
     }
 
+    const sanitizedData: Record<string, unknown> = { ...parsed.data };
+    if (parsed.data.content) sanitizedData.content = sanitizeHtml(parsed.data.content);
+    if (parsed.data.contentAr) sanitizedData.contentAr = sanitizeHtml(parsed.data.contentAr);
+    if (parsed.data.contentFr) sanitizedData.contentFr = sanitizeHtml(parsed.data.contentFr);
+    if (parsed.data.contentEn) sanitizedData.contentEn = sanitizeHtml(parsed.data.contentEn);
+    if (parsed.data.description) sanitizedData.description = sanitizeHtml(parsed.data.description);
+    if (parsed.data.descriptionAr) sanitizedData.descriptionAr = sanitizeHtml(parsed.data.descriptionAr);
+    if (parsed.data.descriptionFr) sanitizedData.descriptionFr = sanitizeHtml(parsed.data.descriptionFr);
+    if (parsed.data.descriptionEn) sanitizedData.descriptionEn = sanitizeHtml(parsed.data.descriptionEn);
+    if (parsed.data.excerpt) sanitizedData.excerpt = sanitizeHtml(parsed.data.excerpt);
+    if (parsed.data.excerptAr) sanitizedData.excerptAr = sanitizeHtml(parsed.data.excerptAr);
+    if (parsed.data.excerptFr) sanitizedData.excerptFr = sanitizeHtml(parsed.data.excerptFr);
+    if (parsed.data.excerptEn) sanitizedData.excerptEn = sanitizeHtml(parsed.data.excerptEn);
+
     const updated = await db.article.update({
       where: { id },
-      data: parsed.data,
+      data: sanitizedData,
     });
 
     notifyGoogleUpdate("articles");

@@ -102,7 +102,7 @@ const COACHING_BG = [
 ];
 
 export default function CoachingPage() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation();
   const { navigate } = useAppStore();
   const individualPurchasesEnabled = useAppStore((s) => s.individualPurchasesEnabled);
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
@@ -230,6 +230,7 @@ export default function CoachingPage() {
 
     return (
       <motion.div
+        dir={dir}
         initial={{ opacity: 0, x: locale === "ar" ? -30 : 30 }}
         animate={{ opacity: 1, x: 0 }}
         className="space-y-6 p-4 md:p-6 lg:p-8 max-w-4xl mx-auto"
@@ -398,6 +399,7 @@ export default function CoachingPage() {
       />
 
       <motion.div
+        dir={dir}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto"

@@ -5,6 +5,7 @@ import { validateAdminCode } from "@/lib/admin-code";
 import { requireAdmin } from "@/lib/session";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 
 const createLessonSchema = z.object({
   title: z.string().max(200),
@@ -42,8 +43,14 @@ export async function POST(
     const parsed = createLessonSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message || "Validation failed" }, { status: 400 });
 
+    const sanitizedData: Record<string, unknown> = { ...parsed.data, chapterId };
+    if (parsed.data.content) sanitizedData.content = sanitizeHtml(parsed.data.content);
+    if (parsed.data.videoUrl && !isUrlSafe(parsed.data.videoUrl)) {
+      sanitizedData.videoUrl = "";
+    }
+
     const lesson = await db.courseLesson.create({
-      data: { ...parsed.data, chapterId },
+      data: sanitizedData,
     });
 
     invalidateContentCache();

@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { validateAdminCode } from "@/lib/admin-code";
 import { requireAdmin } from "@/lib/session";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { validateDocId } from "@/lib/db-security";
 
 /**
  * DELETE /api/admin/members/[id]
@@ -42,6 +43,9 @@ export async function DELETE(
     if (!id) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
+
+    // SECURITY: Validate document ID to prevent path traversal
+    validateDocId(id);
 
     // Cannot delete admin users
     const user = await db.user.findUnique({ where: { id } });
