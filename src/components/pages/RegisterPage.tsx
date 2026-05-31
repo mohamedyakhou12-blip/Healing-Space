@@ -36,6 +36,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup, getIdToken } from "firebase/auth";
 import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
@@ -151,13 +153,83 @@ export default function RegisterPage() {
     }
   };
 
-  const onGoogleSignIn = () => {
-    // ── Server-side OAuth 2.0 flow ──
-    // Firebase Client SDK popup/redirect fails due to CORS/COOP issues on Vercel.
-    // Instead, redirect to server route which handles the full OAuth flow.
+  const onGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     useAppStore.getState().clearUserBeforeLogin();
-    window.location.href = "/api/auth/google-redirect";
+    try {
+      // Step 1: Open Google sign-in popup via Firebase Client SDK
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Step 2: Get the Firebase ID token to verify on the server
+      const idToken = await getIdToken(user);
+
+      // Step 3: Send ID token to our server to create a session
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Server error" }));
+        throw new Error(data.error || "Google sign-in failed");
+      }
+
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "Google sign-in failed");
+      }
+
+      // Step 4: Set user in store and navigate
+      setUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: data.user.avatar,
+        phone: data.user.phone,
+      });
+
+      toast.success(locale === "ar" ? "تم تسجيل الدخول بنجاح!" : "Logged in successfully!");
+
+      if (data.user.role === "admin") {
+        navigate("admin");
+      } else {
+        navigate("home");
+      }
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      const errorCode = error?.code || "";
+      if (errorCode === "auth/unauthorized-domain") {
+        toast.error(
+          locale === "ar"
+            ? "هذا النطاق غير مصرح به. يرجى إضافة نطاق الموقع في إعدادات Firebase"
+            : "This domain is not authorized. Please add it in Firebase Console settings",
+          { duration: 8000 }
+        );
+      } else if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
+        // User closed the popup — no error needed
+      } else if (errorCode === "auth/popup-blocked") {
+        toast.error(
+          locale === "ar"
+            ? "تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة في المتصفح"
+            : "Popup was blocked. Please allow popups in your browser",
+          { duration: 8000 }
+        );
+      } else {
+        const msg = error?.message || "";
+        toast.error(
+          locale === "ar"
+            ? `فشل تسجيل الدخول بغوغل: ${msg}`
+            : `Google sign-in failed: ${msg}`,
+          { duration: 5000 }
+        );
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
