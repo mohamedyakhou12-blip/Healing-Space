@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { validateAdminCode } from "@/lib/admin-code";
 import { requireAdmin } from "@/lib/session";
 import { z } from "zod";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
@@ -34,19 +33,31 @@ const BLOCKED_SETTINGS_KEYS = [
   "admin_access_code", "session_secret", "firebase_config",
 ];
 
+/**
+ * Verify admin access: accepts EITHER a valid admin session OR a valid admin code header.
+ * This allows both cookie-based session auth and code-based auth to work.
+ */
+async function verifyAdminAccess(request: NextRequest): Promise<boolean> {
+  // Try session-based auth first
+  try {
+    const sessionAdminId = await requireAdmin();
+    if (sessionAdminId) return true;
+  } catch { /* session check failed, try code */ }
+
+  // Fall back to admin code header
+  const adminCode = request.headers.get("X-Admin-Code");
+  if (adminCode && (await validateAdminCode(adminCode))) return true;
+
+  return false;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin session first (primary auth)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
-    // Secondary check: admin code header
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
-    }
     const settings = await db.siteSetting.findMany({
       orderBy: { key: "asc" },
     });
@@ -78,16 +89,9 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    // Verify admin session first (primary auth)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    // Secondary check: admin code header
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -133,7 +137,7 @@ export async function PUT(request: NextRequest) {
       )
     );
 
-    notifyGoogleUpdate("settings");
+    // Invalidate public settings cache so changes are reflected immediately
     invalidateContentCache();
     return NextResponse.json({
       message: "Settings updated successfully",

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 /**
@@ -26,15 +25,9 @@ export async function DELETE(
   }
 
   try {
-    // Verify admin session
-    const adminId = await requireAdmin();
-    if (!adminId) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const { id } = await params;

@@ -174,8 +174,19 @@ const ar = {
     confirmPassword: "تأكيد كلمة المرور",
     name: "الاسم الكامل",
     phone: "رقم الهاتف",
-    loginWithGoogle: "تسجيل الدخول بحساب Google",
+    birthday: "تاريخ الميلاد",
     forgotPassword: "نسيت كلمة المرور؟",
+    changePassword: "تغيير كلمة المرور",
+    currentPassword: "كلمة المرور الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    passwordResetSent: "تم إرسال رابط إعادة التعيين",
+    resetPassword: "إعادة تعيين كلمة المرور",
+    resetPasswordTitle: "كلمة المرور الجديدة",
+    resetPasswordDesc: "أدخل كلمة المرور الجديدة لحسابك",
+    passwordChanged: "تم تغيير كلمة المرور بنجاح",
+    invalidResetLink: "رابط إعادة التعيين غير صالح أو منتهي الصلاحية",
+    expiredResetLink: "انتهت صلاحية رابط إعادة التعيين. يرجى طلب رابط جديد.",
+    passwordRequirements: "متطلبات كلمة المرور",
     noAccount: "ليس لديك حساب؟",
     hasAccount: "لديك حساب بالفعل؟",
     loginFailed: "فشل تسجيل الدخول",
@@ -464,6 +475,8 @@ const ar = {
     videoUrl: "رابط الفيديو",
     isFreeLesson: "درس مجاني",
     orderField: "الترتيب",
+    uploadSuccess: "تم رفع الملف بنجاح",
+    allFileTypes: "جميع أنواع الملفات",
   },
 
   // Reviews
@@ -524,6 +537,7 @@ const ar = {
     rating: "التقييم",
     of: "من",
     serverError: "خطأ في الخادم. يرجى المحاولة مرة أخرى.",
+    accessDenied: "تم رفض الوصول. ليس لديك صلاحية.",
   },
 } as const;
 

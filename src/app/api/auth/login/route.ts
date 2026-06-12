@@ -23,17 +23,17 @@ function cleanStaleAttempts() {
   }
 }
 
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const MAX_FAILED_ATTEMPTS = 10;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export async function POST(request: NextRequest) {
   try {
     // Lazy cleanup of stale failed attempt records
     if (failedAttempts.size > 500) cleanStaleAttempts();
 
-    // Rate limiting: max 5 login attempts per minute per IP (reduced from 10)
+    // Rate limiting: max 10 login attempts per minute per IP
     const rlKey = rateLimitKey(request, "login");
-    if (isRateLimited(rlKey, { max: 5, windowMs: 60_000 })) {
+    if (isRateLimited(rlKey, { max: 10, windowMs: 60_000 })) {
       return NextResponse.json(
         { error: "Too many login attempts. Please try again later.", success: false },
         { status: 429 }
@@ -159,7 +159,7 @@ function recordFailedAttempt(email: string) {
   } else {
     failedAttempts.set(email, {
       count,
-      lockedUntil: existing?.lockedUntil || Date.now() + LOCKOUT_DURATION,
+      lockedUntil: existing?.lockedUntil || 0,
     });
   }
 }

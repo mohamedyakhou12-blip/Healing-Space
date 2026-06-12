@@ -8,6 +8,7 @@ const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").optional(),
   phone: z.string().optional(),
   avatar: z.string().optional(),
+  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid birthday format").optional(),
   locale: z.enum(["ar", "fr", "en"]).optional(),
 });
 
@@ -43,6 +44,7 @@ export async function GET() {
             role: user.role,
             avatar: user.avatar,
             phone: user.phone,
+            birthday: user.birthday || null,
           },
         });
       }
@@ -128,6 +130,7 @@ export async function PUT(request: NextRequest) {
         role: updatedUser.role,
         avatar: updatedUser.avatar,
         phone: updatedUser.phone,
+        birthday: updatedUser.birthday || null,
         locale: updatedUser.locale,
         isActive: updatedUser.isActive,
       },

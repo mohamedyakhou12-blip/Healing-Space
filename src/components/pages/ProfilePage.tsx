@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore, type Locale } from "@/lib/store";
@@ -43,6 +43,10 @@ import {
   Headphones,
   FileDown,
   Radio,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -155,6 +159,232 @@ function formatDate(dateStr: string, locale: Locale): string {
 }
 
 /* ------------------------------------------------------------------ */
+/*  ChangePasswordCard                                                 */
+/* ------------------------------------------------------------------ */
+
+function ChangePasswordCard({ locale }: { locale: Locale }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleChangePassword = async () => {
+    setIsSuccess(false);
+    if (!currentPassword) {
+      toast.error(locale === "ar" ? "يرجى إدخال كلمة المرور الحالية" : "Please enter your current password");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error(locale === "ar" ? "كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل" : "New password must be at least 8 characters");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      toast.error(locale === "ar" ? "كلمة المرور يجب أن تحتوي على حرف كبير" : "Password must contain an uppercase letter");
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      toast.error(locale === "ar" ? "كلمة المرور يجب أن تحتوي على حرف صغير" : "Password must contain a lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      toast.error(locale === "ar" ? "كلمة المرور يجب أن تحتوي على رقم" : "Password must contain a number");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(locale === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        let displayError = data.error || "";
+        if (displayError.includes("incorrect")) {
+          displayError = locale === "ar" ? "كلمة المرور الحالية غير صحيحة" : "Current password is incorrect";
+        } else if (displayError.includes("different")) {
+          displayError = locale === "ar" ? "كلمة المرور الجديدة يجب أن تختلف عن الحالية" : "New password must be different from current";
+        }
+        toast.error(displayError);
+        return;
+      }
+
+      setIsSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success(
+        locale === "ar" ? "تم تغيير كلمة المرور بنجاح" : "Password changed successfully"
+      );
+      // Collapse after success
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsExpanded(false);
+      }, 3000);
+    } catch {
+      toast.error(locale === "ar" ? "حدث خطأ. يرجى المحاولة مرة أخرى" : "An error occurred. Please try again");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        {/* Header — always visible */}
+        <button
+          type="button"
+          className="w-full flex items-center justify-between p-4 sm:p-6 hover:bg-muted/30 transition-colors"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0">
+              <Lock className="h-5 w-5 text-white" />
+            </div>
+            <div className="text-start">
+              <h3 className="font-semibold">
+                {locale === "ar" ? "تغيير كلمة المرور" : locale === "fr" ? "Changer le mot de passe" : "Change Password"}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {locale === "ar" ? "حافظ على أمان حسابك" : locale === "fr" ? "Gardez votre compte sécurisé" : "Keep your account secure"}
+              </p>
+            </div>
+          </div>
+          {isSuccess ? (
+            <CheckCircle className="h-5 w-5 text-emerald-500" />
+          ) : (
+            <svg
+              className={`h-5 w-5 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
+        </button>
+
+        {/* Form — expandable */}
+        {isExpanded && (
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4 border-t pt-4">
+            {/* Current Password */}
+            <div className="space-y-2">
+              <Label>
+                {locale === "ar" ? "كلمة المرور الحالية" : locale === "fr" ? "Mot de passe actuel" : "Current Password"}
+              </Label>
+              <div className="relative">
+                <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="ps-10 pe-10"
+                />
+                <button
+                  type="button"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div className="space-y-2">
+              <Label>
+                {locale === "ar" ? "كلمة المرور الجديدة" : locale === "fr" ? "Nouveau mot de passe" : "New Password"}
+              </Label>
+              <div className="relative">
+                <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="ps-10 pe-10"
+                />
+                <button
+                  type="button"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+              {newPassword && (
+                <p className="text-xs text-muted-foreground">
+                  {locale === "ar"
+                    ? "8 أحرف على الأقل مع حرف كبير وصغير ورقم"
+                    : "At least 8 characters with uppercase, lowercase, and a number"}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm New Password */}
+            <div className="space-y-2">
+              <Label>
+                {locale === "ar" ? "تأكيد كلمة المرور الجديدة" : locale === "fr" ? "Confirmer le nouveau mot de passe" : "Confirm New Password"}
+              </Label>
+              <div className="relative">
+                <Lock className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="ps-10 pe-10"
+                />
+                <button
+                  type="button"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="text-xs text-red-500">
+                  {locale === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match"}
+                </p>
+              )}
+            </div>
+
+            {/* Submit */}
+            <Button
+              className="w-full gap-2 bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600"
+              onClick={handleChangePassword}
+              disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {locale === "ar" ? "جارٍ التغيير..." : "Changing..."}
+                </span>
+              ) : (
+                locale === "ar" ? "تغيير كلمة المرور" : "Change Password"
+              )}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -187,6 +417,10 @@ export default function ProfilePage() {
   /* ---- Edit profile state ---- */
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
+  const [editBirthday, setEditBirthday] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -195,6 +429,8 @@ export default function ProfilePage() {
     if (editDialogOpen && user) {
       setEditName(user.name || "");
       setEditPhone(user.phone || "");
+      setEditAvatar(user.avatar || "");
+      setEditBirthday((user as any).birthday || "");
     }
   }, [editDialogOpen, user]);
 
@@ -297,11 +533,13 @@ export default function ProfilePage() {
           id: user.id,
           name: editName,
           phone: editPhone,
+          avatar: editAvatar || undefined,
+          birthday: editBirthday || undefined,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        setUser({ ...user, name: data.user.name, phone: data.user.phone });
+        setUser({ ...user, name: data.user.name, phone: data.user.phone, avatar: data.user.avatar, birthday: data.user.birthday });
         setEditDialogOpen(false);
         toast.success(
           locale === "ar"
@@ -437,14 +675,93 @@ export default function ProfilePage() {
                         />
                       </div>
                       <div className="space-y-2">
+                        <Label>{t("auth.birthday")}</Label>
+                        <Input
+                          type="date"
+                          value={editBirthday}
+                          onChange={(e) => setEditBirthday(e.target.value)}
+                          max={new Date().toISOString().split("T")[0]}
+                          dir="ltr"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {locale === "ar"
+                            ? "تاريخ الميلاد مطلوب لإعادة تعيين كلمة المرور"
+                            : locale === "fr"
+                            ? "La date de naissance est requise pour réinitialiser le mot de passe"
+                            : "Birthday is required for password reset"}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
                         <Label>
                           {locale === "ar" ? "الصورة الشخصية" : locale === "fr" ? "Photo de profil" : "Profile Picture"}
                         </Label>
                         <div className="flex items-center gap-3">
-                          <Button variant="outline" className="gap-2" disabled>
-                            <Camera className="h-4 w-4" />
-                            {locale === "ar" ? "تغيير الصورة" : locale === "fr" ? "Changer la photo" : "Change Photo"}
+                          {editAvatar && (
+                            <img src={editAvatar} alt="Avatar preview" className="size-12 rounded-full object-cover border" />
+                          )}
+                          <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 5 * 1024 * 1024) {
+                                toast.error(locale === "ar" ? "حجم الصورة كبير جداً (الحد 5 ميغابايت)" : "Image too large (max 5MB)");
+                                return;
+                              }
+                              setUploadingAvatar(true);
+                              try {
+                                const formData = new FormData();
+                                formData.append("file", file);
+                                formData.append("type", "content");
+                                formData.append("contentType", "avatars");
+                                const res = await fetch("/api/upload", {
+                                  method: "POST",
+                                  body: formData,
+                                });
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  setEditAvatar(data.url);
+                                  toast.success(locale === "ar" ? "تم رفع الصورة" : "Image uploaded");
+                                } else {
+                                  toast.error(locale === "ar" ? "فشل رفع الصورة" : "Upload failed");
+                                }
+                              } catch {
+                                toast.error(locale === "ar" ? "فشل رفع الصورة" : "Upload failed");
+                              } finally {
+                                setUploadingAvatar(false);
+                                e.target.value = "";
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            className="gap-2"
+                            disabled={uploadingAvatar}
+                            onClick={() => avatarInputRef.current?.click()}
+                          >
+                            {uploadingAvatar ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Camera className="h-4 w-4" />
+                            )}
+                            {uploadingAvatar
+                              ? (locale === "ar" ? "جارٍ الرفع..." : "Uploading...")
+                              : (locale === "ar" ? "تغيير الصورة" : locale === "fr" ? "Changer la photo" : "Change Photo")
+                            }
                           </Button>
+                          {editAvatar && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0 text-muted-foreground hover:text-destructive"
+                              onClick={() => setEditAvatar("")}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -464,6 +781,9 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Password Card */}
+      <ChangePasswordCard locale={locale} />
 
       {/* Tabs */}
       <Tabs defaultValue="courses" className="space-y-4">
@@ -487,10 +807,10 @@ export default function ProfilePage() {
           {(() => {
             // Show courses the user has access to (via subscription or individual purchase)
             const hasSubscription = userWithSub?.subscription?.status === "active" &&
-              (userWithSub.subscription.plan === "full" || userWithSub.subscription.plan === "courses");
-            const hasPurchasedCourses = purchasedContentIds.length > 0;
+              ["full", "courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"].includes(userWithSub.subscription.plan);
+            const hasPurchasedContent = purchasedContentIds.length > 0;
 
-            if (!hasSubscription && !hasPurchasedCourses) {
+            if (!hasSubscription && !hasPurchasedContent) {
               return (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-16 gap-4 text-center">
@@ -542,7 +862,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     )}
-                    {hasPurchasedCourses && purchasedContentIds.length > 0 && (
+                    {hasPurchasedContent && purchasedContentIds.length > 0 && (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                         <ShoppingBag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <div>
@@ -759,7 +1079,7 @@ export default function ProfilePage() {
                                   <span>•</span>
                                   <span>{formatDate(purchase.createdAt, locale)}</span>
                                   <span>•</span>
-                                  <span>{purchase.amount.toLocaleString()} DA</span>
+                                  <span>{purchase.amount.toLocaleString()} {t("common.currency")}</span>
                                 </div>
                               </div>
                               <Badge className={`${statusConfig.color} border-0 shrink-0`}>
@@ -844,7 +1164,7 @@ export default function ProfilePage() {
                           return (
                             <tr key={payment.id} className="border-b last:border-0 hover:bg-muted/30">
                               <td className="py-3 font-medium">{payment.contentId ? ((locale === "ar" ? payment.contentTitleAr : payment.contentTitle) || payment.contentTitleAr || contentTypeName(payment.contentType || "", locale)) : planName(payment.subscriptionType || "full", locale)}</td>
-                              <td className="py-3">{payment.amount.toLocaleString()} DA</td>
+                              <td className="py-3">{payment.amount.toLocaleString()} {t("common.currency")}</td>
                               <td className="py-3 text-muted-foreground">{formatDate(payment.createdAt, locale)}</td>
                               <td className="py-3">
                                 <Badge className={`${config.color} border-0`}>
@@ -885,7 +1205,7 @@ export default function ProfilePage() {
                           <div className="flex-1 min-w-0 space-y-0.5">
                             <p className="text-sm font-medium truncate">{payment.contentId ? ((locale === "ar" ? payment.contentTitleAr : payment.contentTitle) || payment.contentTitleAr || contentTypeName(payment.contentType || "", locale)) : planName(payment.subscriptionType || "full", locale)}</p>
                             <p className="text-xs text-muted-foreground">
-                              {formatDate(payment.createdAt, locale)} • {payment.amount.toLocaleString()} DA
+                              {formatDate(payment.createdAt, locale)} • {payment.amount.toLocaleString()} {t("common.currency")}
                             </p>
                           </div>
                           <Badge className={`${config.color} border-0 shrink-0 text-[10px]`}>

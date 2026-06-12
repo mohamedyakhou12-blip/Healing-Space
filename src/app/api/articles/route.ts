@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { requireAdmin } from "@/lib/session";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { batchReviewStats } from "@/lib/review-stats";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { gateContentList } from "@/lib/api-content-gate";
 
 const createArticleSchema = z.object({
   title: z.string().min(1, "Title is required").max(REQUEST_LIMITS.MAX_TITLE_LENGTH, "Title is too long"),
@@ -75,8 +75,11 @@ export async function GET(request: NextRequest) {
       result = result.slice(0, parseInt(limit, 10));
     }
 
+    // Strip premium content for unauthenticated/unsubscribed users
+    const gatedResult = await gateContentList(result, "articles");
+
     return NextResponse.json(
-      { articles: result },
+      { articles: gatedResult },
       {
         headers: {
           "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
@@ -103,15 +106,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -140,9 +137,6 @@ export async function POST(request: NextRequest) {
 
     // Invalidate cache after content mutation
     invalidateContentCache();
-
-    // Notify Google to re-crawl the articles page
-    notifyGoogleUpdate("articles");
 
     return NextResponse.json({ article }, { status: 201 });
   } catch (error: unknown) {

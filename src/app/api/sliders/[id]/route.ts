@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
@@ -39,15 +37,9 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -72,7 +64,6 @@ export async function PUT(
       data,
     });
 
-    notifyGoogleUpdate("sliders");
     invalidateContentCache();
     return NextResponse.json({ slider: updated });
   } catch (error) {
@@ -100,15 +91,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     await db.slider.delete({ where: { id } });

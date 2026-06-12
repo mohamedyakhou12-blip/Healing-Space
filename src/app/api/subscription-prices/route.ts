@@ -31,7 +31,12 @@ export async function GET() {
     for (const [plan, defaultPrice] of Object.entries(DEFAULT_PRICES)) {
       const key = `subscription_price_${plan}`;
       const storedValue = settingsMap[key];
-      prices[plan] = storedValue ? parseInt(storedValue, 10) : defaultPrice;
+      if (storedValue) {
+        const parsed = parseInt(storedValue, 10);
+        prices[plan] = isNaN(parsed) ? defaultPrice : parsed;
+      } else {
+        prices[plan] = defaultPrice;
+      }
     }
 
     // Read full_plan_includes setting

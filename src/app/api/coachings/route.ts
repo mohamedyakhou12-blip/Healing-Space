@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { requireAdmin } from "@/lib/session";
 import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
@@ -84,15 +83,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -118,7 +111,6 @@ export async function POST(request: NextRequest) {
     // Invalidate cache after content mutation
     invalidateContentCache();
 
-    notifyGoogleUpdate("coachings");
     return NextResponse.json({ coaching }, { status: 201 });
   } catch (error: unknown) {
     console.error("Create coaching error:", error);

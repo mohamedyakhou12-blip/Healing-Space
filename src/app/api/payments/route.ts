@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { requireAuth, requireAdmin } from "@/lib/session";
-import { validateAdminCode } from "@/lib/admin-code";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 import { sanitizeHtml } from "@/lib/html-sanitize";
+import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 const createPaymentSchema = z.object({
   subscriptionType: z.enum([
@@ -46,8 +46,12 @@ function validateReceipt(receiptImage: string): string | null {
       }
       // Block internal/private network URLs (SSRF prevention)
       const hostname = url.hostname.toLowerCase();
-      if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.startsWith("10.") || hostname.startsWith("172.16.")) {
+      if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.startsWith("10.")) {
         return "Invalid receipt URL";
+      }
+      if (hostname.startsWith("172.")) {
+        const secondOctet = parseInt(hostname.split(".")[1], 10);
+        if (secondOctet >= 16 && secondOctet <= 31) return "Invalid receipt URL";
       }
       // Check if the host is from a trusted provider
       const isTrusted = trustedHosts.some(host => hostname === host || hostname.endsWith("." + host));
@@ -177,6 +181,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: receiptError }, { status: 400 });
     }
 
+    // Check if user already has a pending payment for this subscription type
+    const existingPending = await db.payment.findMany({
+      where: {
+        userId,
+        subscriptionType: parsed.data.subscriptionType,
+        status: "pending",
+      },
+    });
+
+    if (existingPending.length > 0) {
+      return NextResponse.json(
+        { error: "You already have a pending payment for this subscription type" },
+        { status: 409 }
+      );
+    }
+
     const payment = await db.payment.create({
       data: {
         userId,
@@ -201,17 +221,12 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // Admin-only: approving/rejecting payments requires admin session + code
-    const adminId = await requireAdmin();
-    if (!adminId) {
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 401 }
       );
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -244,7 +259,8 @@ export async function PUT(request: NextRequest) {
     });
 
     // If approved, create subscription (check for duplicates)
-    if (status === "approved") {
+    // Guard: only run approval logic if not already approved
+    if (status === "approved" && existing.status !== "approved") {
       // Check if user already has an active subscription for this type
       const existingSubs = await db.subscription.findMany({
         where: { userId: existing.userId, status: "active" },

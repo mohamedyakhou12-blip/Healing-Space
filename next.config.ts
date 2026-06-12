@@ -28,20 +28,19 @@ const nextConfig: NextConfig = {
           // ── Content Security Policy ──
           // Firebase Auth needs: gstatic.com scripts, googleapis.com styles/fonts,
           // firebaseapp.com frames, identitytoolkit + securetoken connections
-          // Google Sign-In popup needs: accounts.google.com frames + connections
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://*.gstatic.com https://www.gstatic.com https://apis.google.com",
+              "script-src 'self' 'unsafe-inline' https://*.gstatic.com https://www.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",
               "media-src 'self' blob: https:",
               "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com",
-              // Firebase Auth + Google Sign-In + Cloudinary connections
-              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.cloudinary.com https://oauth2.googleapis.com https://apis.google.com",
-              // Firebase auth handler + Google Sign-In popup frames
-              "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com blob:",
+              // Firebase Auth connections + Cloudinary
+              "connect-src 'self' https: wss: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.cloudinary.com",
+              // Firebase auth handler frames + YouTube embeds + Cloudinary video embeds
+              "frame-src 'self' https://*.firebaseapp.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://res.cloudinary.com blob:",
               "frame-ancestors 'self'",
               "form-action 'self'",
               "object-src 'none'",

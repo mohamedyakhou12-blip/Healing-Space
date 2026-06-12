@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cloudinary } from "@/lib/cloudinary";
-import { requireAdmin, requireAuth } from "@/lib/session";
-import { validateAdminCode } from "@/lib/admin-code";
+import { requireAuth } from "@/lib/session";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 /**
@@ -32,11 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Auth: accept EITHER session-based admin, valid admin code, or authenticated user for receipts ──
-  const adminId = await requireAdmin();
-  const adminCode = request.headers.get("X-Admin-Code");
-  const codeValid = await validateAdminCode(adminCode);
-
-  const isAdmin = !!adminId || codeValid;
+  const isAdmin = await verifyAdminAccess(request);
 
   // Parse the body early to check the folder for receipt uploads by regular users
   let body: { folder?: string; resourceType?: string };

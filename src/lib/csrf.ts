@@ -73,7 +73,6 @@ export function validateCSRFToken(
 export function isCSRFExemptPath(path: string): boolean {
   const exemptPaths = [
     "/api/csrf-token",               // The token endpoint itself
-    "/api/auth/google",              // Google auth callback (may not have CSRF token yet)
     "/api/auth/login",               // Login endpoint (user doesn't have CSRF token before auth)
     "/api/auth/register",            // Registration endpoint (user doesn't have CSRF token before auth)
     "/api/auth/verify-admin",        // Admin code verification (happens during auth flow)

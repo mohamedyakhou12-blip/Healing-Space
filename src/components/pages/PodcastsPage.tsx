@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
@@ -39,6 +39,7 @@ interface PodcastEpisode {
   isFree: boolean;
   price: number;
   gradient: string;
+  audioUrl: string;
 }
 
 const GRADIENTS = [
@@ -70,6 +71,7 @@ const mockEpisodes: PodcastEpisode[] = [
     isFree: true,
     price: 0,
     gradient: "from-emerald-400 to-teal-600",
+    audioUrl: "",
   },
   {
     id: "pod-2",
@@ -91,6 +93,7 @@ const mockEpisodes: PodcastEpisode[] = [
     isFree: true,
     price: 0,
     gradient: "from-amber-400 to-orange-600",
+    audioUrl: "",
   },
   {
     id: "pod-3",
@@ -112,6 +115,7 @@ const mockEpisodes: PodcastEpisode[] = [
     isFree: false,
     price: 1500,
     gradient: "from-violet-400 to-purple-600",
+    audioUrl: "",
   },
   {
     id: "pod-4",
@@ -133,6 +137,7 @@ const mockEpisodes: PodcastEpisode[] = [
     isFree: false,
     price: 1000,
     gradient: "from-rose-400 to-pink-600",
+    audioUrl: "",
   },
   {
     id: "pod-5",
@@ -154,6 +159,7 @@ const mockEpisodes: PodcastEpisode[] = [
     isFree: true,
     price: 0,
     gradient: "from-sky-400 to-cyan-600",
+    audioUrl: "",
   },
 ];
 
@@ -200,9 +206,12 @@ export default function PodcastsPage() {
   const { navigate } = useAppStore();
   const individualPurchasesEnabled = useAppStore((s) => s.individualPurchasesEnabled);
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const volumeRef = useRef<number>(80); // Track volume in ref to avoid stale closure
   const [playingEpisode, setPlayingEpisode] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
   const [apiEpisodes, setApiEpisodes] = useState<PodcastEpisode[] | null>(null);
@@ -247,6 +256,7 @@ export default function PodcastsPage() {
             isFree: p.isFree || false,
             price: p.price || 0,
             gradient: GRADIENTS[i % GRADIENTS.length],
+            audioUrl: p.audioUrl || "",
           }));
         if (episodes.length > 0) setApiEpisodes(episodes);
       })
@@ -275,6 +285,64 @@ export default function PodcastsPage() {
     setPurchaseDialogOpen(true);
   };
 
+  // Manage audio element when playingEpisode changes
+  useEffect(() => {
+    const episode = displayEpisodes.find(e => e.id === playingEpisode);
+    if (!episode?.audioUrl) return;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    const audio = new Audio(episode.audioUrl);
+    audioRef.current = audio;
+
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onLoadedMetadata = () => setAudioDuration(audio.duration || 0);
+    const onEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    audio.addEventListener('ended', onEnded);
+
+    // Read latest volume/mute from refs (avoids stale closure)
+    audio.volume = volumeRef.current === 0 ? 0 : volumeRef.current / 100;
+    if (volumeRef.current === 0) audio.volume = 0;
+
+    if (isPlaying) {
+      audio.play().catch(() => {});
+    }
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audio.removeEventListener('ended', onEnded);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playingEpisode]);
+
+  // Sync play/pause state with audio element
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  // Sync volume with audio element
+  useEffect(() => {
+    volumeRef.current = isMuted ? 0 : volume;
+    if (!audioRef.current) return;
+    audioRef.current.volume = isMuted ? 0 : volume / 100;
+  }, [volume, isMuted]);
+
   const handlePlay = (episode: PodcastEpisode) => {
     if (!canAccessContentById(userWithSub, 'podcasts', episode.id, episode.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems)) {
       if (individualPurchasesEnabled) {
@@ -283,29 +351,70 @@ export default function PodcastsPage() {
       return;
     }
 
+    if (!episode.audioUrl) {
+      toast.info(locale === "ar" ? "الملف الصوتي سيكون متاحاً قريباً" : locale === "fr" ? "Le fichier audio sera bientôt disponible" : "Audio will be available soon");
+      return;
+    }
+
     if (playingEpisode === episode.id) {
+      if (audioRef.current) {
+        if (isPlaying) {
+          audioRef.current.pause();
+        } else {
+          audioRef.current.play().catch(() => {});
+        }
+      }
       setIsPlaying(!isPlaying);
     } else {
       setPlayingEpisode(episode.id);
       setCurrentTime(0);
       setIsPlaying(true);
-      // Show a toast that the podcast audio is not yet available
-      toast.info(
-        locale === "ar" ? "البودكاست سيكون متاحاً قريباً. ترقبوا الحلقات القادمة!" : locale === "fr" ? "Le podcast sera bientôt disponible. Restez à l'écoute!" : "Podcast audio will be available soon. Stay tuned!",
-        { duration: 5000 }
-      );
     }
   };
 
   const handleSeek = (value: number[]) => {
-    if (activeEpisode) {
-      setCurrentTime(value[0] * activeEpisode.durationSeconds);
+    if (audioRef.current) {
+      const duration = audioRef.current.duration || 0;
+      const seekTime = value[0] * duration;
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
     }
   };
 
+  const effectiveDuration = audioDuration > 0 ? audioDuration : (activeEpisode?.durationSeconds || 0);
   const progress = activeEpisode
-    ? currentTime / activeEpisode.durationSeconds
+    ? effectiveDuration > 0
+      ? currentTime / effectiveDuration
+      : 0
     : 0;
+
+  const handleSkipPrevious = () => {
+    if (!activeEpisode) return;
+    const currentIndex = displayEpisodes.findIndex(e => e.id === playingEpisode);
+    if (currentIndex > 0) {
+      const prevEpisode = displayEpisodes[currentIndex - 1];
+      handlePlay(prevEpisode);
+    }
+  };
+
+  const handleSkipNext = () => {
+    if (!activeEpisode) return;
+    const currentIndex = displayEpisodes.findIndex(e => e.id === playingEpisode);
+    if (currentIndex < displayEpisodes.length - 1) {
+      const nextEpisode = displayEpisodes[currentIndex + 1];
+      handlePlay(nextEpisode);
+    }
+  };
+
+  const handleStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setPlayingEpisode(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
 
   return (
     <>
@@ -490,6 +599,7 @@ export default function PodcastsPage() {
               <div className="flex items-center gap-2">
                 <button
                   className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
+                  onClick={handleSkipPrevious}
                   aria-label="Previous"
                 >
                   <SkipBack className="h-4 w-4" />
@@ -497,7 +607,7 @@ export default function PodcastsPage() {
 
                 <button
                   className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center transition-colors"
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => activeEpisode && handlePlay(activeEpisode)}
                   aria-label={isPlaying ? t("podcasts.pause") : t("podcasts.play")}
                 >
                   {isPlaying ? (
@@ -509,6 +619,7 @@ export default function PodcastsPage() {
 
                 <button
                   className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
+                  onClick={handleSkipNext}
                   aria-label="Next"
                 >
                   <SkipForward className="h-4 w-4" />
@@ -526,7 +637,7 @@ export default function PodcastsPage() {
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{formatTime(currentTime)}</span>
-                  <span>{activeEpisode.duration}</span>
+                  <span>{audioDuration > 0 && audioDuration !== activeEpisode.durationSeconds ? formatTime(audioDuration) : activeEpisode.duration}</span>
                 </div>
               </div>
 
@@ -558,11 +669,7 @@ export default function PodcastsPage() {
               {/* Close player button */}
               <button
                 className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors text-muted-foreground"
-                onClick={() => {
-                  setPlayingEpisode(null);
-                  setIsPlaying(false);
-                  setCurrentTime(0);
-                }}
+                onClick={handleStop}
                 aria-label={t("common.close")}
               >
                 <span className="text-lg leading-none">×</span>

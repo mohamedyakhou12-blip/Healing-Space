@@ -76,12 +76,12 @@ function getSessionSecret(): string {
   // In development only, use a fixed fallback for convenience
   console.warn(
     "[SECURITY] ⚠️ SESSION_SECRET not set! Using development fallback. " +
-    "Set SESSION_SESSION env var before deploying to production!"
+    "Set SESSION_SECRET env var before deploying to production!"
   );
   return "dev-only-fallback-secret-do-not-use-in-prod-32ch";
 }
 
-const SESSION_OPTIONS = {
+export const SESSION_OPTIONS = {
   password: getSessionSecret(),
   cookieName: "healing_session",
   cookieOptions: {
@@ -133,7 +133,7 @@ export async function requireAdmin(): Promise<string | null> {
 }
 
 /**
- * Set user session after successful login/register/google-auth.
+ * Set user session after successful login/register.
  */
 export async function setUserSession(
   userId: string,

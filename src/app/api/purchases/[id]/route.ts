@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/session";
-import { validateAdminCode } from "@/lib/admin-code";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
@@ -26,18 +25,9 @@ export async function PUT(
   }
 
   try {
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json(
-        { error: "Unauthorized - admin session required" },
-        { status: 401 }
-      );
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -84,8 +74,8 @@ export async function PUT(
     const contentName = contentTypeNames[existing.contentType] || { ar: "محتوى", fr: "Contenu", en: "Content" };
     const contentTitle = existing.contentTitleAr || existing.contentTitle || contentName.ar;
 
-    // If approved, notify user
-    if (status === "approved") {
+    // If approved, notify user (idempotency: only notify if status was not already approved)
+    if (status === "approved" && existing.status !== "approved") {
       await db.notification.create({
         data: {
           userId: existing.userId,
@@ -164,15 +154,9 @@ export async function DELETE(
   }
 
   try {
-    // Verify admin session
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const { id } = await params;

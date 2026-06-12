@@ -16,9 +16,9 @@ import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: max 5 admin code verification attempts per 5 minutes per IP
+    // Rate limiting: max 10 admin code verification attempts per 5 minutes per IP
     const rlKey = rateLimitKey(request, "verify-admin");
-    if (isRateLimited(rlKey, { max: 5, windowMs: 5 * 60_000 })) {
+    if (isRateLimited(rlKey, { max: 10, windowMs: 5 * 60_000 })) {
       return NextResponse.json(
         { valid: false, error: "Too many attempts. Please try again later." },
         { status: 429 }

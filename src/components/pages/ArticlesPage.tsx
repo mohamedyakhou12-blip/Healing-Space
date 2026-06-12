@@ -439,9 +439,10 @@ export default function ArticlesPage() {
                   >
                     <Newspaper className="absolute bottom-4 start-4 h-12 w-12 text-white/20" />
                   </div>
-                  <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-line text-base leading-relaxed">
-                    {localizedText(article.content)}
-                  </div>
+                  <div
+                    className="prose prose-neutral dark:prose-invert max-w-none text-base leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: localizedText(article.content) }}
+                  />
                 </>
               )}
             </div>

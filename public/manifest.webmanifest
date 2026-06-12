@@ -1,0 +1,57 @@
+{
+  "name": "فضاء الشفاء | Healing Space",
+  "short_name": "فضاء الشفاء",
+  "description": "منصة الدكتورة نسرين التعليمية - اكتشف الدورات والمقالات والبودكاست في مجال العلاج النفسي والتطوير الذاتي",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["education", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الدورات التعليمية",
+      "short_name": "الدورات",
+      "description": "تصفح الدورات التعليمية",
+      "url": "/courses",
+      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "المقالات",
+      "short_name": "المقالات",
+      "description": "اقرأ المقالات المتخصصة",
+      "url": "/articles",
+      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "البودكاست",
+      "short_name": "البودكاست",
+      "description": "استمع للبودكاست",
+      "url": "/podcasts",
+      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+    }
+  ]
+}

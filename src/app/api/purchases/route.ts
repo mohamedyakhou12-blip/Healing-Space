@@ -32,8 +32,12 @@ function validateReceipt(receiptImage: string): string | null {
         return "Invalid receipt URL protocol";
       }
       const hostname = url.hostname.toLowerCase();
-      if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.startsWith("10.") || hostname.startsWith("172.16.")) {
+      if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.startsWith("10.")) {
         return "Invalid receipt URL";
+      }
+      if (hostname.startsWith("172.")) {
+        const secondOctet = parseInt(hostname.split(".")[1], 10);
+        if (secondOctet >= 16 && secondOctet <= 31) return "Invalid receipt URL";
       }
       const isTrusted = trustedHosts.some(host => hostname === host || hostname.endsWith("." + host));
       if (!isTrusted) {

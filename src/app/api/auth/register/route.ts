@@ -17,6 +17,7 @@ const registerSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
   phone: z.string().max(20, "Phone number is too long").optional(),
+  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Birthday must be a valid date (YYYY-MM-DD)"),
 });
 
 export async function POST(request: NextRequest) {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let { name, email, password, phone } = parsed.data;
+    let { name, email, password, phone, birthday } = parsed.data;
 
     // Sanitize inputs
     name = sanitizeName(name);
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
       role: "user",
       locale: "ar",
       isActive: true,
+      birthday,
     };
     if (phone) userData.phone = phone;
 
@@ -88,6 +90,26 @@ export async function POST(request: NextRequest) {
 
     // Set session cookie immediately after registration
     await setUserSession(user.id, "user");
+
+    // Also create user in Firebase Auth for password reset email support
+    try {
+      const { adminAuth, firebaseReady } = await import("@/lib/firebase-admin");
+      if (firebaseReady && adminAuth) {
+        try {
+          await adminAuth.createUser({
+            email,
+            displayName: name,
+            password,
+          });
+          console.log(`[Register] Created Firebase Auth user for: ${email}`);
+        } catch (firebaseErr) {
+          // Non-critical: user can still log in with bcryptjs
+          console.warn("[Register] Failed to create Firebase Auth user (non-critical):", firebaseErr);
+        }
+      }
+    } catch {
+      // Firebase Admin not available — continue
+    }
 
     return NextResponse.json(
       {

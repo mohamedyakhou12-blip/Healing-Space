@@ -19,6 +19,7 @@ import {
   Lock,
   BookOpen,
   HardDrive,
+  X,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
 
@@ -33,6 +34,7 @@ interface PdfItem {
   price: number;
   gradient: string;
   category: { ar: string; en: string; fr: string };
+  fileUrl: string;
 }
 
 const GRADIENTS = [
@@ -63,6 +65,7 @@ const mockPdfs: PdfItem[] = [
     price: 0,
     gradient: "from-emerald-400 to-teal-600",
     category: { ar: "التأمل", en: "Meditation", fr: "Méditation" },
+    fileUrl: "",
   },
   {
     id: "pdf-2",
@@ -83,6 +86,7 @@ const mockPdfs: PdfItem[] = [
     price: 1500,
     gradient: "from-amber-400 to-orange-600",
     category: { ar: "اضطرابات القلق", en: "Anxiety Disorders", fr: "Troubles Anxieux" },
+    fileUrl: "",
   },
   {
     id: "pdf-3",
@@ -103,6 +107,7 @@ const mockPdfs: PdfItem[] = [
     price: 0,
     gradient: "from-violet-400 to-purple-600",
     category: { ar: "التطوير الشخصي", en: "Personal Development", fr: "Développement Personnel" },
+    fileUrl: "",
   },
   {
     id: "pdf-4",
@@ -123,6 +128,7 @@ const mockPdfs: PdfItem[] = [
     price: 2500,
     gradient: "from-rose-400 to-pink-600",
     category: { ar: "الذكاء العاطفي", en: "Emotional Intelligence", fr: "Intelligence Émotionnelle" },
+    fileUrl: "",
   },
 ];
 
@@ -137,6 +143,7 @@ export default function PdfsPage() {
   const [loading, setLoading] = useState(true);
   const [purchasedContentIds, setPurchasedContentIds] = useState<string[]>([]);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<PdfItem | null>(null);
   const [selectedLockedItem, setSelectedLockedItem] = useState<{
     id: string;
     title: string;
@@ -169,11 +176,12 @@ export default function PdfsPage() {
             description: { ar: p.descriptionAr || p.description, en: p.descriptionEn || p.description, fr: p.descriptionFr || p.description },
             author: { ar: p.author || "", en: p.author || "", fr: p.author || "" },
             fileSize: p.fileSize || "",
-            pages: p.pages || 0,
+            pages: p.pageCount || p.pages || 0,
             isFree: p.isFree || false,
             price: p.price || 0,
             gradient: GRADIENTS[i % GRADIENTS.length],
             category: { ar: p.category || "", en: p.category || "", fr: p.category || "" },
+            fileUrl: p.fileUrl || "",
           }));
         if (pdfs.length > 0) setApiPdfs(pdfs);
       })
@@ -216,7 +224,11 @@ export default function PdfsPage() {
       }
       return;
     }
-    toast.success(locale === "ar" ? `جاري تحميل: ${localizedText(pdf.title)}` : `Downloading: ${localizedText(pdf.title)}`);
+    if (pdf.fileUrl) {
+      setSelectedPdf(pdf);
+    } else {
+      toast.error(locale === "ar" ? "الملف غير متوفر بعد" : locale === "fr" ? "Fichier pas encore disponible" : "File not available yet");
+    }
   };
 
   if (loading) {
@@ -252,6 +264,56 @@ export default function PdfsPage() {
       contentTitleAr={selectedLockedItem?.titleAr || ""}
     />
 
+    {selectedPdf && (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+        <Button variant="ghost" size="sm" onClick={() => setSelectedPdf(null)} className="gap-2">
+          <X className="h-4 w-4" />
+          {t("common.back")}
+        </Button>
+
+        <div className="space-y-3">
+          <h1 className="text-xl sm:text-2xl font-bold">{localizedText(selectedPdf.title)}</h1>
+          <p className="text-muted-foreground">{localizedText(selectedPdf.description)}</p>
+        </div>
+
+        {/* PDF Viewer */}
+        <div className="w-full border rounded-xl overflow-hidden bg-muted" style={{ height: '80vh' }}>
+          <iframe
+            src={selectedPdf.fileUrl}
+            className="w-full h-full"
+            title={localizedText(selectedPdf.title)}
+          />
+          {/* Fallback: if iframe fails, show download link */}
+          <noscript>
+            <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
+              <FileText className="h-16 w-16 text-muted-foreground/50" />
+              <p className="text-muted-foreground text-center">
+                {locale === "ar" ? "متصفحك لا يدعم عرض PDF مباشرة" : locale === "fr" ? "Votre navigateur ne supporte pas l'affichage PDF" : "Your browser doesn't support inline PDF viewing"}
+              </p>
+            </div>
+          </noscript>
+        </div>
+
+        {/* Download button */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button className="w-full sm:w-auto" onClick={() => window.open(selectedPdf.fileUrl, '_blank')}>
+            <Download className="h-4 w-4 me-2" />
+            {t("pdfs.download")}
+          </Button>
+          {/* Alternative: Open in Google Docs Viewer for browsers without PDF support */}
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(selectedPdf.fileUrl)}&embedded=true`, '_blank')}
+          >
+            <FileText className="h-4 w-4 me-2" />
+            {locale === "ar" ? "عرض في عارض Google" : locale === "fr" ? "Voir dans Google Viewer" : "Open in Google Viewer"}
+          </Button>
+        </div>
+      </motion.div>
+    )}
+
+    {!selectedPdf && (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -399,6 +461,7 @@ export default function PdfsPage() {
         )}
       </AnimatePresence>
     </motion.div>
+    )}
     </>
   );
 }

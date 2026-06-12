@@ -102,6 +102,8 @@ export async function directCloudinaryUpload(
       live: "healing-space/live",
       coaching: "healing-space/coaching",
       cover: "healing-space/covers",
+      sliders: "healing-space/sliders",
+      avatars: "healing-space/avatars",
       general: "healing-space/content",
       receipts: "healing-space/receipts",
     };

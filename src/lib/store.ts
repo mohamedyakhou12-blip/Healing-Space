@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { clearCSRFToken } from "./csrf-client";
+import { clearStoredAdminCode } from "@/lib/api-helpers";
 
 export type Locale = "ar" | "fr" | "en";
 
@@ -16,6 +17,8 @@ export type PageName =
   | "admin"
   | "login"
   | "register"
+  | "forgot-password"
+  | "reset-password"
   | "subscriptions"
   | "payment"
   | "notifications"
@@ -36,6 +39,8 @@ export const PAGE_ROUTES: Record<PageName, string> = {
   admin: "/admin",
   login: "/login",
   register: "/register",
+  "forgot-password": "/forgot-password",
+  "reset-password": "/reset-password",
   payment: "/payment",
   notifications: "/notifications",
   homepageCustomizer: "/admin",
@@ -56,6 +61,8 @@ export const ROUTE_TO_PAGE: Record<string, PageName> = {
   "/admin": "admin",
   "/login": "login",
   "/register": "register",
+  "/forgot-password": "forgot-password",
+  "/reset-password": "reset-password",
   "/payment": "payment",
   "/notifications": "notifications",
 };
@@ -77,6 +84,7 @@ export interface User {
   phone?: string;
   avatar?: string;
   role: "user" | "admin";
+  birthday?: string;
   subscription?: UserSubscription;
 }
 
@@ -192,8 +200,9 @@ export const useAppStore = create<AppState>()((set, get) => ({
     } catch {
       // Ignore network errors
     }
-    // 2. Clear CSRF token
+    // 2. Clear CSRF token and stored admin code
     clearCSRFToken();
+    clearStoredAdminCode();
     // 3. Clear client state
     set({
       user: null,

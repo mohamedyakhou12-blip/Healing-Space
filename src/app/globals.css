@@ -314,6 +314,39 @@ html.theme-transitioning *::after {
   scrollbar-color: hsl(173, 30%, 35%) transparent;
 }
 
+/* ── Scrollbar Thin Utility ── */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(173, 30%, 70%);
+  border-radius: 2px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(173, 30%, 35%);
+}
+
+/* ── Scrollbar None Utility ── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* ============================================================
    Keyframe Animations
    ============================================================ */

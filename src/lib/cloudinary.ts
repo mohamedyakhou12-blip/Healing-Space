@@ -181,6 +181,8 @@ export function getCloudinaryFolder(contentType?: string): string {
     live: `${baseFolder}/live`,
     coaching: `${baseFolder}/coaching`,
     cover: `${baseFolder}/covers`,
+    sliders: `${baseFolder}/sliders`,
+    avatars: `${baseFolder}/avatars`,
     general: `${baseFolder}/content`,
   };
 

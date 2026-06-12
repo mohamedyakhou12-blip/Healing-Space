@@ -28,10 +28,7 @@ import {
   Star,
   Clock,
   Check,
-  AlertCircle,
   Image as ImageIcon,
-  Send,
-  ExternalLink,
   Banknote,
   Shield,
   Upload,
@@ -240,7 +237,7 @@ const SECTION_LABELS: Record<ContentSubTab, {
   articles: { addNew: "إضافة مقالة", edit: "تعديل المقالة", noData: "لا توجد مقالات بعد", imageLabel: "صورة المقالة", descriptionLabel: "وصف المقالة" },
   podcasts: { addNew: "إضافة بودكاست", edit: "تعديل البودكاست", noData: "لا توجد بودكاست بعد", imageLabel: "صورة البودكاست", descriptionLabel: "وصف البودكاست" },
   videos: { addNew: "إضافة فيديو", edit: "تعديل الفيديو", noData: "لا توجد فيديوهات بعد", imageLabel: "صورة الفيديو", descriptionLabel: "وصف الفيديو" },
-  pdfs: { addNew: "إضافة كتاب PDF", edit: "تعديل الكتاب", noData: "لا توجد كتب PDF بعد", imageLabel: "رفع ملف PDF", descriptionLabel: "وصف الكتاب", acceptTypes: ["application/pdf"] },
+  pdfs: { addNew: "إضافة كتاب PDF", edit: "تعديل الكتاب", noData: "لا توجد كتب PDF بعد", imageLabel: "صورة الغلاف", descriptionLabel: "وصف الكتاب" },
   live: { addNew: "إضافة جلسة مباشرة", edit: "تعديل الجلسة", noData: "لا توجد جلسات مباشرة بعد", imageLabel: "صورة الجلسة", descriptionLabel: "وصف الجلسة" },
   coaching: { addNew: "إضافة كوتشنغ", edit: "تعديل الكوتشنغ", noData: "لا توجد عناصر كوتشنغ بعد", imageLabel: "صورة الكوتشنغ", descriptionLabel: "وصف الكوتشنغ" },
 };
@@ -962,40 +959,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-8rem)] gap-0">
-      {/* ─── Sidebar (desktop) ─── */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 rounded-xl border bg-card p-4 gap-1 sticky top-24 self-start max-h-[calc(100vh-8rem)]">
-        <div className="mb-4 ps-3">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Settings className="size-5 text-teal-600" />
-            {t("nav.admin")}
-          </h2>
-        </div>
-        <Separator className="mb-2" />
-        <nav className="flex flex-col gap-1 flex-1">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                onClick={() => setTab(item.key)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300 shadow-sm"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon className="size-4 shrink-0" />
-                <span>{t(item.labelKey)}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </aside>
-
+    <div className="min-h-[calc(100vh-8rem)]">
       {/* ─── Mobile Tabs ─── */}
-      <div className="lg:hidden flex gap-1 overflow-x-auto pb-2 scrollbar-none mb-4">
+      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-4 px-1">
         {sidebarItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.key;
@@ -1003,21 +969,21 @@ export default function AdminPage() {
             <button
               key={item.key}
               onClick={() => setTab(item.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                 isActive
                   ? "bg-teal-600 text-white shadow-md"
-                  : "bg-muted text-muted-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              <Icon className="size-3.5" />
+              <Icon className="size-4" />
               {t(item.labelKey)}
             </button>
           );
         })}
       </div>
 
-      {/* ─── Main Content ─── */}
-      <main className="flex-1 min-w-0">
+      {/* ─── Main Content (full width, sidebar nav is now in main sidebar) ─── */}
+      <main className="w-full">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -1101,14 +1067,14 @@ function DashboardView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("admin.dashboard")}</h1>
-        <p className="text-muted-foreground text-sm mt-1">{t("admin.statistics")}</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("admin.dashboard")}</h1>
+        <p className="text-muted-foreground mt-1">{t("admin.statistics")}</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+      {/* Stats Grid — bigger cards with 3 cols on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           const colors = colorMap[stat.color];
@@ -1120,20 +1086,20 @@ function DashboardView() {
               variants={fadeInUp}
               transition={{ duration: 0.3, delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden">
-                <CardContent className="p-4">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8">
                   <div className="flex items-start justify-between">
-                    <div className={`p-2.5 rounded-lg ring-1 ${colors.ring} ${colors.bg}`}>
-                      <Icon className={`size-5 ${colors.icon}`} />
+                    <div className={`p-4 rounded-2xl ring-1 ${colors.ring} ${colors.bg}`}>
+                      <Icon className={`size-8 ${colors.icon}`} />
                     </div>
                     <div className={`flex items-center gap-1 text-xs font-medium ${stat.up ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                      {stat.up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                      {stat.up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                       {stat.change}
                     </div>
                   </div>
-                  <div className="mt-3">
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{t(stat.labelKey)}</p>
+                  <div className="mt-6">
+                    <p className="text-4xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-base text-muted-foreground mt-2">{t(stat.labelKey)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1143,27 +1109,31 @@ function DashboardView() {
       </div>
 
       {/* Recent Activity */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">{t("admin.recentActivity")}</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">{t("admin.recentActivity")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {activities.map((activity) => {
+            {activities.length > 0 ? activities.map((activity) => {
               const AIcon = activityIcons[activity.type];
               const aColor = activityColors[activity.type];
               return (
-                <div key={activity.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-muted/50 transition-colors">
-                  <div className={`p-2 rounded-full ${aColor}`}>
-                    <AIcon className="size-4" />
+                <div key={activity.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/50 transition-colors">
+                  <div className={`p-2.5 rounded-full ${aColor}`}>
+                    <AIcon className="size-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground truncate">{activity.text}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{activity.text}</p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
                 </div>
               );
-            })}
+            }) : (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <p className="text-sm">{t("admin.noActivity") || "لا توجد أنشطة حديثة"}</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -2779,49 +2749,43 @@ function ContentView() {
               maxSizeMB={100}
             />
 
-            {/* Video URL field (required) */}
+            {/* Video URL field (required) — Upload or paste YouTube/URL */}
             {contentSubTab === "videos" && (
-              <div className="space-y-1.5">
-                <Label className="text-sm">
-                  رابط الفيديو (YouTube / URL) <span className="text-rose-500">*</span>
-                </Label>
-                <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={formVideoUrl}
-                  onChange={(e) => setFormVideoUrl(e.target.value)}
-                  dir="ltr"
-                />
-              </div>
+              <FileUploadComponent
+                value={formVideoUrl}
+                onChange={setFormVideoUrl}
+                label={t("admin.videoUrl") || "رابط الفيديو (YouTube / رابط مباشر)"}
+                placeholder="https://www.youtube.com/watch?v=... أو رفع ملف فيديو"
+                uploadType="content"
+                contentType="videos"
+                maxSizeMB={500}
+              />
             )}
 
-            {/* Audio URL field (required) */}
+            {/* Audio URL field (required) — Upload or paste URL */}
             {contentSubTab === "podcasts" && (
-              <div className="space-y-1.5">
-                <Label className="text-sm">
-                  رابط الصوت (Audio URL) <span className="text-rose-500">*</span>
-                </Label>
-                <Input
-                  placeholder="https://..."
-                  value={formAudioUrl}
-                  onChange={(e) => setFormAudioUrl(e.target.value)}
-                  dir="ltr"
-                />
-              </div>
+              <FileUploadComponent
+                value={formAudioUrl}
+                onChange={setFormAudioUrl}
+                label={t("admin.audioUrl") || "رابط الصوت (MP3 / ملف صوتي)"}
+                placeholder="https://... أو رفع ملف صوتي"
+                uploadType="content"
+                contentType="podcasts"
+                maxSizeMB={200}
+              />
             )}
 
-            {/* File URL field for PDFs (required) */}
+            {/* File URL field for PDFs (required) — Upload or paste URL */}
             {contentSubTab === "pdfs" && (
-              <div className="space-y-1.5">
-                <Label className="text-sm">
-                  رابط الملف (PDF URL) <span className="text-rose-500">*</span>
-                </Label>
-                <Input
-                  placeholder="https://..."
-                  value={formFileUrl}
-                  onChange={(e) => setFormFileUrl(e.target.value)}
-                  dir="ltr"
-                />
-              </div>
+              <FileUploadComponent
+                value={formFileUrl}
+                onChange={setFormFileUrl}
+                label={t("admin.pdfFileUrl") || "رفع ملف PDF"}
+                placeholder="https://... أو رفع ملف PDF"
+                uploadType="content"
+                contentType="pdfs"
+                maxSizeMB={100}
+              />
             )}
 
             {/* Article content fields - Rich Text Editor */}
@@ -5346,7 +5310,7 @@ function HomepageCustomizer() {
   const locale = useAppStore((s) => s.locale);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<"hero" | "video" | "sliders" | "firebase">("hero");
+  const [activeSection, setActiveSection] = useState<"hero" | "video" | "sliders">("hero");
 
   // Hero settings state
   const [heroTitle, setHeroTitle] = useState({ ar: "", fr: "", en: "" });
@@ -5365,10 +5329,6 @@ function HomepageCustomizer() {
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [sliderDialog, setSliderDialog] = useState<{ open: boolean; slider: Slider | null; isNew: boolean }>({ open: false, slider: null, isNew: false });
   const [sliderForm, setSliderForm] = useState({ imageUrl: "", title: "", titleAr: "", titleFr: "", titleEn: "", order: 0, link: "" });
-
-  // Firebase status
-  const [firebaseStatus, setFirebaseStatus] = useState<any>(null);
-  const [checkingFirebase, setCheckingFirebase] = useState(false);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -5588,24 +5548,6 @@ function HomepageCustomizer() {
     } catch { toast.error(t("common.error")); }
   };
 
-  // Check Firebase status
-  const checkFirebaseStatus = async () => {
-    setCheckingFirebase(true);
-    try {
-      const res = await fetch("/api/auth/firebase-status", { headers: adminHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setFirebaseStatus(data);
-      } else {
-        setFirebaseStatus({ error: "Failed to check Firebase status" });
-      }
-    } catch {
-      setFirebaseStatus({ error: "Network error checking Firebase status" });
-    } finally {
-      setCheckingFirebase(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -5619,7 +5561,6 @@ function HomepageCustomizer() {
     { key: "hero" as const, label: locale === "ar" ? "البانر الرئيسي" : locale === "fr" ? "Bannière" : "Hero Banner", icon: BookOpen },
     { key: "video" as const, label: locale === "ar" ? "فيديو تعريفي" : locale === "fr" ? "Vidéo intro" : "Intro Video", icon: Video },
     { key: "sliders" as const, label: locale === "ar" ? "الشرائح" : locale === "fr" ? "Carrousel" : "Sliders", icon: ImageIcon },
-    { key: "firebase" as const, label: locale === "ar" ? "حالة غوغل" : locale === "fr" ? "Statut Google" : "Google Status", icon: Shield },
   ];
 
   return (
@@ -5920,85 +5861,6 @@ function HomepageCustomizer() {
         </Card>
       )}
 
-      {/* ─── FIREBASE/GOOGLE STATUS SECTION ─── */}
-      {activeSection === "firebase" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="size-5 text-amber-600" />
-              {locale === "ar" ? "حالة تسجيل الدخول بغوغل" : "Google Sign-in Status"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {locale === "ar"
-                ? "تحقق من حالة إعدادات Firebase و Google لتشخيص مشاكل تسجيل الدخول."
-                : "Check Firebase and Google configuration status to diagnose sign-in issues."}
-            </p>
-
-            <Button onClick={checkFirebaseStatus} disabled={checkingFirebase} className="gap-2 bg-amber-500 hover:bg-amber-600 text-white">
-              {checkingFirebase ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
-              {locale === "ar" ? "فحص الحالة الآن" : "Check Status Now"}
-            </Button>
-
-            {firebaseStatus && (
-              <div className="space-y-4 mt-4">
-                {/* Admin SDK Status */}
-                <div className="rounded-lg border p-4">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    {firebaseStatus.adminSDK?.ready ? (
-                      <><Check className="size-5 text-green-500" /> {locale === "ar" ? "Firebase Admin SDK يعمل" : "Firebase Admin SDK is working"}</>
-                    ) : (
-                      <><AlertCircle className="size-5 text-red-500" /> {locale === "ar" ? "Firebase Admin SDK لا يعمل!" : "Firebase Admin SDK is NOT working!"}</>
-                    )}
-                  </h4>
-                  <div className="text-sm space-y-1 text-muted-foreground">
-                    <p>Init Method: {firebaseStatus.adminSDK?.initMethod || "unknown"}</p>
-                    {firebaseStatus.adminSDK?.initError && <p className="text-destructive">Error: {firebaseStatus.adminSDK.initError}</p>}
-                  </div>
-                </div>
-
-                {/* Client Config */}
-                <div className="rounded-lg border p-4">
-                  <h4 className="font-semibold mb-2">{locale === "ar" ? "إعدادات العميل" : "Client Configuration"}</h4>
-                  <div className="text-sm space-y-1 text-muted-foreground">
-                    <p>API Key: {firebaseStatus.clientConfig?.apiKey}</p>
-                    <p>Auth Domain: {firebaseStatus.clientConfig?.authDomain}</p>
-                    <p>Project ID: {firebaseStatus.clientConfig?.projectId}</p>
-                  </div>
-                </div>
-
-                {/* Issues */}
-                {firebaseStatus.issues && firebaseStatus.issues.length > 0 && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 p-4">
-                    <h4 className="font-semibold mb-2 text-red-700 dark:text-red-400 flex items-center gap-2">
-                      <AlertCircle className="size-5" />
-                      {locale === "ar" ? "مشاكل مكتشفة" : "Issues Found"}
-                    </h4>
-                    <ul className="text-sm space-y-1 text-red-600 dark:text-red-400">
-                      {firebaseStatus.issues.map((issue: string, i: number) => (
-                        <li key={i}>• {issue}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Instructions */}
-                <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 p-4">
-                  <h4 className="font-semibold mb-2 text-blue-700 dark:text-blue-400">
-                    {locale === "ar" ? "خطوات الحل" : "Solution Steps"}
-                  </h4>
-                  <ol className="text-sm space-y-1 text-blue-600 dark:text-blue-400 list-decimal list-inside">
-                    {(firebaseStatus.instructions?.ar || firebaseStatus.instructions?.en || []).map((step: string, i: number) => (
-                      <li key={i}>{step}</li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

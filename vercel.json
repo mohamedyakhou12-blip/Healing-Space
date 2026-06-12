@@ -9,6 +9,8 @@
     { "source": "/coaching/:path*", "destination": "/" },
     { "source": "/login", "destination": "/" },
     { "source": "/register", "destination": "/" },
+    { "source": "/forgot-password", "destination": "/" },
+    { "source": "/reset-password", "destination": "/" },
     { "source": "/admin/:path*", "destination": "/" },
     { "source": "/profile", "destination": "/" },
     { "source": "/subscriptions", "destination": "/" },

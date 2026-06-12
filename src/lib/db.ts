@@ -205,10 +205,9 @@ async function countWhere(
 export const db = {
   // --- User ---
   user: {
-    async findUnique({ where }: { where: { id?: string; email?: string; googleUid?: string } }) {
+    async findUnique({ where }: { where: { id?: string; email?: string } }) {
       if (where.id) return findById("users", where.id);
       if (where.email) return findUnique("users", "email", where.email);
-      if (where.googleUid) return findUnique("users", "googleUid", where.googleUid);
       return null;
     },
     async findMany(opts?: { orderBy?: { createdAt?: string }; select?: any }) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 export async function PUT(request: NextRequest) {
@@ -14,10 +14,10 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    // Verify admin session first (primary auth)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
+    // Verify admin access
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();

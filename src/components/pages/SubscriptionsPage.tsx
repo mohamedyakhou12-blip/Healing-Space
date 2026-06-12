@@ -103,11 +103,12 @@ export default function SubscriptionsPage() {
   // Fetch fresh subscription from API on mount and when user changes
   // Using {uid, plan} pattern so currentPlanId auto-resets when userId changes
   const userId = user?.id;
-  const [fetchedPlan, setFetchedPlan] = useState<{ uid: string; plan: string } | null>(null);
-  // Automatically undefined when user changes (fetchedPlan.uid !== userId)
-  const currentPlanId = (fetchedPlan !== null && fetchedPlan.uid === userId && userId !== "admin-1")
-    ? (fetchedPlan.plan || undefined)
-    : undefined;
+  const [fetchedPlans, setFetchedPlans] = useState<{ uid: string; plans: string[] } | null>(null);
+  // Active plan types for the current user
+  const activePlanTypes = (fetchedPlans !== null && fetchedPlans.uid === userId && userId !== "admin-1")
+    ? fetchedPlans.plans
+    : [];
+  const hasFullPlan = activePlanTypes.includes("full");
 
   useEffect(() => {
     if (!userId || userId === "admin-1") return;
@@ -125,9 +126,9 @@ export default function SubscriptionsPage() {
           );
         if (!cancelled) {
           if (activeSubs.length > 0) {
-            setFetchedPlan({ uid: userId, plan: activeSubs[0].type });
+            setFetchedPlans({ uid: userId, plans: activeSubs.map((s: { type: string }) => s.type) });
           } else {
-            setFetchedPlan({ uid: userId, plan: "" });
+            setFetchedPlans({ uid: userId, plans: [] });
           }
         }
       } catch { /* ignore */ }
@@ -279,7 +280,8 @@ export default function SubscriptionsPage() {
       {/* Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {plans.map((plan, index) => {
-          const isCurrentPlan = currentPlanId === plan.id;
+          const isCurrentPlan = activePlanTypes.includes(plan.id);
+          const isIncludedInFullPlan = hasFullPlan && plan.id !== "full" && fullPlanIncludes.includes(plan.id as ContentType);
           const PlanIcon = plan.icon;
 
           return (
@@ -363,6 +365,17 @@ export default function SubscriptionsPage() {
                         disabled
                       >
                         {t("subscriptions.currentPlan")}
+                      </Button>
+                    </div>
+                  ) : isIncludedInFullPlan ? (
+                    <div className="w-full">
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        disabled
+                      >
+                        <Check className="h-4 w-4 me-1" />
+                        {locale === "ar" ? "مشمول في خطتك" : locale === "fr" ? "Inclus dans votre forfait" : "Included in your plan"}
                       </Button>
                     </div>
                   ) : (

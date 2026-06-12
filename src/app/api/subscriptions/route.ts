@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
 
       const now = new Date();
       const validSubscriptions = subscriptions.filter(
-        (sub: { endDate?: string }) => sub.endDate && new Date(sub.endDate) > now
+        (sub: { status?: string; endDate?: string }) =>
+          sub.status === "active" && sub.endDate && new Date(sub.endDate) > now
       );
 
       return NextResponse.json(
@@ -53,11 +54,12 @@ export async function GET(request: NextRequest) {
         where: { userId },
       });
 
-      // Server-side filter: only return subscriptions that are not expired
-      // SECURITY: Missing endDate = expired (not never-expiring)
+      // Server-side filter: only return active subscriptions that are not expired
+      // SECURITY: Must check BOTH status=active AND endDate > now
       const now = new Date();
       const validSubscriptions = subscriptions.filter(
-        (sub: { endDate?: string }) => sub.endDate && new Date(sub.endDate) > now
+        (sub: { status?: string; endDate?: string }) =>
+          sub.status === "active" && sub.endDate && new Date(sub.endDate) > now
       );
 
       return NextResponse.json(
@@ -140,6 +142,32 @@ export async function POST(request: NextRequest) {
     } else {
       endDate = new Date(now);
       endDate.setDate(endDate.getDate() + 30); // Exactly 30 days
+    }
+
+    // Prevent duplicate active subscription of the same type
+    const existingSubs = await db.subscription.findMany({
+      where: {
+        userId: parsed.data.userId,
+        type: parsed.data.type,
+        status: "active",
+        endDate: { gt: now.toISOString() },
+      },
+    });
+
+    const existingActive = Array.isArray(existingSubs) && existingSubs.length > 0 ? existingSubs[0] : null;
+
+    if (existingActive) {
+      // Extend the existing subscription instead of creating a duplicate
+      const newEndDate = new Date(existingActive.endDate);
+      newEndDate.setDate(newEndDate.getDate() + 30);
+      const updated = await db.subscription.update({
+        where: { id: existingActive.id },
+        data: { endDate: newEndDate.toISOString() },
+      });
+      return NextResponse.json(
+        { subscription: updated, message: "Existing subscription extended by 30 days" },
+        { status: 200 }
+      );
     }
 
     const subscription = await db.subscription.create({

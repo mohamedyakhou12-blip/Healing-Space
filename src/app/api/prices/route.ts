@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 const VALID_CONTENT_TYPES = [
@@ -83,15 +82,9 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();

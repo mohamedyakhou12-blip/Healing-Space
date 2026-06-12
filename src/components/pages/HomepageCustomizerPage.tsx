@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowRight, BookOpen, Video, ImageIcon, Shield, Check, X, Loader2,
+  ArrowRight, BookOpen, Video, ImageIcon, Check, X, Loader2,
   Upload, Link2, Plus, Pencil, Trash2, Settings, Eye, EyeOff, GripVertical,
   ChevronLeft, Monitor, Save, RotateCcw, PlayCircle, LayoutDashboard
 } from "lucide-react";
@@ -22,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 
 /* ─── Types ─── */
 type Trilingual = { ar: string; fr: string; en: string };
-type CustomizerTab = "hero" | "video" | "sliders" | "sections" | "firebase";
+type CustomizerTab = "hero" | "video" | "sliders" | "sections";
 type SectionKey = "hero" | "video" | "services" | "courses" | "articles" | "podcasts" | "stats" | "testimonials";
 
 interface Slider {
@@ -114,10 +114,6 @@ export default function HomepageCustomizerPage() {
     DEFAULT_SECTIONS.forEach((s) => { vis[s.key] = s.defaultVisible; });
     return vis as Record<SectionKey, boolean>;
   });
-
-  // ─── Firebase status ───
-  const [firebaseStatus, setFirebaseStatus] = useState<Record<string, unknown> | null>(null);
-  const [checkingFirebase, setCheckingFirebase] = useState(false);
 
   // ─── Fetch all settings ───
   useEffect(() => {
@@ -303,24 +299,6 @@ export default function HomepageCustomizerPage() {
     } catch { toast.error(locale === "ar" ? "حدث خطأ" : "Error"); }
   };
 
-  // ─── Firebase status check ───
-  const checkFirebaseStatus = async () => {
-    setCheckingFirebase(true);
-    try {
-      const res = await fetch("/api/auth/firebase-check");
-      if (res.ok) {
-        const data = await res.json();
-        setFirebaseStatus(data);
-      } else {
-        setFirebaseStatus({ error: "Failed to check Firebase status" });
-      }
-    } catch {
-      setFirebaseStatus({ error: "Network error" });
-    } finally {
-      setCheckingFirebase(false);
-    }
-  };
-
   // ─── Trilingual input helper ───
   const TrilingualInput = ({ label, value, onChange, placeholder, isTextarea = false }: {
     label: string; value: Trilingual; onChange: (v: Trilingual) => void;
@@ -360,7 +338,6 @@ export default function HomepageCustomizerPage() {
     { key: "video", labelAr: "الفيديو التعريفي", labelEn: "Intro Video", icon: Video, color: "text-rose-600" },
     { key: "sliders", labelAr: "الشرائح", labelEn: "Sliders", icon: ImageIcon, color: "text-violet-600" },
     { key: "sections", labelAr: "أقسام الصفحة", labelEn: "Page Sections", icon: LayoutDashboard, color: "text-cyan-600" },
-    { key: "firebase", labelAr: "حالة غوغل", labelEn: "Google Status", icon: Shield, color: "text-amber-600" },
   ];
 
   /* ─── Loading state ─── */
@@ -878,75 +855,6 @@ export default function HomepageCustomizerPage() {
               </Card>
             )}
 
-            {/* ═══════════════════════════════════════════════════════════ */}
-            {/*  FIREBASE STATUS TAB                                      */}
-            {/* ═══════════════════════════════════════════════════════════ */}
-            {activeTab === "firebase" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="size-5 text-amber-600" />
-                    {locale === "ar" ? "حالة تسجيل الدخول بغوغل" : "Google Sign-In Status"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {locale === "ar"
-                      ? "تحقق من حالة اتصال Firebase وتسجيل الدخول بغوغل. هذه الأداة تساعد في تشخيص مشاكل المصادقة."
-                      : "Check Firebase connectivity and Google sign-in status. This tool helps diagnose authentication issues."}
-                  </p>
-
-                  <Button
-                    onClick={checkFirebaseStatus}
-                    disabled={checkingFirebase}
-                    className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
-                  >
-                    {checkingFirebase ? <Loader2 className="size-4 animate-spin" /> : <Shield className="size-4" />}
-                    {locale === "ar" ? "فحص الحالة" : "Check Status"}
-                  </Button>
-
-                  {firebaseStatus && (
-                    <div className="space-y-3">
-                      <div className={`rounded-xl p-4 ${firebaseStatus.overall === "ALL_CHECKS_PASSED" ? "bg-green-50 dark:bg-green-950/20 border border-green-200" : "bg-red-50 dark:bg-red-950/20 border border-red-200"}`}>
-                        <p className="font-semibold flex items-center gap-2">
-                          {firebaseStatus.overall === "ALL_CHECKS_PASSED" ? (
-                            <><Check className="size-5 text-green-600" /> {locale === "ar" ? "كل الفحوصات ناجحة" : "All checks passed"}</>
-                          ) : (
-                            <><X className="size-5 text-red-600" /> {locale === "ar" ? "بعض الفحوصات فشلت" : "Some checks failed"}</>
-                          )}
-                        </p>
-                      </div>
-
-                      {(firebaseStatus.checks as Record<string, Record<string, unknown>> | undefined) && Object.entries(firebaseStatus.checks as Record<string, Record<string, unknown>>).map(([key, check]) => (
-                        <div key={key} className="flex items-center gap-3 rounded-lg border p-3">
-                          {check.ok ? (
-                            <Check className="size-4 text-green-500 shrink-0" />
-                          ) : (
-                            <X className="size-4 text-red-500 shrink-0" />
-                          )}
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{key}</p>
-                            {typeof check.error === 'string' && check.error && <p className="text-xs text-destructive">{check.error}</p>}
-                            {typeof check.latency === 'number' && <p className="text-xs text-muted-foreground">{check.latency}ms</p>}
-                          </div>
-                        </div>
-                      ))}
-
-                      {firebaseStatus.troubleshooting !== undefined && firebaseStatus.troubleshooting !== null && (
-                        <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 p-4">
-                          <h4 className="font-semibold text-amber-700 dark:text-amber-400 mb-2">
-                            {locale === "ar" ? "نصائح لحل المشاكل" : "Troubleshooting Tips"}
-                          </h4>
-                          <pre className="text-xs whitespace-pre-wrap text-amber-800 dark:text-amber-300">
-                            {JSON.stringify(firebaseStatus.troubleshooting, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </motion.div>
         </AnimatePresence>
 

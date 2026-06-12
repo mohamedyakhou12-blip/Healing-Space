@@ -34,6 +34,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
+import { getOptimizedImageUrl } from "@/lib/cloudinary-utils";
 
 interface Lesson {
   id: string;
@@ -444,7 +445,7 @@ export default function CoursesPage() {
                   </h1>
                 </div>
               </div>
-              <BookOpen className="absolute top-6 right-6 h-16 w-16 text-white/20" />
+              <BookOpen className="absolute top-6 end-6 h-16 w-16 text-white/20" />
             </div>
 
             {/* Course Info */}
@@ -781,7 +782,7 @@ export default function CoursesPage() {
                 >
                   {/* Card Image */}
                   <div className={`relative h-40 bg-gradient-to-br ${course.gradient} overflow-hidden`}>
-                    {course.image && <img src={course.image} alt={localizedText(course.title)} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />}
+                    {course.image && <img src={getOptimizedImageUrl(course.image, { width: 400, height: 250, quality: "auto:good" })} alt={localizedText(course.title)} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />}
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                     <BookOpen className="absolute bottom-3 start-3 h-8 w-8 text-white/30" />
                     {course.isFree ? (

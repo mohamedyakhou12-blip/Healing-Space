@@ -688,7 +688,44 @@ export default function HomePage() {
               viewport={{ once: true, amount: 0.2 }}
               variants={scaleIn}
             >
-              {introVideoUrl.includes('youtube.com') || introVideoUrl.includes('youtu.be') ? (
+              {(() => {
+                // ── Parse YouTube video ID from various URL formats ──
+                const isYouTube = introVideoUrl!.includes('youtube.com') || introVideoUrl!.includes('youtu.be');
+                let youtubeVideoId: string | null = null;
+
+                if (isYouTube) {
+                  const shortMatch = introVideoUrl!.match(/youtu\.be\/([\w-]{11})/);
+                  const watchMatch = introVideoUrl!.match(/[?&]v=([\w-]{11})/);
+                  const embedMatch = introVideoUrl!.match(/youtube\.com\/embed\/([\w-]{11})/);
+                  youtubeVideoId = embedMatch?.[1] || watchMatch?.[1] || shortMatch?.[1] || null;
+                }
+
+                const embedUrl = youtubeVideoId
+                  ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}`
+                  : introVideoUrl!;
+
+                // YouTube watch URL for fallback link
+                const youtubeWatchUrl = youtubeVideoId
+                  ? `https://www.youtube.com/watch?v=${youtubeVideoId}`
+                  : null;
+
+                // Auto-detect video MIME type from URL
+                const getVideoType = (url: string): string | undefined => {
+                  const lower = url.toLowerCase();
+                  if (lower.includes('.mp4')) return 'video/mp4';
+                  if (lower.includes('.webm')) return 'video/webm';
+                  if (lower.includes('.ogg')) return 'video/ogg';
+                  if (lower.includes('.mov')) return 'video/quicktime';
+                  if (lower.includes('.avi')) return 'video/x-msvideo';
+                  if (lower.includes('res.cloudinary.com')) return 'video/mp4';
+                  return undefined;
+                };
+
+                // Cloudinary thumbnail URL
+                const getCloudinaryThumb = (url: string) =>
+                  url.replace(/\/upload\/.*?\//, '/upload/so_0,w_800,h_450,c_pad,f_jpg/');
+
+                return isYouTube && youtubeVideoId ? (
                 /* ── YouTube embed ── */
                 <div className="relative aspect-video">
                   {!showVideo ? (
@@ -697,27 +734,47 @@ export default function HomePage() {
                       onClick={() => setShowVideo(true)}
                     >
                       <img
-                        src={`https://img.youtube.com/vi/${introVideoUrl.match(/[\w-]{11}/)?.[0] || ''}/maxresdefault.jpg`}
+                        src={`https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`}
                         alt="Video thumbnail"
                         className="h-full w-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          // Fallback to lower quality thumbnail
+                          const img = e.target as HTMLImageElement;
+                          if (!img.src.includes('hqdefault')) {
+                            img.src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
+                          } else {
+                            img.style.display = 'none';
+                          }
                         }}
                       />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
                         <div className="flex size-20 items-center justify-center rounded-full bg-white/90 shadow-2xl group-hover:scale-110 transition-transform">
-                          <Play className="size-10 text-teal-600 ms-1" />
+                          <Play className="size-10 text-red-600 ms-1" />
                         </div>
                       </div>
                     </div>
                   ) : (
                     <iframe
-                      src={`${introVideoUrl}${introVideoUrl.includes('?') ? '&' : '?'}autoplay=1&rel=0`}
+                      src={`${embedUrl}?autoplay=1&rel=0`}
                       title={t("home.introVideoTitle")}
                       className="absolute inset-0 h-full w-full"
-                      allow="autoplay; encrypted-media; picture-in-picture"
+                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                       allowFullScreen
                     />
+                  )}
+                  {/* Fallback link to watch on YouTube directly */}
+                  {showVideo && youtubeWatchUrl && (
+                    <div className="absolute bottom-2 start-2 z-10">
+                      <a
+                        href={youtubeWatchUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-black/70 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-black/90"
+                      >
+                        <Play className="size-3" />
+                        {locale === "ar" ? "مشاهدة على YouTube" : locale === "fr" ? "Regarder sur YouTube" : "Watch on YouTube"}
+                      </a>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -729,8 +786,8 @@ export default function HomePage() {
                       onClick={() => setShowVideo(true)}
                     >
                       <img
-                        src={introVideoUrl.includes('res.cloudinary.com')
-                          ? introVideoUrl.replace(/\/upload\/.*?\//, '/upload/so_0,w_800,h_450,c_pad,f_jpg/')
+                        src={introVideoUrl!.includes('res.cloudinary.com')
+                          ? getCloudinaryThumb(introVideoUrl!)
                           : undefined
                         }
                         alt="Video thumbnail"
@@ -751,18 +808,32 @@ export default function HomePage() {
                       controls
                       playsInline
                       autoPlay
-                      preload="metadata"
-                      poster={introVideoUrl.includes('res.cloudinary.com')
-                        ? introVideoUrl.replace(/\/upload\/.*?\//, '/upload/so_0,w_800,h_450,c_pad,f_jpg/')
+                      preload="auto"
+                      poster={introVideoUrl!.includes('res.cloudinary.com')
+                        ? getCloudinaryThumb(introVideoUrl!)
                         : undefined
                       }
+                      onError={(e) => {
+                        // Show error message if video fails to load
+                        const video = e.target as HTMLVideoElement;
+                        const container = video.parentElement;
+                        if (container) {
+                          container.innerHTML = `
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 text-white p-8 text-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="size-16 mb-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                              <p class="text-lg font-semibold mb-2">${locale === "ar" ? "خطأ في تشغيل الفيديو" : locale === "fr" ? "Erreur de lecture" : "Video playback error"}</p>
+                              <p class="text-sm text-gray-300">${locale === "ar" ? "لم يتمكن المتصفح من تشغيل هذا الفيديو. حاول تحديث الصفحة أو استخدم رابطاً مختلفاً." : locale === "fr" ? "Le navigateur n'a pas pu lire cette vidéo. Essayez de rafraîchir la page ou utilisez un lien différent." : "The browser could not play this video. Try refreshing the page or using a different link."}</p>
+                            </div>`;
+                        }
+                      }}
                     >
-                      <source src={introVideoUrl} />
+                      <source src={introVideoUrl} type={getVideoType(introVideoUrl!)} />
                       {t("home.videoNotSupported")}
                     </video>
                   )}
                 </div>
-              )}
+              );
+              })()}
             </motion.div>
           </div>
         </section>

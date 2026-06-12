@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml } from "@/lib/html-sanitize";
 
 const updateArticleSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -71,15 +70,9 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -92,6 +85,16 @@ export async function PUT(
       );
     }
 
+    // Sanitize HTML content to prevent XSS
+    if (parsed.data.content) parsed.data.content = sanitizeHtml(parsed.data.content);
+    if (parsed.data.contentAr) parsed.data.contentAr = sanitizeHtml(parsed.data.contentAr);
+    if (parsed.data.contentFr) parsed.data.contentFr = sanitizeHtml(parsed.data.contentFr);
+    if (parsed.data.contentEn) parsed.data.contentEn = sanitizeHtml(parsed.data.contentEn);
+    if (parsed.data.excerpt) parsed.data.excerpt = sanitizeHtml(parsed.data.excerpt);
+    if (parsed.data.excerptAr) parsed.data.excerptAr = sanitizeHtml(parsed.data.excerptAr);
+    if (parsed.data.excerptFr) parsed.data.excerptFr = sanitizeHtml(parsed.data.excerptFr);
+    if (parsed.data.excerptEn) parsed.data.excerptEn = sanitizeHtml(parsed.data.excerptEn);
+
     const existing = await db.article.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
@@ -102,7 +105,6 @@ export async function PUT(
       data: parsed.data,
     });
 
-    notifyGoogleUpdate("articles");
     invalidateContentCache();
     return NextResponse.json({ article: updated });
   } catch (error: unknown) {
@@ -128,15 +130,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const existing = await db.article.findUnique({ where: { id } });

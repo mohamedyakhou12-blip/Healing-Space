@@ -235,7 +235,7 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="hidden gap-2 px-2 sm:flex"
+                  className="flex gap-2 px-2"
                 >
                   <Avatar className="size-7 border-2 border-primary/30">
                     <AvatarImage src={user.avatar} alt={user.name} />
@@ -294,6 +294,7 @@ export function Header() {
               >
                 {t("nav.register")}
               </Button>
+
               <Button
                 variant="ghost"
                 size="icon"

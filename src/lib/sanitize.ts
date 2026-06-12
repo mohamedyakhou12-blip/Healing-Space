@@ -80,7 +80,7 @@ export function sanitizeFileName(name: string): string {
  * Validate that a string is a valid content type identifier
  */
 export function isValidContentType(type: string): boolean {
-  const validTypes = ["courses", "articles", "podcasts", "videos", "pdfs", "live"];
+  const validTypes = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"];
   return validTypes.includes(type);
 }
 

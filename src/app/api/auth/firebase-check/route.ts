@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/session";
-import { validateAdminCode } from "@/lib/admin-code";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 /**
  * Firebase connectivity check endpoint (ADMIN ONLY).
- * Tests if the Firebase API key, auth handler, and Google sign-in are reachable.
+ * Tests if the Firebase API key, auth handler, and token endpoint are reachable.
  * Requires admin authentication — exposes infrastructure details.
  */
 export async function GET(request: NextRequest) {
@@ -19,11 +18,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Require admin auth
-  const adminId = await requireAdmin();
-  const adminCode = request.headers.get("X-Admin-Code");
-  const codeValid = await validateAdminCode(adminCode);
-
-  if (!adminId && !codeValid) {
+  const isAuthorized = await verifyAdminAccess(request);
+  if (!isAuthorized) {
     return NextResponse.json(
       { error: "Admin access required" },
       { status: 401 }
@@ -68,33 +64,7 @@ export async function GET(request: NextRequest) {
     results.apiKey = { ok: false, error: message };
   }
 
-  // 2. Test Google sign-in provider
-  try {
-    const start = Date.now();
-    const vercelDomain = process.env.NEXT_PUBLIC_VERCEL_URL || "healing-space-henna.vercel.app";
-    const res = await fetch(
-      `https://www.googleapis.com/identitytoolkit/v3/relyingparty/createAuthUri?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          providerId: "google.com",
-          continueUri: `https://${vercelDomain}`,
-        }),
-        signal: AbortSignal.timeout(10000),
-      }
-    );
-    results.googleProvider = {
-      ok: res.ok,
-      status: res.status,
-      latency: Date.now() - start,
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Network error";
-    results.googleProvider = { ok: false, error: message };
-  }
-
-  // 3. Test Firebase Auth Handler page
+  // 2. Test Firebase Auth Handler page
   try {
     const start = Date.now();
     const firebaseAuthDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "";
@@ -116,23 +86,7 @@ export async function GET(request: NextRequest) {
     results.authHandler = { ok: false, error: message };
   }
 
-  // 4. Test Google Identity Services
-  try {
-    const start = Date.now();
-    const res = await fetch("https://apis.google.com/js/api.js", {
-      signal: AbortSignal.timeout(10000),
-    });
-    results.googleApis = {
-      ok: res.ok,
-      status: res.status,
-      latency: Date.now() - start,
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Network error";
-    results.googleApis = { ok: false, error: message };
-  }
-
-  // 5. Test securetoken.googleapis.com
+  // 3. Test securetoken.googleapis.com
   try {
     const start = Date.now();
     const res = await fetch(
@@ -164,9 +118,7 @@ export async function GET(request: NextRequest) {
       ? undefined
       : {
           apiKeyFailed: "Firebase API key is invalid or project doesn't exist. Generate a new key in Firebase Console.",
-          googleProviderFailed: "Google sign-in provider is not enabled. Enable it in Firebase Console > Authentication > Sign-in method.",
           authHandlerFailed: "Firebase auth handler is unreachable. This usually indicates a network/firewall issue blocking *.firebaseapp.com.",
-          googleApisFailed: "Google APIs (apis.google.com) is unreachable. This may be blocked by firewall or ISP.",
           secureTokenFailed: "securetoken.googleapis.com is unreachable. Token exchange will fail.",
         },
   });

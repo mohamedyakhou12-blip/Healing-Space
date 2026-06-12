@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
-import { notifyGoogleUpdate } from "@/lib/google-notify";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { sanitizeHtml } from "@/lib/html-sanitize";
 
 const updatePodcastSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -68,15 +67,9 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -89,6 +82,12 @@ export async function PUT(
       );
     }
 
+    // Sanitize HTML content to prevent XSS
+    if (parsed.data.description) parsed.data.description = sanitizeHtml(parsed.data.description);
+    if (parsed.data.descriptionAr) parsed.data.descriptionAr = sanitizeHtml(parsed.data.descriptionAr);
+    if (parsed.data.descriptionFr) parsed.data.descriptionFr = sanitizeHtml(parsed.data.descriptionFr);
+    if (parsed.data.descriptionEn) parsed.data.descriptionEn = sanitizeHtml(parsed.data.descriptionEn);
+
     const existing = await db.podcast.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Podcast not found" }, { status: 404 });
@@ -99,7 +98,6 @@ export async function PUT(
       data: parsed.data,
     });
 
-    notifyGoogleUpdate("podcasts");
     invalidateContentCache();
     return NextResponse.json({ podcast: updated });
   } catch (error: unknown) {
@@ -125,15 +123,9 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // SECURITY: Double-check admin access (session + admin code)
-    const sessionAdminId = await requireAdmin();
-    if (!sessionAdminId) {
-      return NextResponse.json({ error: "Unauthorized - admin session required" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized - invalid admin code" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const existing = await db.podcast.findUnique({ where: { id } });

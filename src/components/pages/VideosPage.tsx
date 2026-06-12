@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
 import { toast } from "sonner";
+import { getOptimizedImageUrl } from "@/lib/cloudinary-utils";
 
 interface VideoItem {
   id: string;
@@ -37,6 +38,7 @@ interface VideoItem {
   isFree: boolean;
   price: number;
   youtubeId?: string;
+  videoUrl: string;
 }
 
 const GRADIENTS = [
@@ -55,7 +57,7 @@ const mockVideos: VideoItem[] = [
     duration: "18:45", views: 12450, likes: 892, publishedDate: "2025-01-20",
     gradient: "from-emerald-400 to-teal-600",
     image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ",
+    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
   },
   {
     id: "vid-2",
@@ -64,7 +66,7 @@ const mockVideos: VideoItem[] = [
     duration: "12:30", views: 8900, likes: 654, publishedDate: "2025-02-15",
     gradient: "from-amber-400 to-orange-600",
     image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ",
+    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
   },
   {
     id: "vid-3",
@@ -73,7 +75,7 @@ const mockVideos: VideoItem[] = [
     duration: "22:15", views: 15200, likes: 1100, publishedDate: "2025-03-10",
     gradient: "from-violet-400 to-purple-600",
     image: "https://images.unsplash.com/photo-1515894203077-9cd36032142f?w=400&h=250&fit=crop",
-    isFree: false, price: 2000, youtubeId: "dQw4w9WgXcQ",
+    isFree: false, price: 2000, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
   },
   {
     id: "vid-4",
@@ -82,7 +84,7 @@ const mockVideos: VideoItem[] = [
     duration: "28:00", views: 9800, likes: 780, publishedDate: "2025-03-25",
     gradient: "from-rose-400 to-pink-600",
     image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
-    isFree: false, price: 2500, youtubeId: "dQw4w9WgXcQ",
+    isFree: false, price: 2500, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
   },
   {
     id: "vid-5",
@@ -91,7 +93,7 @@ const mockVideos: VideoItem[] = [
     duration: "10:30", views: 22000, likes: 1850, publishedDate: "2025-04-05",
     gradient: "from-sky-400 to-cyan-600",
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ",
+    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
   },
 ];
 
@@ -102,6 +104,7 @@ export default function VideosPage() {
   const { user: userWithSub, activePlans, fullPlanIncludes, fullPlanExcludedItems } = useUserWithFreshSubscription();
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
   const [apiVideos, setApiVideos] = useState<VideoItem[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasedContentIds, setPurchasedContentIds] = useState<string[]>([]);
@@ -145,6 +148,7 @@ export default function VideosPage() {
             isFree: v.isFree || false,
             price: v.price || 0,
             youtubeId: v.youtubeId || undefined,
+            videoUrl: v.videoUrl || "",
           }));
         if (videos.length > 0) setApiVideos(videos);
       })
@@ -157,9 +161,14 @@ export default function VideosPage() {
   const filteredVideos = useMemo(() => {
     return displayVideos.filter((video) => {
       const title = video.title[locale] || video.title.ar;
-      return !searchQuery || title.includes(searchQuery);
+      const matchesSearch = !searchQuery || title.includes(searchQuery);
+      const matchesFilter =
+        filterType === "all" ||
+        (filterType === "free" && video.isFree) ||
+        (filterType === "paid" && !video.isFree);
+      return matchesSearch && matchesFilter;
     });
-  }, [searchQuery, locale, displayVideos]);
+  }, [searchQuery, filterType, locale, displayVideos]);
 
   const localizedText = (obj: { ar: string; en: string; fr: string }) =>
     obj[locale] || obj.ar;
@@ -232,9 +241,17 @@ export default function VideosPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="relative aspect-video rounded-2xl overflow-hidden bg-black">
-              {selectedVideo.youtubeId ? (
+              {selectedVideo.videoUrl && !selectedVideo.youtubeId ? (
+                <video
+                  src={selectedVideo.videoUrl}
+                  controls
+                  autoPlay
+                  className="absolute inset-0 h-full w-full object-contain bg-black"
+                  preload="metadata"
+                />
+              ) : selectedVideo.youtubeId ? (
                 <iframe
-                  src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1&rel=0`}
+                  src={`https://www.youtube-nocookie.com/embed/${selectedVideo.youtubeId}?autoplay=1&rel=0`}
                   title={localizedText(selectedVideo.title)}
                   className="absolute inset-0 h-full w-full"
                   allow="autoplay; encrypted-media; picture-in-picture"
@@ -308,9 +325,23 @@ export default function VideosPage() {
           <p className="text-muted-foreground text-base max-w-2xl">{t("videos.description")}</p>
         </div>
 
-        <div className="relative max-w-md">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={t("common.search") + "..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="ps-10" />
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative max-w-md flex-1 min-w-[200px]">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder={t("common.search") + "..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="ps-10" />
+          </div>
+          <div className="flex gap-2">
+            {(["all", "free", "paid"] as const).map((type) => (
+              <Button
+                key={type}
+                variant={filterType === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterType(type)}
+              >
+                {t(`common.${type}`)}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <AnimatePresence mode="wait">
@@ -325,7 +356,7 @@ export default function VideosPage() {
                 <motion.div key={video.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
                   <Card className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col" onClick={() => handleVideoClick(video)}>
                     <div className={`relative aspect-video bg-gradient-to-br ${video.gradient} overflow-hidden`}>
-                      {video.image && <img src={video.image} alt={localizedText(video.title)} className="absolute inset-0 h-full w-full object-cover" />}
+                      {video.image && <img src={getOptimizedImageUrl(video.image, { width: 400, height: 225, quality: "auto:good" })} alt={localizedText(video.title)} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />}
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">

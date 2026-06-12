@@ -11,6 +11,8 @@ import dynamic from "next/dynamic";
 const HomePage = dynamic(() => import("@/components/pages/HomePage"));
 const LoginPage = dynamic(() => import("@/components/pages/LoginPage"));
 const RegisterPage = dynamic(() => import("@/components/pages/RegisterPage"));
+const ForgotPasswordPage = dynamic(() => import("@/components/pages/ForgotPasswordPage"));
+const ResetPasswordPage = dynamic(() => import("@/components/pages/ResetPasswordPage"));
 
 const CoursesPage = dynamic(() => import("@/components/pages/CoursesPage"));
 const ArticlesPage = dynamic(() => import("@/components/pages/ArticlesPage"));
@@ -30,6 +32,8 @@ const pageComponents: Record<string, React.ComponentType> = {
   home: HomePage,
   login: LoginPage,
   register: RegisterPage,
+  "forgot-password": ForgotPasswordPage,
+  "reset-password": ResetPasswordPage,
   courses: CoursesPage,
   articles: ArticlesPage,
   podcasts: PodcastsPage,
@@ -51,7 +55,7 @@ export default function Page() {
   const setUser = useAppStore((s) => s.setUser);
   const PageComponent = pageComponents[currentPage] ?? HomePage;
 
-  // No Firebase redirect result handling needed — Google sign-in uses server-side OAuth
+  // Authentication uses email/password with bcryptjs + iron-session
 
   // CRITICAL: key includes userId so ALL pages remount when user changes.
   // This prevents stale subscription state from leaking between accounts.

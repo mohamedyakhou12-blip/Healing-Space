@@ -13,12 +13,16 @@ import { cached } from "@/lib/cache";
 
 // Keys that are SAFE to expose to the public (allow-list approach)
 const PUBLIC_KEYS = new Set([
+  // Site identity
   "site_name",
   "site_name_ar",
   "site_name_fr",
   "site_description",
   "site_description_ar",
   "site_description_fr",
+  "siteName",
+  "siteDescription",
+  // Hero section — trilingual JSON objects stored by admin
   "hero_title",
   "hero_title_ar",
   "hero_title_fr",
@@ -26,6 +30,17 @@ const PUBLIC_KEYS = new Set([
   "hero_subtitle_ar",
   "hero_subtitle_fr",
   "hero_image",
+  "heroTitle",
+  "heroSubtitle",
+  "heroDescription",
+  "siteOwnerNameSetting",
+  "ctaButton1",
+  "ctaButton2",
+  // Intro video URL (direct or YouTube)
+  "introVideoUrl",
+  // Section visibility toggles (JSON object)
+  "sectionVisibility",
+  // Feature toggles
   "individualPurchasesEnabled",
   // All subscription prices are public — shown on pricing page
   "subscription_price_full",

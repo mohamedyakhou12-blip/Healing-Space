@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { validateAdminCode } from "@/lib/admin-code";
-import { requireAdmin } from "@/lib/session";
+import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 // POST /api/seed — Add sample content for demonstration (admin only)
@@ -25,15 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Admin-only: double-check (session + code)
-    const adminId = await requireAdmin();
-    if (!adminId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const adminCode = request.headers.get("X-Admin-Code");
-    if (!(await validateAdminCode(adminCode))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const isAuthorized = await verifyAdminAccess(request);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
     const results: Record<string, number> = {};
