@@ -70,26 +70,38 @@ export async function GET(request: NextRequest) {
     const userId = await requireAuth();
 
     if (adminId) {
-      // Auto-delete rejected purchases older than 10 days
+      // Auto-delete rejected purchases older than 10 days (background, non-blocking)
       // NOTE: We do NOT auto-delete approved purchases because they represent
       // permanent content access. Deleting them would revoke the user's access.
-      // Approved purchases can only be deleted manually by the admin.
-      try {
-        const tenDaysAgo = new Date();
-        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-        const allPurchases = await db.purchase.findMany({});
-        const oldPurchases = allPurchases.filter(
-          (p: any) => p.status === "rejected" && p.updatedAt && new Date(p.updatedAt) < tenDaysAgo
-        );
-        for (const p of oldPurchases) {
-          try { await db.purchase.delete({ where: { id: p.id } }); } catch {}
+      // Using targeted DB query instead of fetch-all-filter-in-JS for performance.
+      const cleanupPromise = (async () => {
+        try {
+          const tenDaysAgo = new Date();
+          tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+          // Use a targeted query instead of fetching ALL purchases
+          const oldRejected = await db.purchase.findMany({
+            where: {
+              status: "rejected",
+              updatedAt: { lt: tenDaysAgo.toISOString() },
+            },
+          });
+          if (oldRejected.length > 0) {
+            // Delete in parallel using individual delete calls
+            await Promise.all(
+              oldRejected.map((p: any) => db.purchase.delete({ where: { id: p.id } }).catch(() => {}))
+            );
+          }
+        } catch (e) {
+          console.error("Auto-cleanup of old purchases failed:", e);
         }
-      } catch (e) {
-        console.error("Auto-cleanup of old purchases failed:", e);
-      }
+      })();
 
-      // Admin: return all purchases
+      // Fetch admin data immediately (don't wait for cleanup)
       const purchases = await db.purchase.findMany({});
+
+      // Let cleanup finish in background (fire-and-forget for speed)
+      cleanupPromise.catch(() => {});
+
       return NextResponse.json({ purchases });
     }
 

@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
       if (!adminId) status = "published";
     }
 
-    const cacheKey = `api:articles:${status || "all"}:${limit || "all"}`;
-
-    const data = await cached(cacheKey, async () => {
+    // Cache ALL articles once, then filter in-memory for different query combos
+    // This avoids duplicate DB reads for different status/limit combinations
+    const allArticles = await cached("api:articles:all", async () => {
       const articles = await db.article.findMany({
         include: { _count: true },
       });
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       const articleIds = articles.map((a: any) => a.id);
       const reviewStats = await batchReviewStats("article", articleIds);
 
-      const articlesWithStats = articles.map((article: any) => {
+      return articles.map((article: any) => {
         const stats = reviewStats.get(article.id) || { avgRating: 0, reviewCount: 0 };
         return {
           ...article,
@@ -62,12 +62,10 @@ export async function GET(request: NextRequest) {
           reviewCount: stats.reviewCount,
         };
       });
-
-      return articlesWithStats;
     }, 30_000);
 
-    // Apply filters (after cache, so cached data serves multiple filter combos)
-    let result = data;
+    // Apply filters from cached data (no extra DB reads)
+    let result = allArticles;
     if (status) {
       result = result.filter((a: any) => a.status === status);
     }

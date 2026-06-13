@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 
@@ -36,15 +36,21 @@ export async function GET(
       return NextResponse.json({ error: "Coaching ID is required" }, { status: 400 });
     }
 
-    const coaching = await db.coaching.findUnique({
-      where: { id },
-    });
+    const coaching = await cached(
+      `api:coaching:${id}`,
+      () => db.coaching.findUnique({
+        where: { id },
+      })
+    );
 
     if (!coaching) {
       return NextResponse.json({ error: "Coaching not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ coaching });
+    return NextResponse.json(
+      { coaching },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Fetch coaching error:", error);

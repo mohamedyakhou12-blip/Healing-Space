@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Use session to determine identity — no userId from client
     const userId = await requireAuth();
     if (!userId) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json({ error: "Authentication required" }, { status: 401, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }
 
     const { searchParams } = new URL(request.url);
@@ -49,12 +49,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       notifications,
       unreadCount,
+    }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
     });
   } catch (error) {
     console.error("Fetch notifications error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   }
 }

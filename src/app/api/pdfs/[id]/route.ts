@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 
@@ -33,13 +33,19 @@ export async function GET(
       return NextResponse.json({ error: "PDF ID is required" }, { status: 400 });
     }
 
-    const pdf = await db.pdfResource.findUnique({ where: { id } });
+    const pdf = await cached(
+      `api:pdf:${id}`,
+      () => db.pdfResource.findUnique({ where: { id } })
+    );
 
     if (!pdf) {
       return NextResponse.json({ error: "PDF not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ pdf });
+    return NextResponse.json(
+      { pdf },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Fetch PDF error:", error);

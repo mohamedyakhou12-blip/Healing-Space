@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 
@@ -33,16 +33,22 @@ export async function GET(
       return NextResponse.json({ error: "Video ID is required" }, { status: 400 });
     }
 
-    const video = await db.video.findUnique({
-      where: { id },
-      include: { _count: true },
-    });
+    const video = await cached(
+      `api:video:${id}`,
+      () => db.video.findUnique({
+        where: { id },
+        include: { _count: true },
+      })
+    );
 
     if (!video) {
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ video });
+    return NextResponse.json(
+      { video },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Fetch video error:", error);

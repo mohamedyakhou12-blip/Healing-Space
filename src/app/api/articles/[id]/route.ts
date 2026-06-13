@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 
@@ -37,16 +37,22 @@ export async function GET(
       return NextResponse.json({ error: "Article ID is required" }, { status: 400 });
     }
 
-    const article = await db.article.findUnique({
-      where: { id },
-      include: { _count: true },
-    });
+    const article = await cached(
+      `api:article:${id}`,
+      () => db.article.findUnique({
+        where: { id },
+        include: { _count: true },
+      })
+    );
 
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ article });
+    return NextResponse.json(
+      { article },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Fetch article error:", error);

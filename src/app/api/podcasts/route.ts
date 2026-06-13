@@ -39,9 +39,8 @@ export async function GET(request: NextRequest) {
       const adminId = await requireAdmin();
       if (!adminId) status = "published";
     }
-    const cacheKey = `api:podcasts:${status || "all"}:${limit || "all"}`;
-
-    const data = await cached(cacheKey, async () => {
+    // Cache ALL podcasts once, then filter in-memory for different query combos
+    const allPodcasts = await cached("api:podcasts:all", async () => {
       const podcasts = await db.podcast.findMany({
         include: { _count: true },
       });
@@ -50,7 +49,7 @@ export async function GET(request: NextRequest) {
       const podcastIds = podcasts.map((p: any) => p.id);
       const reviewStats = await batchReviewStats("podcast", podcastIds);
 
-      const podcastsWithStats = podcasts.map((podcast: any) => {
+      return podcasts.map((podcast: any) => {
         const stats = reviewStats.get(podcast.id) || { avgRating: 0, reviewCount: 0 };
         return {
           ...podcast,
@@ -58,12 +57,10 @@ export async function GET(request: NextRequest) {
           reviewCount: stats.reviewCount,
         };
       });
-
-      return podcastsWithStats;
     }, 30_000);
 
-    // Apply filters after cache
-    let result = data;
+    // Apply filters from cached data (no extra DB reads)
+    let result = allPodcasts;
     if (status) {
       result = result.filter((p: any) => p.status === status);
     }

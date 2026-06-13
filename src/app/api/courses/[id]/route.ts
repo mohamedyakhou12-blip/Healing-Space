@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { invalidateContentCache, cached } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { gateCourseLessons } from "@/lib/api-content-gate";
@@ -38,34 +38,45 @@ export async function GET(
       );
     }
 
-    const course = await db.course.findUnique({
-      where: { id },
-      include: { chapters: true, reviews: true, _count: true },
-    });
+    // Use server-side cache for individual course lookups (reduces DB reads)
+    const cachedData = await cached(`api:course:${id}`, async () => {
+      const course = await db.course.findUnique({
+        where: { id },
+        include: { chapters: true, reviews: true, _count: true },
+      });
 
-    if (!course) {
+      if (!course) return null;
+
+      const reviews = (course as any).reviews || [];
+      const avgRating =
+        reviews.length > 0
+          ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
+            reviews.length
+          : 0;
+
+      return {
+        ...course,
+        avgRating: Math.round(avgRating * 10) / 10,
+        reviewCount: reviews.length,
+      };
+    }, 30_000);
+
+    if (!cachedData) {
       return NextResponse.json(
         { error: "Course not found" },
         { status: 404 }
       );
     }
 
-    const reviews = (course as any).reviews || [];
-    const avgRating =
-      reviews.length > 0
-        ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
-          reviews.length
-        : 0;
-
     // Strip premium lesson content for unauthenticated/unsubscribed users
-    const gatedCourse = await gateCourseLessons({
-      ...course,
-      avgRating: Math.round(avgRating * 10) / 10,
-      reviewCount: reviews.length,
-    });
+    const gatedCourse = await gateCourseLessons(cachedData);
 
     return NextResponse.json({
       course: gatedCourse,
+    }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+      },
     });
   } catch (error) {
     console.error("Fetch course error:", error);

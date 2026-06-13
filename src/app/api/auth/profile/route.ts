@@ -28,7 +28,7 @@ export async function GET() {
     if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
       );
     }
 
@@ -46,6 +46,8 @@ export async function GET() {
             phone: user.phone,
             birthday: user.birthday || null,
           },
+        }, {
+          headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
         });
       }
     } catch (dbError) {
@@ -69,12 +71,14 @@ export async function GET() {
         avatar: null,
         phone: null,
       },
+    }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
     });
   } catch (error) {
     console.error("Fetch profile error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   }
 }

@@ -85,28 +85,41 @@ export async function GET(request: NextRequest) {
     const userId = await requireAuth();
 
     if (adminId) {
-      // Auto-delete rejected payments older than 10 days
+      // Auto-delete rejected payments older than 10 days (background, non-blocking)
       // NOTE: We do NOT auto-delete approved payments because they represent
       // valid subscription access. Deleting approved payments would remove
       // the audit trail. Only rejected payments are cleaned up.
-      try {
-        const tenDaysAgo = new Date();
-        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-        const allPayments = await db.payment.findMany({});
-        const oldPayments = allPayments.filter(
-          (p: any) => p.status === "rejected" && p.updatedAt && new Date(p.updatedAt) < tenDaysAgo
-        );
-        for (const p of oldPayments) {
-          try { await db.payment.delete({ where: { id: p.id } }); } catch {}
+      // Using targeted DB query instead of fetch-all-filter-in-JS for performance.
+      const cleanupPromise = (async () => {
+        try {
+          const tenDaysAgo = new Date();
+          tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+          // Use a targeted query instead of fetching ALL payments
+          const oldRejected = await db.payment.findMany({
+            where: {
+              status: "rejected",
+              updatedAt: { lt: tenDaysAgo.toISOString() },
+            },
+          });
+          if (oldRejected.length > 0) {
+            // Delete in parallel using individual delete calls
+            await Promise.all(
+              oldRejected.map((p: any) => db.payment.delete({ where: { id: p.id } }).catch(() => {}))
+            );
+          }
+        } catch (e) {
+          console.error("Auto-cleanup of old payments failed:", e);
         }
-      } catch (e) {
-        console.error("Auto-cleanup of old payments failed:", e);
-      }
+      })();
 
-      // Admin: return all payments with user info
+      // Fetch admin data immediately (don't wait for cleanup)
       const payments = await db.payment.findMany({
         include: { user: true },
       });
+
+      // Let cleanup finish in background (fire-and-forget for speed)
+      cleanupPromise.catch(() => {});
+
       return NextResponse.json({ payments });
     }
 

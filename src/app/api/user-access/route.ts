@@ -16,7 +16,7 @@ export async function GET() {
   try {
     const userId = await requireAuth();
     if (!userId) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json({ error: "Authentication required" }, { status: 401, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }
 
     // Fetch approved purchases for this user
@@ -87,12 +87,14 @@ export async function GET() {
       activeSubscriptionTypes,
       fullPlanIncludes,
       fullPlanExcludedItems,
+    }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
     });
   } catch (error) {
     console.error("Fetch user access error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   }
 }

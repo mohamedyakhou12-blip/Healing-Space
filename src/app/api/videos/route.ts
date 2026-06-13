@@ -38,9 +38,8 @@ export async function GET(request: NextRequest) {
       const adminId = await requireAdmin();
       if (!adminId) status = "published";
     }
-    const cacheKey = `api:videos:${status || "all"}:${limit || "all"}`;
-
-    const data = await cached(cacheKey, async () => {
+    // Cache ALL videos once, then filter in-memory for different query combos
+    const allVideos = await cached("api:videos:all", async () => {
       const videos = await db.video.findMany({
         include: { _count: true },
       });
@@ -61,8 +60,8 @@ export async function GET(request: NextRequest) {
       return videosWithStats;
     }, 30_000);
 
-    // Apply filters after cache
-    let result = data;
+    // Apply filters from cached data (no extra DB reads)
+    let result = allVideos;
     if (status) {
       result = result.filter((v: any) => v.status === status);
     }

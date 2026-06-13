@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { invalidateContentCache } from "@/lib/cache";
+import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 
@@ -34,16 +34,22 @@ export async function GET(
       return NextResponse.json({ error: "Podcast ID is required" }, { status: 400 });
     }
 
-    const podcast = await db.podcast.findUnique({
-      where: { id },
-      include: { _count: true },
-    });
+    const podcast = await cached(
+      `api:podcast:${id}`,
+      () => db.podcast.findUnique({
+        where: { id },
+        include: { _count: true },
+      })
+    );
 
     if (!podcast) {
       return NextResponse.json({ error: "Podcast not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ podcast });
+    return NextResponse.json(
+      { podcast },
+      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Fetch podcast error:", error);

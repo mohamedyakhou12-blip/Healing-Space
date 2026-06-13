@@ -39,14 +39,13 @@ export async function GET(request: NextRequest) {
       const adminId = await requireAdmin();
       if (!adminId) status = "published";
     }
-    const cacheKey = `api:live:${status || "all"}:${limit || "all"}`;
-
-    const data = await cached(cacheKey, async () => {
+    // Cache ALL live sessions once, then filter in-memory for different query combos
+    const allLive = await cached("api:live:all", async () => {
       return await db.liveSession.findMany();
     }, 30_000);
 
-    // Apply filters after cache
-    let result = data;
+    // Apply filters from cached data (no extra DB reads)
+    let result = allLive;
     if (status) {
       result = result.filter((s: any) => s.status === status);
     }

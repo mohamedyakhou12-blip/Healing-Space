@@ -35,8 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     initCSRFProtection();
   }, []);
 
-  // ── Restore session on mount ──
-  // Check iron-session cookie to see if user is already logged in.
+  // ── Restore session + fetch settings on mount (all in parallel) ──
   useEffect(() => {
     let cancelled = false;
 
@@ -69,17 +68,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     phone: profileData.user.phone,
                   });
                   profileRestored = true;
-                  console.log("[AppShell] Session restored for:", profileData.user.email);
                 }
               }
             } catch {
-              console.warn("[AppShell] Session exists but profile fetch failed");
+              // Session exists but profile fetch failed
             }
 
             // FALLBACK: If profile fetch failed but session says user is logged in,
             // set user from session data.
             if (!profileRestored && !useAppStore.getState().user) {
-              console.log("[AppShell] Falling back to session data for user:", data.userId);
               store.setUser({
                 id: data.userId,
                 name: data.role === "admin" ? "Admin" : "User",
@@ -98,10 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       }
     }
 
-    restoreSession();
-
-    // Fetch public site settings
-    (async () => {
+    async function fetchSettings() {
       try {
         const res = await fetch("/api/public-settings");
         if (res.ok) {
@@ -113,7 +107,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       } catch {
         // Ignore — settings will use defaults
       }
-    })();
+    }
+
+    // Run session restoration and settings fetch IN PARALLEL
+    // instead of sequentially to speed up initial page load
+    Promise.all([restoreSession(), fetchSettings()]);
 
     return () => { cancelled = true; };
   }, []);

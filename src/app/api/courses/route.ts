@@ -67,20 +67,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const cacheKey = `api:courses:${status || "all"}:${limit || "all"}`;
-
-    const data = await cached(cacheKey, async () => {
+    // Cache ALL courses once, then filter in-memory for different query combos
+    const allCourses = await cached("api:courses:all", async () => {
       const courses = await db.course.findMany({
         include: { chapters: true, _count: true },
-        limit: limit ? parseInt(limit, 10) : undefined,
-        status: status || undefined,
       });
 
       // Batch fetch review stats instead of N+1
       const courseIds = courses.map((c: any) => c.id);
       const reviewStats = await batchReviewStats("course", courseIds);
 
-      const coursesWithStats = courses.map((course: any) => {
+      return courses.map((course: any) => {
         const stats = reviewStats.get(course.id) || { avgRating: 0, reviewCount: 0 };
         return {
           ...course,
@@ -88,9 +85,16 @@ export async function GET(request: NextRequest) {
           reviewCount: stats.reviewCount,
         };
       });
-
-      return coursesWithStats;
     }, 30_000);
+
+    // Apply filters from cached data (no extra DB reads)
+    let data = allCourses;
+    if (status) {
+      data = data.filter((c: any) => c.status === status);
+    }
+    if (limit) {
+      data = data.slice(0, parseInt(limit, 10));
+    }
 
     return NextResponse.json(
       { courses: data },

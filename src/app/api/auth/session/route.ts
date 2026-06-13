@@ -12,7 +12,9 @@ export async function GET() {
     const session = await getSession();
 
     if (!session.userId) {
-      return NextResponse.json({ isLoggedIn: false });
+      return NextResponse.json({ isLoggedIn: false }, {
+        headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+      });
     }
 
     return NextResponse.json({
@@ -20,9 +22,13 @@ export async function GET() {
       userId: session.userId,
       role: session.userRole || "user",
       isAdmin: session.isAdmin || false,
+    }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
     });
   } catch (error) {
     console.error("[Session] Error reading session:", error);
-    return NextResponse.json({ isLoggedIn: false });
+    return NextResponse.json({ isLoggedIn: false }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+    });
   }
 }

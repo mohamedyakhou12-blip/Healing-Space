@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       if (!validTypes.includes(contentType)) {
         return NextResponse.json(
           { error: `contentType must be one of: ${validTypes.join(", ")}` },
-          { status: 400 }
+          { status: 400, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
         );
       }
 
@@ -56,12 +56,14 @@ export async function GET(request: NextRequest) {
       reviews,
       avgRating: Math.round(avgRating * 10) / 10,
       total: reviews.length,
+    }, {
+      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
     });
   } catch (error) {
     console.error("Fetch reviews error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
     );
   }
 }
