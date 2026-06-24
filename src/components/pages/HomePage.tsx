@@ -33,6 +33,7 @@ import {
   Leaf,
   HandHeart,
   Activity,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -300,6 +301,19 @@ type SliderItem = {
   link?: string;
 };
 
+type HomepageImageItem = {
+  id: string;
+  imageUrl: string;
+  titleAr?: string;
+  titleFr?: string;
+  titleEn?: string;
+  captionAr?: string;
+  captionFr?: string;
+  captionEn?: string;
+  link?: string;
+  order: number;
+};
+
 /* ================================================================== */
 /*  HomePage                                                           */
 /* ================================================================== */
@@ -367,6 +381,15 @@ export default function HomePage() {
     } catch { return []; }
   });
 
+  const [homepageImages, setHomepageImages] = useState<HomepageImageItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const cached = localStorage.getItem('hs_homepageImages');
+      if (!cached) return [];
+      return JSON.parse(cached);
+    } catch { return []; }
+  });
+
   const displayFeaturedCourses = apiFeaturedCourses || mockFeaturedCourses;
   const displayArticles = apiArticles || mockArticles;
   const displayPodcasts = apiPodcasts || mockPodcasts;
@@ -409,7 +432,8 @@ export default function HomePage() {
       cachedFetch('/api/podcasts?status=published&limit=4', 60_000).catch(() => ({})),
       cachedFetch('/api/public-settings', 120_000).catch(() => ({})),
       cachedFetch('/api/sliders', 120_000).catch(() => ({})),
-    ]).then(([coursesData, articlesData, podcastsData, settingsData, slidersData]: any[]) => {
+      cachedFetch('/api/homepage-images', 120_000).catch(() => ({})),
+    ]).then(([coursesData, articlesData, podcastsData, settingsData, slidersData, homepageImagesData]: any[]) => {
       // Courses (already filtered by API)
       const courses = (coursesData.courses || [])
         .map((c: any) => ({
@@ -510,6 +534,25 @@ export default function HomePage() {
         }));
       setSliders(sliderItems);
       if (sliderItems.length > 0) localStorage.setItem('hs_sliders', JSON.stringify(sliderItems));
+
+      // Homepage Images
+      const imageItems = (homepageImagesData.images || [])
+        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+        .map((img: any) => ({
+          id: img.id,
+          imageUrl: img.image || img.imageUrl || "",
+          titleAr: img.titleAr || "",
+          titleFr: img.titleFr || "",
+          titleEn: img.titleEn || "",
+          captionAr: img.captionAr || "",
+          captionFr: img.captionFr || "",
+          captionEn: img.captionEn || "",
+          link: img.link || "",
+          order: img.order || 0,
+        }));
+      setHomepageImages(imageItems);
+      if (imageItems.length > 0) localStorage.setItem('hs_homepageImages', JSON.stringify(imageItems));
+      else localStorage.removeItem('hs_homepageImages');
     });
   }, []);
 
@@ -835,6 +878,82 @@ export default function HomePage() {
               );
               })()}
             </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* ============================================================ */}
+      {/* IMAGE GALLERY SECTION                                         */}
+      {/* ============================================================ */}
+      {isSectionVisible("images") && homepageImages.length > 0 && (
+        <section className="bg-gradient-to-b from-background to-amber-50/30 dark:to-amber-950/10 px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+              className="mb-10 text-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+            >
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <ImageIcon className="size-6 text-amber-600" />
+                <h2 className="text-2xl font-bold sm:text-3xl">{t("home.imageGalleryTitle")}</h2>
+              </div>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                {t("home.imageGallerySubtitle")}
+              </p>
+              <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-400" />
+            </motion.div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {homepageImages.map((image, idx) => {
+                const caption = locale === "ar" ? (image.captionAr || image.captionEn || image.captionFr)
+                  : locale === "fr" ? (image.captionFr || image.captionEn || image.captionAr)
+                  : (image.captionEn || image.captionAr || image.captionFr);
+                const title = locale === "ar" ? (image.titleAr || image.titleEn || image.titleFr)
+                  : locale === "fr" ? (image.titleFr || image.titleEn || image.titleAr)
+                  : (image.titleEn || image.titleAr || image.titleFr);
+                return (
+                  <motion.div
+                    key={image.id}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.1 }}
+                    variants={fadeUp}
+                    transition={{ delay: Math.min(idx * 0.05, 0.4) }}
+                    className="group relative aspect-square overflow-hidden rounded-2xl border bg-card shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                    onClick={() => image.link ? window.open(image.link, "_blank") : undefined}
+                  >
+                    {image.imageUrl ? (
+                      <img
+                        src={image.imageUrl}
+                        alt={caption || title || ""}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                        <ImageIcon className="size-8 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    {/* Gradient overlay with caption */}
+                    {(caption || title) && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+                    )}
+                    {(caption || title) && (
+                      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+                        {title && (
+                          <h3 className="font-semibold text-sm mb-0.5 line-clamp-1 drop-shadow">{title}</h3>
+                        )}
+                        {caption && (
+                          <p className="text-xs text-white/85 line-clamp-2 drop-shadow">{caption}</p>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </section>
       )}

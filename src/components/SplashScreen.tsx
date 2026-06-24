@@ -42,14 +42,14 @@ export function SplashScreen() {
     // Initialize splash (deferred to avoid synchronous setState)
     const initTimer = setTimeout(() => setPhase("showing"), 0);
 
-    // Begin fade-out after 1.2 seconds (reduced from 2.5s for faster perceived load)
-    const fadeTimer = setTimeout(() => setPhase("fading-out"), 1200);
+    // Begin fade-out after 600ms (reduced from 1.2s for faster perceived load)
+    const fadeTimer = setTimeout(() => setPhase("fading-out"), 600);
 
-    // Unmount after 1.7 seconds (500ms fade-out window)
+    // Unmount after 1000ms (reduced from 1.7s — 400ms fade-out window)
     const unmountTimer = setTimeout(() => {
       sessionStorage.setItem(SPLASH_STORAGE_KEY, "true");
       setPhase("done");
-    }, 1700);
+    }, 1000);
 
     return () => {
       clearTimeout(initTimer);

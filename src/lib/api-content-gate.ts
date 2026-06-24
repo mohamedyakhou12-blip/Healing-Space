@@ -44,18 +44,37 @@ interface AccessContext {
 // Resolve the access context from the request session
 // ---------------------------------------------------------------
 
+// ---------------------------------------------------------------
+// In-memory cache for access contexts (per serverless instance).
+// Cache keyed by userId; expires after 30 seconds so changes in
+// subscription/purchase status propagate reasonably fast.
+// ---------------------------------------------------------------
+
+const accessCtxCache = new Map<string, { ctx: AccessContext; expiry: number }>();
+const ACCESS_CTX_TTL = 30_000;
+
 async function resolveAccessContext(): Promise<AccessContext> {
   const session = await getSession();
   const userId = session.userId || null;
   const isAdmin = session.isAdmin === true;
 
   if (!userId) {
+    // Anonymous users: no DB queries needed — return empty context immediately.
+    // This is a critical performance optimization: previously every API call
+    // to /api/articles (even for unauthenticated users) was making 2 Firestore
+    // queries that always returned empty results.
     return { userId: null, isAdmin: false, activePlans: [], purchasedContentIds: new Set() };
   }
 
   if (isAdmin) {
     // Admins get full access — no need to query subscriptions/purchases
     return { userId, isAdmin: true, activePlans: [], purchasedContentIds: new Set() };
+  }
+
+  // Check in-memory cache first (avoids 2 Firestore queries per API call)
+  const cached = accessCtxCache.get(userId);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.ctx;
   }
 
   // Fetch active subscriptions
@@ -77,7 +96,28 @@ async function resolveAccessContext(): Promise<AccessContext> {
     purchases.map((p: Record<string, any>) => String(p.contentId || ""))
   );
 
-  return { userId, isAdmin, activePlans, purchasedContentIds };
+  const ctx: AccessContext = { userId, isAdmin, activePlans, purchasedContentIds };
+
+  // Cache for 30 seconds
+  accessCtxCache.set(userId, { ctx, expiry: Date.now() + ACCESS_CTX_TTL });
+  // Lazy cleanup: if cache grows too large, clear expired entries
+  if (accessCtxCache.size > 1000) {
+    const nowMs = Date.now();
+    for (const [k, v] of accessCtxCache) {
+      if (v.expiry <= nowMs) accessCtxCache.delete(k);
+    }
+  }
+
+  return ctx;
+}
+
+/**
+ * Invalidate the cached access context for a user.
+ * Call this after a successful purchase or subscription activation
+ * so the user sees their new access rights immediately.
+ */
+export function invalidateAccessContext(userId: string): void {
+  accessCtxCache.delete(userId);
 }
 
 // ---------------------------------------------------------------

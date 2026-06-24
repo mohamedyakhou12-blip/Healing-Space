@@ -54,6 +54,10 @@ const en = {
     videoNotSupported: "Your browser does not support video playback",
     coachingProgramTitle: "Integrated Healing Program",
     coachingProgramSubtitle: "A comprehensive journey towards recovery and balance through our integrated program combining psychological, physical, and spiritual healing",
+    imageGalleryTitle: "Image Gallery",
+    imageGallerySubtitle: "Moments from the journey of healing and growth",
+    addImage: "Add Image",
+    imagesSection: "Images",
   },
 
   // Courses

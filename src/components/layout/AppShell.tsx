@@ -41,11 +41,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     async function restoreSession() {
       try {
-        const res = await fetch("/api/auth/session");
-        if (!res.ok) return;
-        const data = await res.json();
+        // Fetch session and profile IN PARALLEL — if session says logged in,
+        // we'll also need the profile. Doing them together saves ~150ms latency.
+        const [sessionRes, profileRes] = await Promise.all([
+          fetch("/api/auth/session"),
+          fetch("/api/auth/profile"),
+        ]);
 
         if (cancelled) return;
+
+        const data = await sessionRes.json();
 
         if (data.isLoggedIn && data.userId) {
           const store = useAppStore.getState();
@@ -53,10 +58,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           if (!store.user) {
             let profileRestored = false;
 
-            // Try to fetch full user data from profile API
-            try {
-              const profileRes = await fetch("/api/auth/profile");
-              if (profileRes.ok) {
+            // Try to use the profile data we already fetched in parallel
+            if (profileRes.ok) {
+              try {
                 const profileData = await profileRes.json();
                 if (profileData.user) {
                   store.setUser({
@@ -69,9 +73,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   });
                   profileRestored = true;
                 }
+              } catch {
+                // Profile JSON parse failed — fall back to session data
               }
-            } catch {
-              // Session exists but profile fetch failed
             }
 
             // FALLBACK: If profile fetch failed but session says user is logged in,

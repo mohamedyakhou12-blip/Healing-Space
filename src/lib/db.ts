@@ -205,9 +205,10 @@ async function countWhere(
 export const db = {
   // --- User ---
   user: {
-    async findUnique({ where }: { where: { id?: string; email?: string } }) {
+    async findUnique({ where }: { where: { id?: string; email?: string; googleUid?: string } }) {
       if (where.id) return findById("users", where.id);
       if (where.email) return findUnique("users", "email", where.email);
+      if (where.googleUid) return findUnique("users", "googleUid", where.googleUid);
       return null;
     },
     async findMany(opts?: { orderBy?: { createdAt?: string }; select?: any }) {
@@ -1075,6 +1076,29 @@ export const db = {
     },
     async delete({ where }: { where: { id: string } }) {
       await deleteById("sliders", where.id);
+    },
+  },
+
+  // --- HomepageImage (admin-uploaded images shown on homepage gallery) ---
+  homepageImage: {
+    async findMany(opts?: { orderBy?: { order?: string; createdAt?: string } }) {
+      const orderField = opts?.orderBy?.order ? "order" : (opts?.orderBy?.createdAt ? "createdAt" : "order");
+      return findAll("homepageImages", orderField, "asc");
+    },
+    async create({ data }: { data: Record<string, any> }) {
+      return create("homepageImages", data);
+    },
+    async update({
+      where,
+      data,
+    }: {
+      where: { id: string };
+      data: Record<string, any>;
+    }) {
+      return updateById("homepageImages", where.id, data);
+    },
+    async delete({ where }: { where: { id: string } }) {
+      await deleteById("homepageImages", where.id);
     },
   },
 };

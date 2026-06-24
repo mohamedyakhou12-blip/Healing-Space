@@ -54,6 +54,10 @@ const ar = {
     videoNotSupported: "متصفحك لا يدعم تشغيل الفيديو",
     coachingProgramTitle: "برنامج الشفاء المتكامل",
     coachingProgramSubtitle: "رحلة شاملة نحو التعافي والتوازن من خلال برنامجنا المتكامل الذي يجمع بين العلاج النفسي والبدني والروحي",
+    imageGalleryTitle: "معرض الصور",
+    imageGallerySubtitle: "لحظات من رحلة الشفاء والتطوير",
+    addImage: "إضافة صورة",
+    imagesSection: "الصور",
   },
 
   // Courses

@@ -43,6 +43,7 @@ const VALID_COLLECTIONS = new Set([
   "purchases",
   "siteSettings",
   "sliders",
+  "homepageImages",
 ]);
 
 // ── Field whitelist per collection ──
@@ -51,7 +52,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
   users: new Set([
     "id", "email", "name", "nameAr", "nameFr", "nameEn",
     "phone", "avatar", "role", "isActive",
-    "locale", "password", "birthday",
+    "locale", "password", "birthday", "googleUid",
     "createdAt", "updatedAt",
   ]),
   subscriptions: new Set([
@@ -177,6 +178,13 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "subtitle", "subtitleAr", "subtitleFr", "subtitleEn",
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
     "order", "link", "isActive",
+    "createdAt", "updatedAt",
+  ]),
+  homepageImages: new Set([
+    "id", "image", "imageUrl", "caption", "captionAr", "captionFr", "captionEn",
+    "title", "titleAr", "titleFr", "titleEn",
+    "description", "descriptionAr", "descriptionFr", "descriptionEn",
+    "link", "order", "isActive", "layout",
     "createdAt", "updatedAt",
   ]),
 };

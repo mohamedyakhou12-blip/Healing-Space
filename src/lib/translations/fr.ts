@@ -54,6 +54,10 @@ const fr = {
     videoNotSupported: "Votre navigateur ne supporte pas la lecture vidéo",
     coachingProgramTitle: "Programme de Guérison Intégré",
     coachingProgramSubtitle: "Un voyage complet vers la guérison et l'équilibre à travers notre programme intégré combinant guérison psychologique, physique et spirituelle",
+    imageGalleryTitle: "Galerie d'Images",
+    imageGallerySubtitle: "Des moments du voyage de guérison et de croissance",
+    addImage: "Ajouter une Image",
+    imagesSection: "Images",
   },
 
   // Courses

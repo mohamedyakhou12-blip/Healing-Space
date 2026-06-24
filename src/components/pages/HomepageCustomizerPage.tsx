@@ -22,8 +22,8 @@ import { Switch } from "@/components/ui/switch";
 
 /* ─── Types ─── */
 type Trilingual = { ar: string; fr: string; en: string };
-type CustomizerTab = "hero" | "video" | "sliders" | "sections";
-type SectionKey = "hero" | "video" | "services" | "courses" | "articles" | "podcasts" | "stats" | "testimonials";
+type CustomizerTab = "hero" | "video" | "sliders" | "images" | "sections";
+type SectionKey = "hero" | "video" | "images" | "services" | "courses" | "articles" | "podcasts" | "stats" | "testimonials";
 
 interface Slider {
   id: string;
@@ -34,6 +34,20 @@ interface Slider {
   titleEn?: string;
   order: number;
   link?: string;
+}
+
+interface HomepageImage {
+  id: string;
+  imageUrl: string;
+  captionAr?: string;
+  captionFr?: string;
+  captionEn?: string;
+  titleAr?: string;
+  titleFr?: string;
+  titleEn?: string;
+  link?: string;
+  order: number;
+  isActive: boolean;
 }
 
 /* ─── Helper: Admin headers ─── */
@@ -63,6 +77,7 @@ const parseTrilingual = (raw: string | undefined): Trilingual => {
 const DEFAULT_SECTIONS: { key: SectionKey; labelAr: string; labelEn: string; defaultVisible: boolean }[] = [
   { key: "hero", labelAr: "البانر الرئيسي", labelEn: "Hero Banner", defaultVisible: true },
   { key: "video", labelAr: "الفيديو التعريفي", labelEn: "Intro Video", defaultVisible: true },
+  { key: "images", labelAr: "معرض الصور", labelEn: "Image Gallery", defaultVisible: true },
   { key: "services", labelAr: "الخدمات", labelEn: "Services", defaultVisible: true },
   { key: "courses", labelAr: "الدورات المميزة", labelEn: "Featured Courses", defaultVisible: true },
   { key: "articles", labelAr: "أحدث المقالات", labelEn: "Latest Articles", defaultVisible: true },
@@ -108,6 +123,19 @@ export default function HomepageCustomizerPage() {
   });
   const [uploadingSliderImage, setUploadingSliderImage] = useState(false);
 
+  // ─── Homepage Images (gallery) ───
+  const [homepageImages, setHomepageImages] = useState<HomepageImage[]>([]);
+  const [imageDialog, setImageDialog] = useState<{ open: boolean; image: HomepageImage | null; isNew: boolean }>({
+    open: false, image: null, isNew: false,
+  });
+  const [imageForm, setImageForm] = useState({
+    imageUrl: "",
+    titleAr: "", titleFr: "", titleEn: "",
+    captionAr: "", captionFr: "", captionEn: "",
+    link: "", order: 0, isActive: true,
+  });
+  const [uploadingHomepageImage, setUploadingHomepageImage] = useState(false);
+
   // ─── Sections visibility ───
   const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey, boolean>>(() => {
     const vis: Record<string, boolean> = {};
@@ -119,9 +147,10 @@ export default function HomepageCustomizerPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [settingsRes, slidersRes] = await Promise.all([
+        const [settingsRes, slidersRes, imagesRes] = await Promise.all([
           fetch("/api/admin/settings", { headers: adminHeaders() }),
           fetch("/api/sliders"),
+          fetch("/api/homepage-images"),
         ]);
 
         if (settingsRes.ok) {
@@ -156,6 +185,25 @@ export default function HomepageCustomizerPage() {
               titleEn: s.titleEn as string,
               order: (s.order as number) || 0,
               link: s.link as string,
+            }))
+          );
+        }
+
+        if (imagesRes.ok) {
+          const data = await imagesRes.json();
+          setHomepageImages(
+            (data.images || []).map((img: Record<string, unknown>) => ({
+              id: img.id as string,
+              imageUrl: (img.image || img.imageUrl) as string,
+              titleAr: img.titleAr as string,
+              titleFr: img.titleFr as string,
+              titleEn: img.titleEn as string,
+              captionAr: img.captionAr as string,
+              captionFr: img.captionFr as string,
+              captionEn: img.captionEn as string,
+              link: img.link as string,
+              order: (img.order as number) || 0,
+              isActive: img.isActive !== false,
             }))
           );
         }
@@ -299,6 +347,76 @@ export default function HomepageCustomizerPage() {
     } catch { toast.error(locale === "ar" ? "حدث خطأ" : "Error"); }
   };
 
+  // ─── Homepage Image management ───
+  const fetchHomepageImages = useCallback(async () => {
+    try {
+      const res = await fetch("/api/homepage-images");
+      if (res.ok) {
+        const data = await res.json();
+        setHomepageImages(
+          (data.images || []).map((img: Record<string, unknown>) => ({
+            id: img.id as string,
+            imageUrl: (img.image || img.imageUrl) as string,
+            titleAr: img.titleAr as string,
+            titleFr: img.titleFr as string,
+            titleEn: img.titleEn as string,
+            captionAr: img.captionAr as string,
+            captionFr: img.captionFr as string,
+            captionEn: img.captionEn as string,
+            link: img.link as string,
+            order: (img.order as number) || 0,
+            isActive: img.isActive !== false,
+          }))
+        );
+      }
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleImageSave = async () => {
+    if (!imageForm.imageUrl) {
+      toast.error(locale === "ar" ? "يرجى رفع صورة أو إدخال رابط" : "Please upload an image or enter a URL");
+      return;
+    }
+    try {
+      if (imageDialog.isNew) {
+        const res = await fetch("/api/homepage-images", {
+          method: "POST",
+          headers: { ...adminHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify(imageForm),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          toast.error((err as Record<string, string>).error || (locale === "ar" ? "فشل الإضافة" : "Failed to add"));
+          return;
+        }
+      } else if (imageDialog.image) {
+        const res = await fetch(`/api/homepage-images/${encodeURIComponent(imageDialog.image.id)}`, {
+          method: "PUT",
+          headers: { ...adminHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify(imageForm),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          toast.error((err as Record<string, string>).error || (locale === "ar" ? "فشل التحديث" : "Failed to update"));
+          return;
+        }
+      }
+      toast.success(locale === "ar" ? "تم الحفظ" : "Saved");
+      fetchHomepageImages();
+    } catch {
+      toast.error(locale === "ar" ? "حدث خطأ" : "Error");
+    }
+    setImageDialog({ open: false, image: null, isNew: false });
+  };
+
+  const handleImageDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/homepage-images/${encodeURIComponent(id)}`, { method: "DELETE", headers: adminHeaders() });
+      if (res.ok) { toast.success(locale === "ar" ? "تم الحذف" : "Deleted"); fetchHomepageImages(); }
+      else { toast.error(locale === "ar" ? "فشل الحذف" : "Delete failed"); }
+    } catch { toast.error(locale === "ar" ? "حدث خطأ" : "Error"); }
+  };
+
   // ─── Trilingual input helper ───
   const TrilingualInput = ({ label, value, onChange, placeholder, isTextarea = false }: {
     label: string; value: Trilingual; onChange: (v: Trilingual) => void;
@@ -337,6 +455,7 @@ export default function HomepageCustomizerPage() {
     { key: "hero", labelAr: "البانر الرئيسي", labelEn: "Hero Banner", icon: BookOpen, color: "text-teal-600" },
     { key: "video", labelAr: "الفيديو التعريفي", labelEn: "Intro Video", icon: Video, color: "text-rose-600" },
     { key: "sliders", labelAr: "الشرائح", labelEn: "Sliders", icon: ImageIcon, color: "text-violet-600" },
+    { key: "images", labelAr: "معرض الصور", labelEn: "Image Gallery", icon: ImageIcon, color: "text-amber-600" },
     { key: "sections", labelAr: "أقسام الصفحة", labelEn: "Page Sections", icon: LayoutDashboard, color: "text-cyan-600" },
   ];
 
@@ -775,6 +894,244 @@ export default function HomepageCustomizerPage() {
                           </div>
                         </div>
                         <Button onClick={handleSliderSave} className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
+                          <Check className="size-4" />
+                          {locale === "ar" ? "حفظ" : "Save"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/*  IMAGE GALLERY TAB                                       */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {activeTab === "images" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ImageIcon className="size-5 text-amber-600" />
+                    {locale === "ar" ? "معرض الصور" : "Image Gallery"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    {locale === "ar"
+                      ? "أضف صوراً تظهر في معرض الصور بالصفحة الرئيسية. يمكنك رفع صورة من جهازك أو إدخال رابط."
+                      : "Add images that appear in the homepage gallery. Upload from your device or enter a URL."}
+                  </p>
+
+                  <Button
+                    onClick={() => {
+                      setImageForm({
+                        imageUrl: "",
+                        titleAr: "", titleFr: "", titleEn: "",
+                        captionAr: "", captionFr: "", captionEn: "",
+                        link: "", order: homepageImages.length + 1, isActive: true,
+                      });
+                      setImageDialog({ open: true, image: null, isNew: true });
+                    }}
+                    className="bg-amber-600 hover:bg-amber-700 text-white gap-2"
+                  >
+                    <Plus className="size-4" />
+                    {locale === "ar" ? "إضافة صورة" : "Add Image"}
+                  </Button>
+
+                  {homepageImages.length === 0 ? (
+                    <div className="text-center py-12 border-2 border-dashed rounded-xl">
+                      <ImageIcon className="size-12 text-muted-foreground/30 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        {locale === "ar" ? "لا توجد صور بعد. أضف صورة لعرضها في المعرض." : "No images yet. Add one to display in the gallery."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {homepageImages.sort((a, b) => a.order - b.order).map((image) => (
+                        <div
+                          key={image.id}
+                          className="relative group rounded-xl overflow-hidden border bg-card shadow-sm"
+                        >
+                          <div className="aspect-square relative">
+                            {image.imageUrl ? (
+                              <img
+                                src={image.imageUrl}
+                                alt={image.captionAr || image.captionEn || image.captionFr || ""}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                                <ImageIcon className="size-6 text-muted-foreground" />
+                              </div>
+                            )}
+                            {/* Overlay actions */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost" size="sm"
+                                  className="h-8 w-8 p-0 bg-white/90 text-slate-800 hover:bg-white rounded-full"
+                                  onClick={() => {
+                                    setImageForm({
+                                      imageUrl: image.imageUrl,
+                                      titleAr: image.titleAr || "", titleFr: image.titleFr || "", titleEn: image.titleEn || "",
+                                      captionAr: image.captionAr || "", captionFr: image.captionFr || "", captionEn: image.captionEn || "",
+                                      link: image.link || "", order: image.order, isActive: image.isActive,
+                                    });
+                                    setImageDialog({ open: true, image, isNew: false });
+                                  }}
+                                >
+                                  <Pencil className="size-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost" size="sm"
+                                  className="h-8 w-8 p-0 bg-white/90 text-rose-600 hover:bg-white rounded-full"
+                                  onClick={() => {
+                                    if (confirm(locale === "ar" ? "هل أنت متأكد من حذف هذه الصورة؟" : "Are you sure you want to delete this image?")) {
+                                      handleImageDelete(image.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                            {/* Order badge */}
+                            <span className="absolute top-1 start-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                              #{image.order}
+                            </span>
+                            {!image.isActive && (
+                              <span className="absolute top-1 end-1 bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                                {locale === "ar" ? "مخفي" : "Hidden"}
+                              </span>
+                            )}
+                          </div>
+                          {/* Caption preview */}
+                          {(image.captionAr || image.captionEn || image.captionFr) && (
+                            <div className="p-2 text-xs text-muted-foreground line-clamp-1">
+                              {locale === "ar" ? (image.captionAr || image.captionEn || image.captionFr)
+                                : locale === "fr" ? (image.captionFr || image.captionEn || image.captionAr)
+                                : (image.captionEn || image.captionAr || image.captionFr)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Image Dialog */}
+                  <Dialog open={imageDialog.open} onOpenChange={(open) => setImageDialog({ open, image: null, isNew: false })}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>
+                          {imageDialog.isNew
+                            ? (locale === "ar" ? "إضافة صورة" : "Add Image")
+                            : (locale === "ar" ? "تعديل صورة" : "Edit Image")}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        {/* Image upload / URL */}
+                        <div className="space-y-2">
+                          <Label>{locale === "ar" ? "الصورة" : "Image"}</Label>
+                          {imageForm.imageUrl ? (
+                            <div className="relative rounded-lg overflow-hidden border">
+                              <img src={imageForm.imageUrl} alt="Preview" className="w-full h-48 object-cover" />
+                              <Button
+                                variant="ghost" size="sm"
+                                className="absolute top-1 end-1 h-7 w-7 p-0 bg-black/50 text-white hover:bg-black/70 rounded-full"
+                                onClick={() => setImageForm((p) => ({ ...p, imageUrl: "" }))}
+                              >
+                                <X className="size-3.5" />
+                              </Button>
+                            </div>
+                          ) : null}
+                          <div className="flex gap-2 flex-wrap">
+                            <label className={`cursor-pointer inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium border hover:bg-accent transition-colors ${uploadingHomepageImage ? "pointer-events-none opacity-60" : ""}`}>
+                              {uploadingHomepageImage ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                              {locale === "ar" ? "رفع صورة" : "Upload Image"}
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  if (file.size > 10 * 1024 * 1024) {
+                                    toast.error(locale === "ar" ? "الصورة كبيرة جداً (الحد 10MB)" : "Image too large (max 10MB)");
+                                    return;
+                                  }
+                                  setUploadingHomepageImage(true);
+                                  try {
+                                    const result = await directCloudinaryUpload(
+                                      file,
+                                      { folder: "healing-space/homepage-images", resourceType: "image" }
+                                    );
+                                    setImageForm((p) => ({ ...p, imageUrl: result.url }));
+                                    toast.success(locale === "ar" ? "تم رفع الصورة بنجاح" : "Image uploaded successfully");
+                                  } catch (err) {
+                                    const msg = err instanceof Error ? err.message : "";
+                                    toast.error(locale === "ar" ? `فشل رفع الصورة: ${msg}` : `Image upload failed: ${msg}`);
+                                  } finally {
+                                    setUploadingHomepageImage(false);
+                                    e.target.value = "";
+                                  }
+                                }}
+                              />
+                            </label>
+                            <span className="text-xs text-muted-foreground self-center">{locale === "ar" ? "أو أدخل رابط" : "or enter URL"}</span>
+                          </div>
+                          <Input
+                            value={imageForm.imageUrl}
+                            onChange={(e) => setImageForm((p) => ({ ...p, imageUrl: e.target.value }))}
+                            placeholder="https://..."
+                            dir="ltr"
+                          />
+                        </div>
+
+                        <TrilingualInput
+                          label={locale === "ar" ? "العنوان (اختياري)" : "Title (optional)"}
+                          value={{ ar: imageForm.titleAr, fr: imageForm.titleFr, en: imageForm.titleEn }}
+                          onChange={(v) => setImageForm((p) => ({ ...p, titleAr: v.ar, titleFr: v.fr, titleEn: v.en }))}
+                        />
+
+                        <TrilingualInput
+                          label={locale === "ar" ? "التعليق (اختياري)" : "Caption (optional)"}
+                          value={{ ar: imageForm.captionAr, fr: imageForm.captionFr, en: imageForm.captionEn }}
+                          onChange={(v) => setImageForm((p) => ({ ...p, captionAr: v.ar, captionFr: v.fr, captionEn: v.en }))}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>{locale === "ar" ? "الترتيب" : "Order"}</Label>
+                            <Input
+                              type="number"
+                              value={imageForm.order}
+                              onChange={(e) => setImageForm((p) => ({ ...p, order: parseInt(e.target.value) || 0 }))}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>{locale === "ar" ? "الرابط (اختياري)" : "Link (optional)"}</Label>
+                            <Input
+                              value={imageForm.link}
+                              onChange={(e) => setImageForm((p) => ({ ...p, link: e.target.value }))}
+                              placeholder="https://..."
+                              dir="ltr"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                          <Label htmlFor="image-active" className="text-sm font-medium cursor-pointer">
+                            {locale === "ar" ? "ظاهر في المعرض" : "Visible in gallery"}
+                          </Label>
+                          <Switch
+                            id="image-active"
+                            checked={imageForm.isActive}
+                            onCheckedChange={(checked) => setImageForm((p) => ({ ...p, isActive: checked }))}
+                          />
+                        </div>
+
+                        <Button onClick={handleImageSave} className="w-full bg-amber-600 hover:bg-amber-700 text-white gap-2">
                           <Check className="size-4" />
                           {locale === "ar" ? "حفظ" : "Save"}
                         </Button>

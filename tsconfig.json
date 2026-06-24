@@ -41,6 +41,10 @@
     "examples",
     "mini-services",
     "skills",
-    "Healing-Space"
+    "Healing-Space",
+    "healing-space-src",
+    "temp-upload-api",
+    "tool-results",
+    "download"
   ]
 }
