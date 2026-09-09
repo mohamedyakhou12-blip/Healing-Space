@@ -393,6 +393,7 @@ const fr = {
     security: "Sécurité",
     subscriptionPrices: "Prix des abonnements",
     subscriptionPricesDesc: "Gérer les prix des plans d'abonnement",
+    recommended: "Recommandé",
     uploadFile: "Télécharger un fichier",
     externalUrl: "URL externe",
     uploading: "Téléchargement en cours...",
