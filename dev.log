@@ -794,3 +794,4 @@ https://react.dev/link/hydration-mismatch
  GET /live 200 in 138ms (next.js: 83ms, application-code: 55ms)
  GET / 200 in 39ms (next.js: 12ms, application-code: 28ms)
  GET / 200 in 42ms (next.js: 3ms, application-code: 39ms)
+ GET / 200 in 372ms (next.js: 3ms, application-code: 370ms)
