@@ -192,7 +192,7 @@ export function Header() {
                 }
               >
                 {mounted && theme === "dark" ? (
-                  <Sun className="size-5 text-healing-gold" />
+                  <Sun className="size-5 text-primary" />
                 ) : (
                   <Moon className="size-5" />
                 )}

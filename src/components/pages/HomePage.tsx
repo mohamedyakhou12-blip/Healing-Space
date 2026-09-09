@@ -222,13 +222,13 @@ type ServiceConfig = {
 };
 
 const services: ServiceConfig[] = [
-  { key: "courses", icon: BookOpen, color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-200", descKey: "courses.description", image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop" },
-  { key: "articles", icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", descKey: "articles.description", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=250&fit=crop" },
-  { key: "podcasts", icon: Headphones, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-200", descKey: "podcasts.description", image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=250&fit=crop" },
-  { key: "videos", icon: PlayCircle, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200", descKey: "videos.description", image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop" },
-  { key: "pdfs", icon: FileDown, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", descKey: "pdfs.description", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=250&fit=crop" },
-  { key: "live", icon: Radio, color: "text-cyan-600", bg: "bg-cyan-50", border: "border-cyan-200", descKey: "live.description", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
-  { key: "coaching", icon: Sparkles, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", descKey: "coaching.description", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
+  { key: "courses", icon: BookOpen, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "courses.description", image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop" },
+  { key: "articles", icon: FileText, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "articles.description", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=250&fit=crop" },
+  { key: "podcasts", icon: Headphones, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "podcasts.description", image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=250&fit=crop" },
+  { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop" },
+  { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=250&fit=crop" },
+  { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
+  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -574,10 +574,10 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* HERO SECTION                                                  */}
       {/* ============================================================ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-emerald-50/80 to-white dark:from-teal-950/30 dark:via-emerald-950/20 dark:to-background">
+      <section className="relative overflow-hidden bg-gradient-to-br from-stone-50 via-amber-50/80 to-white dark:from-stone-950/30 dark:via-amber-950/20 dark:to-background">
         {/* Subtle gradient washes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/4 -left-1/4 h-[60%] w-[60%] rounded-full bg-teal-400/5 dark:bg-teal-700/8 blur-3xl" />
+          <div className="absolute -top-1/4 -left-1/4 h-[60%] w-[60%] rounded-full bg-stone-400/5 dark:bg-stone-700/8 blur-3xl" />
           <div className="absolute -bottom-1/4 -right-1/4 h-[50%] w-[50%] rounded-full bg-amber-300/4 dark:bg-amber-700/6 blur-3xl" />
         </div>
 
@@ -593,7 +593,7 @@ export default function HomePage() {
             {/* Sliders Carousel (if any) */}
             {sliders.length > 0 && (
               <motion.div variants={fadeUp} custom={0} className="w-full max-w-4xl mb-8">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-teal-500/10">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-stone-500/10">
                   <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
                     {sliders.map((slider, idx) => (
                       <div
@@ -646,7 +646,7 @@ export default function HomePage() {
             <motion.h1
               variants={fadeUp}
               custom={1}
-              className="mb-4 bg-gradient-to-r from-teal-600 via-emerald-500 to-cyan-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
+              className="mb-4 bg-gradient-to-r from-stone-600 via-amber-500 to-amber-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl"
             >
               {heroTitle}
             </motion.h1>
@@ -684,7 +684,7 @@ export default function HomePage() {
             >
               <Button
                 size="lg"
-                className="min-w-[200px] gap-2 rounded-full bg-gradient-to-r from-teal-600 to-emerald-500 px-8 text-base shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30"
+                className="min-w-[200px] gap-2 rounded-full bg-gradient-to-r from-stone-600 to-amber-500 px-8 text-base shadow-lg shadow-stone-500/25 hover:shadow-xl hover:shadow-stone-500/30"
                 onClick={() => navigate("courses")}
               >
                 <Heart className="size-5" />
@@ -718,14 +718,14 @@ export default function HomePage() {
               variants={fadeUp}
             >
               <div className="flex items-center justify-center gap-2 mb-3">
-                <Video className="size-6 text-teal-600" />
+                <Video className="size-6 text-primary" />
                 <h2 className="text-2xl font-bold sm:text-3xl">{t("home.introVideoTitle")}</h2>
               </div>
-              <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" />
+              <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
             </motion.div>
 
             <motion.div
-              className="relative rounded-2xl overflow-hidden shadow-2xl shadow-teal-500/10 bg-black"
+              className="relative rounded-2xl overflow-hidden shadow-2xl shadow-stone-500/10 bg-black"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
@@ -841,7 +841,7 @@ export default function HomePage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent flex items-center justify-center group-hover:from-black/60 transition-colors">
                         <div className="flex size-20 items-center justify-center rounded-full bg-white/90 shadow-2xl group-hover:scale-110 transition-transform">
-                          <Play className="size-10 text-teal-600 ms-1" />
+                          <Play className="size-10 text-primary ms-1" />
                         </div>
                       </div>
                     </div>
@@ -972,7 +972,7 @@ export default function HomePage() {
             variants={fadeUp}
           >
             <h2 className="mb-3 text-3xl font-bold sm:text-4xl">{t("home.ourServices")}</h2>
-            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" />
+            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
           </motion.div>
 
           <motion.div
@@ -1038,10 +1038,10 @@ export default function HomePage() {
             variants={fadeUp}
           >
             <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="size-6 text-teal-600" />
+              <Sparkles className="size-6 text-primary" />
               <h2 className="text-3xl font-bold sm:text-4xl">{t("home.coachingProgramTitle")}</h2>
             </div>
-            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 mb-4" />
+            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-stone-500 to-amber-400 mb-4" />
             <p className="text-muted-foreground max-w-2xl mx-auto text-base">
               {t("home.coachingProgramSubtitle")}
             </p>
@@ -1061,33 +1061,33 @@ export default function HomePage() {
                 icon: Mic,
                 titleKey: "subscriptions.coachingMonthly",
                 subtitle: "Grosra Du mois / Live coaching",
-                gradient: "from-teal-400 to-emerald-500",
-                bg: "bg-teal-50 dark:bg-teal-950/20",
-                border: "border-teal-200 dark:border-teal-800",
+                gradient: "from-stone-400 to-amber-500",
+                bg: "bg-stone-50 dark:bg-stone-950/20",
+                border: "border-stone-200 dark:border-stone-800",
               },
               {
                 icon: Users,
                 titleKey: "subscriptions.coachingWorkshop",
                 subtitle: "Workshop",
-                gradient: "from-emerald-400 to-green-500",
-                bg: "bg-emerald-50 dark:bg-emerald-950/20",
-                border: "border-emerald-200 dark:border-emerald-800",
+                gradient: "from-amber-400 to-amber-500",
+                bg: "bg-amber-50 dark:bg-amber-950/20",
+                border: "border-amber-200 dark:border-amber-800",
               },
               {
                 icon: Dumbbell,
                 titleKey: "subscriptions.coachingExercise",
                 subtitle: "Exercise",
-                gradient: "from-cyan-400 to-sky-500",
-                bg: "bg-cyan-50 dark:bg-cyan-950/20",
-                border: "border-cyan-200 dark:border-cyan-800",
+                gradient: "from-amber-400 to-sky-500",
+                bg: "bg-amber-50 dark:bg-amber-950/20",
+                border: "border-amber-200 dark:border-amber-800",
               },
               {
                 icon: TreePine,
                 titleKey: "subscriptions.coachingRetreat",
                 subtitle: "Retraite",
-                gradient: "from-green-400 to-emerald-500",
-                bg: "bg-green-50 dark:bg-green-950/20",
-                border: "border-green-200 dark:border-green-800",
+                gradient: "from-amber-400 to-amber-500",
+                bg: "bg-amber-50 dark:bg-amber-950/20",
+                border: "border-amber-200 dark:border-amber-800",
               },
               {
                 icon: MessageCircleQuestion,
@@ -1133,7 +1133,7 @@ export default function HomePage() {
                 icon: Leaf,
                 titleKey: "subscriptions.coachingHolistic",
                 subtitle: "Médecine holistique et Integrative",
-                gradient: "from-lime-400 to-green-500",
+                gradient: "from-lime-400 to-amber-500",
                 bg: "bg-lime-50 dark:bg-lime-950/20",
                 border: "border-lime-200 dark:border-lime-800",
               },
@@ -1197,7 +1197,7 @@ export default function HomePage() {
           >
             <div>
               <h2 className="mb-1 text-2xl font-bold sm:text-3xl">{t("home.featuredCourses")}</h2>
-              <div className="h-1 w-12 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" />
+              <div className="h-1 w-12 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
             </div>
             <div className="flex items-center gap-2">
               {canScrollLeft && (
@@ -1240,7 +1240,7 @@ export default function HomePage() {
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <Badge className="absolute bottom-3 start-3 bg-teal-600 text-white">
+                    <Badge className="absolute bottom-3 start-3 bg-stone-600 text-white">
                       {course.lessons} {t("courses.lessons")}
                     </Badge>
                   </div>
@@ -1300,7 +1300,7 @@ export default function HomePage() {
           >
             <div>
               <h2 className="mb-1 text-2xl font-bold sm:text-3xl">{t("home.latestArticles")}</h2>
-              <div className="h-1 w-12 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" />
+              <div className="h-1 w-12 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
             </div>
             <Button variant="ghost" className="gap-1 text-sm" onClick={() => navigate("articles")}>
               {t("home.viewAll")}
@@ -1422,7 +1422,7 @@ export default function HomePage() {
       {/* STATS                                                         */}
       {/* ============================================================ */}
       {isSectionVisible("stats") && (
-      <section className="bg-gradient-to-br from-teal-600 to-emerald-600 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-br from-stone-600 to-amber-600 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <motion.div
             className="grid grid-cols-2 gap-8 lg:grid-cols-4"
@@ -1453,7 +1453,7 @@ export default function HomePage() {
             variants={fadeUp}
           >
             <h2 className="mb-3 text-2xl font-bold sm:text-3xl">{t("reviews.title")}</h2>
-            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" />
+            <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
           </motion.div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -1468,10 +1468,10 @@ export default function HomePage() {
               >
                 <Card className="h-full border-muted transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <CardContent className="relative p-6">
-                    <Quote className="absolute top-4 end-4 size-8 text-teal-100 dark:text-teal-900" />
+                    <Quote className="absolute top-4 end-4 size-8 text-stone-100 dark:text-stone-900" />
                     <div className="mb-4 flex items-center gap-3">
-                      <Avatar className="size-12 border-2 border-teal-200">
-                        <AvatarFallback className="bg-gradient-to-br from-teal-500 to-emerald-400 text-sm font-bold text-white">
+                      <Avatar className="size-12 border-2 border-stone-200">
+                        <AvatarFallback className="bg-gradient-to-br from-stone-500 to-amber-400 text-sm font-bold text-white">
                           {testimonial.avatar}
                         </AvatarFallback>
                       </Avatar>

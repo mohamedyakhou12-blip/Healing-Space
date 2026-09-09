@@ -54,10 +54,10 @@ export default function CourseDetailPage() {
       <main className="flex-1 bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Course Header */}
-          <div className="bg-gradient-to-br from-teal-600 to-teal-800 rounded-2xl p-8 text-white mb-8">
+          <div className="bg-gradient-to-br from-primary to-stone-700 rounded-2xl p-8 text-white mb-8">
             <div className="max-w-3xl">
               <h1 className="text-3xl font-bold mb-4">{courseData.title}</h1>
-              <p className="text-teal-100 mb-6 leading-relaxed">{courseData.description}</p>
+              <p className="text-stone-100 mb-6 leading-relaxed">{courseData.description}</p>
               <div className="flex flex-wrap items-center gap-6 text-sm">
                 <div className="flex items-center gap-1"><Star className="h-4 w-4 text-amber-400 fill-amber-400" /> {courseData.rating}</div>
                 <div className="flex items-center gap-1"><Users className="h-4 w-4" /> {courseData.students} طالب</div>
@@ -84,7 +84,7 @@ export default function CourseDetailPage() {
                   <AccordionItem key={chapterIdx} value={`chapter-${chapterIdx}`} className="bg-white rounded-lg shadow-sm border-0 px-4">
                     <AccordionTrigger className="hover:no-underline py-4">
                       <div className="flex items-center gap-3">
-                        <span className="h-8 w-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">
+                        <span className="h-8 w-8 rounded-full bg-secondary text-primary flex items-center justify-center text-sm font-bold">
                           {chapterIdx + 1}
                         </span>
                         <span className="font-medium text-gray-900">{chapter.title}</span>
@@ -96,7 +96,7 @@ export default function CourseDetailPage() {
                           <div key={lessonIdx} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50">
                             <div className="flex items-center gap-3">
                               {lesson.free ? (
-                                <Play className="h-4 w-4 text-teal-600" />
+                                <Play className="h-4 w-4 text-primary" />
                               ) : (
                                 <Lock className="h-4 w-4 text-gray-400" />
                               )}
@@ -105,7 +105,7 @@ export default function CourseDetailPage() {
                             <div className="flex items-center gap-3">
                               <span className="text-xs text-gray-500">{lesson.duration}</span>
                               {lesson.free && (
-                                <span className="text-xs text-teal-600 font-medium">مجاني</span>
+                                <span className="text-xs text-primary font-medium">مجاني</span>
                               )}
                             </div>
                           </div>
@@ -123,8 +123,8 @@ export default function CourseDetailPage() {
                 <CardContent className="p-6">
                   <h3 className="font-bold text-lg text-gray-900 mb-4">عن المدربة</h3>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-full bg-teal-100 flex items-center justify-center">
-                      <span className="text-teal-700 font-bold">ن</span>
+                    <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+                      <span className="text-primary font-bold">ن</span>
                     </div>
                     <div>
                       <p className="font-medium">{courseData.instructor}</p>
