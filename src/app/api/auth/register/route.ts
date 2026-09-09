@@ -5,6 +5,7 @@ import { hash } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeEmail, sanitizeName } from "@/lib/sanitize";
 import { setUserSession } from "@/lib/session";
+import { isReservedAdminEmail } from "@/lib/admin-email";
 
 // Enhanced password schema — requires at least 8 chars with complexity
 const registerSchema = z.object({
@@ -52,6 +53,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Invalid name provided", success: false },
         { status: 400 }
+      );
+    }
+
+    // Reserve the admin account: no other user may register this email.
+    if (isReservedAdminEmail(email)) {
+      return NextResponse.json(
+        { error: "This email is reserved and cannot be used for registration.", success: false },
+        { status: 403 }
       );
     }
 
