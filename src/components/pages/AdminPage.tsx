@@ -780,7 +780,7 @@ function FileUploadComponent({
   );
 }
 
-// ─── Categories ──────────────────────────────────────────────────────────────
+// ─── Categories ────────────────────────────────────────────────────��─────────
 
 const CATEGORIES = [
   "علاج نفسي",
@@ -1040,8 +1040,7 @@ function DashboardView() {
   ];
 
   const colorMap: Record<string, { bg: string; icon: string; ring: string }> = {
-    primary: { bg: "bg-secondary dark:bg-secondary/50", icon: "text-primary dark:text-accent", ring: "ring-primary-100 dark:ring-accent" },
-    primary: { bg: "bg-primary-50 dark:bg-secondary/50", icon: "text-primary dark:text-accent", ring: "ring-primary-100 dark:ring-accent" },
+    primary: { bg: "bg-secondary dark:bg-secondary/50", icon: "text-primary dark:text-accent", ring: "ring-primary/20 dark:ring-accent" },
     violet: { bg: "bg-violet-50 dark:bg-violet-950/50", icon: "text-violet-600 dark:text-violet-400", ring: "ring-violet-100 dark:ring-violet-900" },
     amber: { bg: "bg-amber-50 dark:bg-amber-950/50", icon: "text-amber-600 dark:text-amber-400", ring: "ring-amber-100 dark:ring-amber-900" },
     rose: { bg: "bg-rose-50 dark:bg-rose-950/50", icon: "text-rose-600 dark:text-rose-400", ring: "ring-rose-100 dark:ring-rose-900" },
@@ -1855,7 +1854,7 @@ function PaymentsView() {
             <AlertDialogDescription>
               {confirmAction.type === "delete"
                 ? (locale === "ar"
-                    ? `هل أنت متأكد من حذف هذا الدفع؟ سيتم حذف سجل الدفع فقط وسيبقى اشتراك المستخدم محفوظاً.`
+                    ? `هل أ��ت متأكد من حذف هذا الدفع؟ سيتم حذف سجل الدفع فقط وسيبقى اشتراك المستخدم محفوظاً.`
                     : locale === "fr"
                     ? `Êtes-vous sûr de vouloir supprimer ce paiement ? Seul l'enregistrement du paiement sera supprimé, l'abonnement de l'utilisateur sera préservé.`
                     : `Are you sure you want to delete this payment? Only the payment record will be deleted, the user's subscription will be preserved.`)

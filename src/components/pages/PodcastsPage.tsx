@@ -258,13 +258,13 @@ export default function PodcastsPage() {
             gradient: GRADIENTS[i % GRADIENTS.length],
             audioUrl: p.audioUrl || "",
           }));
-        if (episodes.length > 0) setApiEpisodes(episodes);
+        setApiEpisodes(episodes);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const displayEpisodes = apiEpisodes || mockEpisodes;
+  const displayEpisodes = apiEpisodes || [];
 
   const localizedText = (obj: { ar: string; en: string; fr: string }) =>
     obj[locale] || obj.ar;
@@ -288,7 +288,14 @@ export default function PodcastsPage() {
   // Manage audio element when playingEpisode changes
   useEffect(() => {
     const episode = displayEpisodes.find(e => e.id === playingEpisode);
-    if (!episode?.audioUrl) return;
+    if (!episode?.audioUrl) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setAudioDuration(0);
+      return;
+    }
 
     if (audioRef.current) {
       audioRef.current.pause();
@@ -505,7 +512,7 @@ export default function PodcastsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           {!episode.isFree && episode.price > 0 && (
-                            <Badge className="text-xs shrink-0 bg-teal-600 text-white border-0">
+                            <Badge className="text-xs shrink-0 bg-primary text-white border-0">
                               {episode.price.toLocaleString()} {t("common.currency")}
                             </Badge>
                           )}

@@ -57,7 +57,7 @@ const mockVideos: VideoItem[] = [
     duration: "18:45", views: 12450, likes: 892, publishedDate: "2025-01-20",
     gradient: "from-emerald-400 to-teal-600",
     image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
+    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
   },
   {
     id: "vid-2",
@@ -66,7 +66,7 @@ const mockVideos: VideoItem[] = [
     duration: "12:30", views: 8900, likes: 654, publishedDate: "2025-02-15",
     gradient: "from-amber-400 to-orange-600",
     image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
+    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
   },
   {
     id: "vid-3",
@@ -75,7 +75,7 @@ const mockVideos: VideoItem[] = [
     duration: "22:15", views: 15200, likes: 1100, publishedDate: "2025-03-10",
     gradient: "from-violet-400 to-purple-600",
     image: "https://images.unsplash.com/photo-1515894203077-9cd36032142f?w=400&h=250&fit=crop",
-    isFree: false, price: 2000, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
+    isFree: false, price: 2000, youtubeId: undefined, videoUrl: "",
   },
   {
     id: "vid-4",
@@ -84,7 +84,7 @@ const mockVideos: VideoItem[] = [
     duration: "28:00", views: 9800, likes: 780, publishedDate: "2025-03-25",
     gradient: "from-rose-400 to-pink-600",
     image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
-    isFree: false, price: 2500, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
+    isFree: false, price: 2500, youtubeId: undefined, videoUrl: "",
   },
   {
     id: "vid-5",
@@ -93,7 +93,7 @@ const mockVideos: VideoItem[] = [
     duration: "10:30", views: 22000, likes: 1850, publishedDate: "2025-04-05",
     gradient: "from-sky-400 to-cyan-600",
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: "dQw4w9WgXcQ", videoUrl: "",
+    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
   },
 ];
 
@@ -150,13 +150,14 @@ export default function VideosPage() {
             youtubeId: v.youtubeId || undefined,
             videoUrl: v.videoUrl || "",
           }));
-        if (videos.length > 0) setApiVideos(videos);
+        setApiVideos(videos);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const displayVideos = apiVideos || mockVideos;
+  const displayVideos = apiVideos || [];
+  const hasVideoContent = displayVideos.length > 0;
 
   const filteredVideos = useMemo(() => {
     return displayVideos.filter((video) => {
@@ -365,9 +366,9 @@ export default function VideosPage() {
                       </div>
                       <Badge className="absolute bottom-2 end-2 text-[10px] bg-black/70 text-white border-0"><Clock className="h-3 w-3 me-1" />{video.duration}</Badge>
                       {video.isFree ? (
-                        <Badge className="absolute top-2 start-2 text-[10px] bg-emerald-500 border-0">{t("common.free")}</Badge>
+                        <Badge className="absolute top-2 start-2 text-[10px] bg-primary border-0">{t("common.free")}</Badge>
                       ) : video.price > 0 ? (
-                        <Badge className="absolute top-2 start-2 text-[10px] bg-teal-600 text-white border-0">{video.price.toLocaleString()} {t("common.currency")}</Badge>
+                        <Badge className="absolute top-2 start-2 text-[10px] bg-primary text-white border-0">{video.price.toLocaleString()} {t("common.currency")}</Badge>
                       ) : (
                         <Badge variant="secondary" className="absolute top-2 start-2 text-[10px] bg-white/90 text-foreground border-0">{t("common.paid")}</Badge>
                       )}
@@ -378,7 +379,7 @@ export default function VideosPage() {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
                         <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{video.views.toLocaleString()}</span>
                         <span className="flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" />{video.likes.toLocaleString()}</span>
-                        {video.price > 0 && <span className="flex items-center gap-1 font-semibold text-teal-600 dark:text-teal-400">{video.price.toLocaleString()} {t("common.currency")}</span>}
+                        {video.price > 0 && <span className="flex items-center gap-1 font-semibold text-primary">{video.price.toLocaleString()} {t("common.currency")}</span>}
                       </div>
                     </CardContent>
                   </Card>
