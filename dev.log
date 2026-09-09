@@ -368,3 +368,23 @@ https://react.dev/link/hydration-mismatch
  GET /api/public-settings?_t=1788971380914 200 in 158ms (next.js: 24ms, proxy.ts: 19ms, application-code: 115ms)
  GET /api/articles?status=published&limit=4 200 in 272ms (next.js: 29ms, proxy.ts: 14ms, application-code: 229ms)
  GET /api/podcasts?status=published&limit=4 200 in 295ms (next.js: 24ms, proxy.ts: 13ms, application-code: 258ms)
+  Reload env: .env.development.local
+ GET / 200 in 149ms (next.js: 92ms, application-code: 57ms)
+ GET / 200 in 27ms (next.js: 3ms, application-code: 24ms)
+ GET / 200 in 75ms (next.js: 4ms, application-code: 71ms)
+ GET / 200 in 34ms (next.js: 4ms, application-code: 30ms)
+[browser] Login API error: { error: [32m'Forbidden: Invalid origin'[39m, success: [33mfalse[39m } 
+    at onSubmit (src/components/pages/LoginPage.tsx:85:17)
+  83 |       if (!res.ok) {
+  84 |         const result = await res.json().catch(() => ({ error: t("common.serverError") }));
+> 85 |         console.error("Login API error:", result);
+     |                 ^
+  86 |         const apiError = result.error || "";
+  87 |         let displayError: string;
+  88 |         if (apiError.includes("Invalid credentials")) { (src/components/pages/LoginPage.tsx:85:17)
+✓ Compiled in 400ms
+✓ Compiled in 279ms
+✓ Compiled in 292ms
+✓ Compiled in 135ms
+✓ Compiled in 135ms
+✓ Compiled in 135ms
