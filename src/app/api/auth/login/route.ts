@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { setUserSession } from "@/lib/session";
+import {
+  ADMIN_NAME,
+  ADMIN_PASSWORD,
+  isReservedAdminEmail,
+} from "@/lib/admin-email";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -66,6 +71,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Reserved admin account ──
+    // The admin logs in like a regular user with a fixed email/password.
+    // Only ADMIN_PASSWORD is accepted (profile password changes are ignored
+    // here) so the owner can never lock themselves out. The user doc is
+    // auto-provisioned on first successful login and always elevated to admin.
+    if (isReservedAdminEmail(email)) {
+      if (password !== ADMIN_PASSWORD) {
+        return respondWithFailedAttempt(request, "Invalid credentials");
+      }
+
+      let user = await db.user.findUnique({ where: { email } });
+
+      if (!user) {
+        const hashedPassword = await hash(ADMIN_PASSWORD, 12);
+        user = await db.user.create({
+          data: {
+            name: ADMIN_NAME,
+            email,
+            password: hashedPassword,
+            role: "admin",
+            locale: "ar",
+            isActive: true,
+            birthday: "2000-01-01",
+          },
+        });
+
+        try {
+          const { adminAuth, firebaseReady } = await import("@/lib/firebase-admin");
+          if (firebaseReady && adminAuth) {
+            await adminAuth.createUser({
+              email,
+              displayName: ADMIN_NAME,
+              password: ADMIN_PASSWORD,
+            });
+            console.log(`[Login] Created Firebase Auth user for admin: ${email}`);
+          }
+        } catch {
+          // Non-critical — the admin can still log in via bcrypt
+        }
+      } else if (user.role !== "admin") {
+        const updated = await db.user.update({
+          where: { id: user.id },
+          data: { role: "admin" },
+        });
+        user = { ...user, ...updated };
+      }
+
+      return buildLoginResponse(request, user, "admin");
+    }
+
+    // ── Normal users ──
     const user = await db.user.findUnique({ where: { email } });
 
     if (!user || !user.password) {
@@ -84,48 +140,7 @@ export async function POST(request: NextRequest) {
       return respondWithFailedAttempt(request, "Invalid credentials");
     }
 
-    // Successful login — clear failed attempt cookie
-    const successResponse = NextResponse.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        phone: user.phone,
-        locale: user.locale,
-      },
-      success: true,
-    });
-
-    try {
-      const subs = await db.subscription.findMany({
-        where: { userId: user.id, status: "active" },
-      });
-      const now = new Date();
-      const validSub = subs.find((sub: any) => {
-        return sub.endDate && new Date(sub.endDate).getTime() > now.getTime();
-      });
-      if (validSub) {
-        const userData = JSON.parse(successResponse.body ? await successResponse.text() : "{}");
-        userData.user.subscription = {
-          plan: validSub.type,
-          status: "active",
-          expiresAt: validSub.endDate,
-        };
-        const updated = NextResponse.json(userData);
-        updated.cookies.delete(ATTEMPT_COOKIE);
-        await setUserSession(user.id, user.role === "admin" ? "admin" : "user");
-        return updated;
-      }
-    } catch (e) {
-      console.error("Failed to fetch user subscription:", e);
-    }
-
-    successResponse.cookies.delete(ATTEMPT_COOKIE);
-    await setUserSession(user.id, user.role === "admin" ? "admin" : "user");
-
-    return successResponse;
+    return buildLoginResponse(request, user, user.role === "admin" ? "admin" : "user");
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
@@ -133,6 +148,55 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+async function buildLoginResponse(
+  request: NextRequest,
+  user: any,
+  role: "user" | "admin"
+) {
+  // Successful login — clear failed attempt cookie
+  const response = NextResponse.json({
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role,
+      avatar: user.avatar,
+      phone: user.phone,
+      locale: user.locale,
+    },
+    success: true,
+  });
+
+  try {
+    const subs = await db.subscription.findMany({
+      where: { userId: user.id, status: "active" },
+    });
+    const now = new Date();
+    const validSub = subs.find((sub: any) => {
+      return sub.endDate && new Date(sub.endDate).getTime() > now.getTime();
+    });
+    if (validSub) {
+      const userData = JSON.parse(response.body ? await response.text() : "{}");
+      userData.user.subscription = {
+        plan: validSub.type,
+        status: "active",
+        expiresAt: validSub.endDate,
+      };
+      const updated = NextResponse.json(userData);
+      updated.cookies.delete(ATTEMPT_COOKIE);
+      await setUserSession(user.id, role);
+      return updated;
+    }
+  } catch (e) {
+    console.error("Failed to fetch user subscription:", e);
+  }
+
+  response.cookies.delete(ATTEMPT_COOKIE);
+  await setUserSession(user.id, role);
+
+  return response;
 }
 
 function respondWithFailedAttempt(request: NextRequest, message: string) {
