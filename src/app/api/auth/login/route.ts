@@ -11,26 +11,26 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-// Track failed login attempts per email for account lockout
-const failedAttempts = new Map<string, { count: number; lockedUntil: number }>();
+const MAX_FAILED_ATTEMPTS = 10;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+const ATTEMPT_COOKIE = "hs_login_attempts";
 
-// Lazy cleanup: no setInterval (leaks in serverless).
-// Prune stale entries when the map grows too large.
-function cleanStaleAttempts() {
-  const now = Date.now();
-  for (const [key, entry] of failedAttempts) {
-    if (now > entry.lockedUntil) failedAttempts.delete(key);
+function readAttemptsCookie(request: NextRequest): { count: number; lockedUntil: number } {
+  const cookie = request.cookies.get(ATTEMPT_COOKIE);
+  if (!cookie?.value) return { count: 0, lockedUntil: 0 };
+  try {
+    const parsed = JSON.parse(cookie.value);
+    return {
+      count: typeof parsed.count === "number" ? parsed.count : 0,
+      lockedUntil: typeof parsed.lockedUntil === "number" ? parsed.lockedUntil : 0,
+    };
+  } catch {
+    return { count: 0, lockedUntil: 0 };
   }
 }
 
-const MAX_FAILED_ATTEMPTS = 10;
-const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
-
 export async function POST(request: NextRequest) {
   try {
-    // Lazy cleanup of stale failed attempt records
-    if (failedAttempts.size > 500) cleanStaleAttempts();
-
     // Rate limiting: max 10 login attempts per minute per IP
     const rlKey = rateLimitKey(request, "login");
     if (isRateLimited(rlKey, { max: 10, windowMs: 60_000 })) {
@@ -51,14 +51,12 @@ export async function POST(request: NextRequest) {
     }
 
     let { email, password } = parsed.data;
-
-    // Sanitize inputs
     email = sanitizeEmail(email);
 
-    // Check if account is temporarily locked due to too many failed attempts
-    const attemptRecord = failedAttempts.get(email);
-    if (attemptRecord && Date.now() < attemptRecord.lockedUntil) {
-      const remainingMinutes = Math.ceil((attemptRecord.lockedUntil - Date.now()) / 60_000);
+    // Check cookie-based lockout (persists across cold starts)
+    const attemptState = readAttemptsCookie(request);
+    if (attemptState.count >= MAX_FAILED_ATTEMPTS && Date.now() < attemptState.lockedUntil) {
+      const remainingMinutes = Math.ceil((attemptState.lockedUntil - Date.now()) / 60_000);
       return NextResponse.json(
         {
           error: `Account temporarily locked due to too many failed attempts. Please try again in ${remainingMinutes} minutes.`,
@@ -68,17 +66,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await db.user.findUnique({
-      where: { email },
-    });
+    const user = await db.user.findUnique({ where: { email } });
 
     if (!user || !user.password) {
-      // Record failed attempt (but don't reveal whether user exists)
-      recordFailedAttempt(email);
-      return NextResponse.json(
-        { error: "Invalid credentials", success: false },
-        { status: 401 }
-      );
+      return respondWithFailedAttempt(request, "Invalid credentials");
     }
 
     if (!user.isActive) {
@@ -90,42 +81,11 @@ export async function POST(request: NextRequest) {
 
     const isValid = await compare(password, user.password);
     if (!isValid) {
-      recordFailedAttempt(email);
-      return NextResponse.json(
-        { error: "Invalid credentials", success: false },
-        { status: 401 }
-      );
+      return respondWithFailedAttempt(request, "Invalid credentials");
     }
 
-    // Successful login — clear any failed attempt records
-    failedAttempts.delete(email);
-
-    // Set session cookie — server now knows who the user is
-    await setUserSession(user.id, user.role === "admin" ? "admin" : "user");
-
-    // Fetch active subscriptions for this user
-    let subscription: { plan: string; status: string; expiresAt: any } | null = null;
-    try {
-      const subs = await db.subscription.findMany({
-        where: { userId: user.id, status: "active" },
-      });
-      const now = new Date();
-      // Find a valid (non-expired) active subscription
-      const validSub = subs.find((sub: any) => {
-        return sub.endDate && new Date(sub.endDate).getTime() > now.getTime();
-      });
-      if (validSub) {
-        subscription = {
-          plan: validSub.type,
-          status: "active",
-          expiresAt: validSub.endDate,
-        };
-      }
-    } catch (e) {
-      console.error("Failed to fetch user subscription:", e);
-    }
-
-    return NextResponse.json({
+    // Successful login — clear failed attempt cookie
+    const successResponse = NextResponse.json({
       user: {
         id: user.id,
         name: user.name,
@@ -134,10 +94,38 @@ export async function POST(request: NextRequest) {
         avatar: user.avatar,
         phone: user.phone,
         locale: user.locale,
-        subscription,
       },
       success: true,
     });
+
+    try {
+      const subs = await db.subscription.findMany({
+        where: { userId: user.id, status: "active" },
+      });
+      const now = new Date();
+      const validSub = subs.find((sub: any) => {
+        return sub.endDate && new Date(sub.endDate).getTime() > now.getTime();
+      });
+      if (validSub) {
+        const userData = JSON.parse(successResponse.body ? await successResponse.text() : "{}");
+        userData.user.subscription = {
+          plan: validSub.type,
+          status: "active",
+          expiresAt: validSub.endDate,
+        };
+        const updated = NextResponse.json(userData);
+        updated.cookies.delete(ATTEMPT_COOKIE);
+        await setUserSession(user.id, user.role === "admin" ? "admin" : "user");
+        return updated;
+      }
+    } catch (e) {
+      console.error("Failed to fetch user subscription:", e);
+    }
+
+    successResponse.cookies.delete(ATTEMPT_COOKIE);
+    await setUserSession(user.id, user.role === "admin" ? "admin" : "user");
+
+    return successResponse;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
@@ -147,19 +135,28 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function recordFailedAttempt(email: string) {
-  const existing = failedAttempts.get(email);
-  const count = (existing?.count || 0) + 1;
+function respondWithFailedAttempt(request: NextRequest, message: string) {
+  const state = readAttemptsCookie(request);
+  const now = Date.now();
+  let count = state.count + 1;
+  let lockedUntil = state.lockedUntil;
 
   if (count >= MAX_FAILED_ATTEMPTS) {
-    failedAttempts.set(email, {
-      count,
-      lockedUntil: Date.now() + LOCKOUT_DURATION,
-    });
-  } else {
-    failedAttempts.set(email, {
-      count,
-      lockedUntil: existing?.lockedUntil || 0,
-    });
+    lockedUntil = now + LOCKOUT_DURATION;
   }
+
+  const response = NextResponse.json(
+    { error: message, success: false },
+    { status: 401 }
+  );
+
+  response.cookies.set(ATTEMPT_COOKIE, JSON.stringify({ count, lockedUntil }), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: Math.ceil(LOCKOUT_DURATION / 1000),
+    path: "/",
+  });
+
+  return response;
 }
