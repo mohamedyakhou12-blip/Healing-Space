@@ -77,8 +77,13 @@ export async function POST(request: NextRequest) {
     // here) so the owner can never lock themselves out. The user doc is
     // auto-provisioned on first successful login and always elevated to admin.
     if (isReservedAdminEmail(email)) {
-      if (password !== ADMIN_PASSWORD) {
-        return respondWithFailedAttempt(request, "Invalid credentials");
+      // Trim whitespace — password managers / autofill often append a space.
+      const normalizedPassword = password.trim();
+      if (normalizedPassword !== ADMIN_PASSWORD) {
+        return NextResponse.json(
+          { error: "كلمة مرور الأدمن غير صحيحة", success: false },
+          { status: 401 }
+        );
       }
 
       let user = await db.user.findUnique({ where: { email } });
