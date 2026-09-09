@@ -356,3 +356,15 @@ https://react.dev/link/hydration-mismatch
   574 |       {/* ============================================================ */}
   575 |       {/* HERO SECTION                                                  */}
   576 |       {/* ============================================================ */}
+ GET / 200 in 128ms (next.js: 4ms, application-code: 124ms)
+ GET /api/courses?status=published&limit=4 200 in 114ms (next.js: 19ms, proxy.ts: 13ms, application-code: 82ms)
+ GET /api/csrf-token 200 in 44ms (next.js: 21ms, proxy.ts: 18ms, application-code: 5ms)
+ GET /api/sliders 200 in 131ms (next.js: 34ms, proxy.ts: 14ms, application-code: 83ms)
+ GET /api/auth/session 200 in 57ms (next.js: 27ms, proxy.ts: 18ms, application-code: 12ms)
+ GET /api/auth/profile 401 in 63ms (next.js: 37ms, proxy.ts: 21ms, application-code: 6ms)
+ GET /api/public-settings 200 in 160ms (next.js: 32ms, proxy.ts: 16ms, application-code: 113ms)
+ GET /api/homepage-images 200 in 151ms (next.js: 33ms, proxy.ts: 26ms, application-code: 92ms)
+ GET /api/public-settings 200 in 70ms (next.js: 38ms, proxy.ts: 28ms, application-code: 4ms)
+ GET /api/public-settings?_t=1788971380914 200 in 158ms (next.js: 24ms, proxy.ts: 19ms, application-code: 115ms)
+ GET /api/articles?status=published&limit=4 200 in 272ms (next.js: 29ms, proxy.ts: 14ms, application-code: 229ms)
+ GET /api/podcasts?status=published&limit=4 200 in 295ms (next.js: 24ms, proxy.ts: 13ms, application-code: 258ms)
