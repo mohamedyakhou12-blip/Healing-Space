@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 text-white">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-accent text-white">
       {/* Background decoration */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
@@ -27,7 +27,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl sm:text-2xl text-teal-100 mb-4"
+            className="text-xl sm:text-2xl text-primary-foreground/80 mb-4"
           >
             منصة الدكتورة نسرين التعليمية
           </motion.p>
@@ -35,7 +35,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base sm:text-lg text-teal-200 mb-8 leading-relaxed"
+            className="text-base sm:text-lg text-primary-foreground/70 mb-8 leading-relaxed"
           >
             اكتشف عالماً من المعرفة في مجال العلاج النفسي والتطوير الذاتي. دورات تعليمية، مقالات متخصصة، بودكاست ملهم، وأكثر من ذلك بكثير.
           </motion.p>

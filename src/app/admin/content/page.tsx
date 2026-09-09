@@ -21,7 +21,7 @@ export default function AdminContentPage() {
           <h1 className="text-2xl font-bold text-gray-900">إدارة المحتوى</h1>
           <p className="text-gray-600 mt-1">إدارة جميع أنواع المحتوى على المنصة</p>
         </div>
-        <Button className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+        <Button className="bg-primary hover:bg-accent text-primary-foreground gap-2">
           <Plus className="h-4 w-4" />
           إضافة محتوى جديد
         </Button>
@@ -31,7 +31,7 @@ export default function AdminContentPage() {
           <Card key={type.name} className="shadow-sm border-0 hover:shadow-md transition-all cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">{type.name}</CardTitle>
-              <BookOpen className="h-5 w-5 text-teal-600" />
+              <BookOpen className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">{type.count}</div>

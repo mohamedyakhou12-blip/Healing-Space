@@ -35,7 +35,7 @@ function AnimatedCounter({ value, suffix, decimals = 0 }: { value: number; suffi
   }, [isInView, value]);
 
   return (
-    <span ref={ref} className="text-4xl sm:text-5xl font-extrabold text-teal-600">
+    <span ref={ref} className="text-4xl sm:text-5xl font-extrabold text-primary">
       {decimals > 0 ? count.toFixed(decimals) : Math.floor(count)}
       {suffix}
     </span>

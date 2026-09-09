@@ -63,7 +63,7 @@ export default function AdminCustomizePage() {
           </CardContent>
         </Card>
 
-        <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">حفظ التخصيصات</Button>
+        <Button className="w-full bg-primary hover:bg-accent text-primary-foreground">حفظ التخصيصات</Button>
       </div>
     </div>
   );

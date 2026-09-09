@@ -318,7 +318,7 @@ function formatFileSize(bytes: number): string {
 
 function getFileTypeInfo(file: File): { label: string; color: string } {
   if (file.type.startsWith("image/")) {
-    return { label: "Image", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-400" };
+    return { label: "Image", color: "text-primary bg-secondary dark:bg-secondary dark:text-primary" };
   }
   if (file.type.startsWith("audio/")) {
     return { label: "Audio", color: "text-violet-600 bg-violet-50 dark:bg-violet-950 dark:text-violet-400" };
@@ -330,7 +330,7 @@ function getFileTypeInfo(file: File): { label: string; color: string } {
     return { label: "PDF", color: "text-rose-600 bg-rose-50 dark:bg-rose-950 dark:text-rose-400" };
   }
   if (file.type.startsWith("text/")) {
-    return { label: "Text", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950 dark:text-cyan-400" };
+    return { label: "Text", color: "text-primary bg-secondary dark:bg-secondary dark:text-primary" };
   }
   if (file.type.includes("zip") || file.type.includes("rar") || file.type.includes("compress")) {
     return { label: "Archive", color: "text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-400" };
@@ -339,7 +339,7 @@ function getFileTypeInfo(file: File): { label: string; color: string } {
     return { label: "Document", color: "text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400" };
   }
   if (file.type.includes("spreadsheet") || file.type.includes("excel")) {
-    return { label: "Spreadsheet", color: "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400" };
+    return { label: "Spreadsheet", color: "text-primary bg-secondary dark:bg-secondary dark:text-primary" };
   }
   if (file.type.includes("presentation")) {
     return { label: "Presentation", color: "text-red-600 bg-red-50 dark:bg-red-950 dark:text-red-400" };
@@ -572,11 +572,11 @@ function FileUploadComponent({
       {/* Tab switch: Upload File | External URL */}
       <Tabs value={effectiveTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full h-9 grid grid-cols-2">
-          <TabsTrigger value="upload" className="text-xs gap-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="upload" className="text-xs gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
             <Upload className="size-3.5" />
             {t("admin.uploadFile") || "رفع ملف"}
           </TabsTrigger>
-          <TabsTrigger value="url" className="text-xs gap-1.5 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="url" className="text-xs gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-white">
             <Paperclip className="size-3.5" />
             {t("admin.externalUrl") || "رابط خارجي"}
           </TabsTrigger>
@@ -694,13 +694,13 @@ function FileUploadComponent({
           ) : (uploading ? (
             /* Upload in progress */
             <div
-              className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-teal-500 bg-teal-50/50 dark:bg-teal-950/20 p-8"
+              className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-primary bg-secondary/50 dark:bg-secondary/20 p-8"
             >
-              <Loader2 className="size-8 text-teal-500 animate-spin" />
+              <Loader2 className="size-8 text-primary animate-spin" />
               <p className="text-sm text-muted-foreground">{t("admin.uploading") || "جارٍ الرفع..."}</p>
               <div className="w-full max-w-xs bg-muted rounded-full h-2">
                 <div
-                  className="bg-teal-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-secondary0 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${Math.min(uploadProgress, 100)}%` }}
                 />
               </div>
@@ -715,13 +715,13 @@ function FileUploadComponent({
               onClick={() => fileInputRef.current?.click()}
               className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ${
                 isDragOver
-                  ? "border-teal-500 bg-teal-50 dark:bg-teal-950/30"
-                  : "border-muted-foreground/25 hover:border-teal-400 hover:bg-muted/50"
+                  ? "border-primary bg-secondary dark:bg-secondary/30"
+                  : "border-muted-foreground/25 hover:border-accent hover:bg-muted/50"
               } ${uploading ? "pointer-events-none opacity-60" : ""}`}
             >
               <>
-                <div className={`p-3 rounded-full transition-colors ${isDragOver ? "bg-teal-100 dark:bg-teal-900" : "bg-muted"}`}>
-                  <Upload className={`size-6 ${isDragOver ? "text-teal-600 dark:text-teal-400" : "text-muted-foreground"}`} />
+                <div className={`p-3 rounded-full transition-colors ${isDragOver ? "bg-primary-100 dark:bg-accent" : "bg-muted"}`}>
+                  <Upload className={`size-6 ${isDragOver ? "text-primary dark:text-accent" : "text-muted-foreground"}`} />
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-foreground">
@@ -791,7 +791,7 @@ const CATEGORIES = [
   "أخرى",
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════��═════════════════════════════════════
 // ─── RICH TEXT EDITOR COMPONENT ──────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -807,7 +807,7 @@ function ToolbarButton({ onClick, active, children, title }: { onClick: () => vo
     <button
       type="button"
       onMouseDown={(e) => { e.preventDefault(); onClick(); }}
-      className={`p-1.5 rounded hover:bg-muted transition-colors ${active ? "bg-muted text-teal-600" : "text-muted-foreground"}`}
+      className={`p-1.5 rounded hover:bg-muted transition-colors ${active ? "bg-muted text-primary" : "text-muted-foreground"}`}
       title={title}
     >
       {children}
@@ -899,7 +899,7 @@ function RichTextEditor({ value, onChange, placeholder, dir }: RichTextEditorPro
             dir="ltr"
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertLink(); } }}
           />
-          <Button type="button" size="sm" className="h-8 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={insertLink}>
+          <Button type="button" size="sm" className="h-8 text-xs bg-primary hover:bg-accent text-white" onClick={insertLink}>
             <Check className="size-3" />
           </Button>
         </div>
@@ -933,7 +933,7 @@ export default function AdminPage() {
   if (isLoadingAuth) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary" />
       </div>
     );
   }
@@ -971,7 +971,7 @@ export default function AdminPage() {
               onClick={() => setTab(item.key)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                 isActive
-                  ? "bg-teal-600 text-white shadow-md"
+                  ? "bg-primary text-white shadow-md"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
@@ -1032,16 +1032,16 @@ function DashboardView() {
   }, []);
 
   const stats = [
-    { labelKey: "admin.totalMembers", value: statsData ? String(statsData.totalMembers || 0) : "—", change: "", up: true, icon: Users, color: "teal" },
-    { labelKey: "admin.totalCourses", value: statsData ? String(statsData.totalCourses || 0) : "—", change: "", up: true, icon: BookOpen, color: "emerald" },
+    { labelKey: "admin.totalMembers", value: statsData ? String(statsData.totalMembers || 0) : "—", change: "", up: true, icon: Users, color: "primary" },
+    { labelKey: "admin.totalCourses", value: statsData ? String(statsData.totalCourses || 0) : "—", change: "", up: true, icon: BookOpen, color: "primary" },
     { labelKey: "admin.totalSubscriptions", value: statsData ? String(statsData.activeSubscriptions || 0) : "—", change: "", up: true, icon: CreditCard, color: "violet" },
     { labelKey: "admin.avgRating", value: statsData ? String(statsData.avgRating || 0) : "—", change: "", up: true, icon: Star, color: "amber" },
     { labelKey: "admin.pendingPayments", value: statsData ? String(statsData.pendingPayments || 0) : "—", change: "", up: false, icon: Clock, color: "rose" },
   ];
 
   const colorMap: Record<string, { bg: string; icon: string; ring: string }> = {
-    teal: { bg: "bg-teal-50 dark:bg-teal-950/50", icon: "text-teal-600 dark:text-teal-400", ring: "ring-teal-100 dark:ring-teal-900" },
-    emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/50", icon: "text-emerald-600 dark:text-emerald-400", ring: "ring-emerald-100 dark:ring-emerald-900" },
+    primary: { bg: "bg-secondary dark:bg-secondary/50", icon: "text-primary dark:text-accent", ring: "ring-primary-100 dark:ring-accent" },
+    primary: { bg: "bg-primary-50 dark:bg-secondary/50", icon: "text-primary dark:text-accent", ring: "ring-primary-100 dark:ring-accent" },
     violet: { bg: "bg-violet-50 dark:bg-violet-950/50", icon: "text-violet-600 dark:text-violet-400", ring: "ring-violet-100 dark:ring-violet-900" },
     amber: { bg: "bg-amber-50 dark:bg-amber-950/50", icon: "text-amber-600 dark:text-amber-400", ring: "ring-amber-100 dark:ring-amber-900" },
     rose: { bg: "bg-rose-50 dark:bg-rose-950/50", icon: "text-rose-600 dark:text-rose-400", ring: "ring-rose-100 dark:ring-rose-900" },
@@ -1061,9 +1061,9 @@ function DashboardView() {
   };
 
   const activityColors: Record<string, string> = {
-    member: "text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-950",
+    member: "text-primary bg-secondary dark:text-accent dark:bg-secondary",
     payment: "text-violet-600 bg-violet-50 dark:text-violet-400 dark:bg-violet-950",
-    content: "text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950",
+    content: "text-primary bg-primary-50 dark:text-accent dark:bg-secondary",
   };
 
   return (
@@ -1092,7 +1092,7 @@ function DashboardView() {
                     <div className={`p-4 rounded-2xl ring-1 ${colors.ring} ${colors.bg}`}>
                       <Icon className={`size-8 ${colors.icon}`} />
                     </div>
-                    <div className={`flex items-center gap-1 text-xs font-medium ${stat.up ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                    <div className={`flex items-center gap-1 text-xs font-medium ${stat.up ? "text-primary dark:text-accent" : "text-rose-600 dark:text-rose-400"}`}>
                       {stat.up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                       {stat.change}
                     </div>
@@ -1338,7 +1338,7 @@ function MembersView() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="size-8">
-                          <AvatarFallback className="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 text-xs font-medium">
+                          <AvatarFallback className="bg-primary-100 dark:bg-accent text-accent dark:text-primary-300 text-xs font-medium">
                             {member.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -1357,7 +1357,7 @@ function MembersView() {
                         variant={member.status === "active" ? "default" : "secondary"}
                         className={
                           member.status === "active"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 border-0"
+                            ? "bg-primary-100 text-primary dark:bg-accent dark:text-primary-300 border-0"
                             : "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300 border-0"
                         }
                       >
@@ -1388,7 +1388,7 @@ function MembersView() {
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem
-                              className="cursor-pointer text-emerald-600 focus:text-emerald-600"
+                              className="cursor-pointer text-primary focus:text-primary"
                               onClick={() => setConfirmAction({ type: "activate", member })}
                             >
                               <UserCheck className="size-4 me-2" />
@@ -1671,7 +1671,7 @@ function PaymentsView() {
 
   const statusColors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-    approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
+    approved: "bg-primary-100 text-primary dark:bg-accent dark:text-primary-300",
     rejected: "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
   };
 
@@ -1745,7 +1745,7 @@ function PaymentsView() {
                     <p className="text-sm font-medium flex items-center gap-1.5">
                       {payment.planType}
                       {payment.isPurchase && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300">
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary-100 text-accent dark:bg-accent dark:text-primary-300">
                           {t("common.buyNow") || "شراء فردي"}
                         </Badge>
                       )}
@@ -1753,7 +1753,7 @@ function PaymentsView() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t("payment.amount")}</p>
-                    <p className="text-sm font-bold text-teal-600 dark:text-teal-400">{payment.amount}</p>
+                    <p className="text-sm font-bold text-primary dark:text-accent">{payment.amount}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t("admin.ccpNumber")}</p>
@@ -1770,7 +1770,7 @@ function PaymentsView() {
                   <p className="text-xs text-muted-foreground mb-2">{t("admin.receipt")}</p>
                   <button
                     onClick={() => setReceiptDialog(payment.receiptUrl)}
-                    className="block w-full rounded-lg overflow-hidden border hover:ring-2 hover:ring-teal-300 transition-all group"
+                    className="block w-full rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary-300 transition-all group"
                   >
                     <div className="aspect-video bg-muted relative">
                       <img
@@ -1790,7 +1790,7 @@ function PaymentsView() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="flex-1 bg-primary hover:bg-accent text-white"
                       onClick={() => setConfirmAction({ type: "approve", payment })}
                     >
                       <Check className="size-4 me-1.5" />
@@ -1868,7 +1868,7 @@ function PaymentsView() {
             <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleAction}
-              className={confirmAction.type === "delete" ? "bg-red-600 hover:bg-red-700" : confirmAction.type === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+              className={confirmAction.type === "delete" ? "bg-red-600 hover:bg-red-700" : confirmAction.type === "approve" ? "bg-primary hover:bg-accent" : ""}
             >
               {confirmAction.type === "delete"
                 ? (locale === "ar" ? "حذف نهائي" : locale === "fr" ? "Supprimer définitivement" : "Delete Permanently")
@@ -2443,7 +2443,7 @@ function ContentView() {
           <h1 className="text-2xl font-bold text-foreground">{t("admin.content")}</h1>
           <p className="text-muted-foreground text-sm mt-1">{t("admin.manageContent")}</p>
         </div>
-        <Button onClick={() => openEdit(null, true)} className="bg-teal-600 hover:bg-teal-700 text-white">
+        <Button onClick={() => openEdit(null, true)} className="bg-primary hover:bg-accent text-white">
           <Plus className="size-4 me-1.5" />
           {SECTION_LABELS[contentSubTab].addNew}
         </Button>
@@ -2535,10 +2535,10 @@ function ContentView() {
 
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg border bg-teal-50 dark:bg-teal-950/30 border-teal-200 dark:border-teal-800">
+        <div className="flex items-center gap-3 p-3 rounded-lg border bg-secondary dark:bg-secondary/30 border-primary-200 dark:border-accent">
           <span className="text-sm font-medium">{selectedIds.size} {t("admin.selected") || "محدد"}</span>
           <div className="flex gap-2 ms-auto">
-            <Button size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleBulkAction("publish")} disabled={saving}>
+            <Button size="sm" className="h-8 text-xs bg-primary hover:bg-accent text-white" onClick={() => handleBulkAction("publish")} disabled={saving}>
               <Check className="size-3 me-1" /> {t("admin.bulkPublish") || "نشر المحدد"}
             </Button>
             <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleBulkAction("draft")} disabled={saving}>
@@ -2590,7 +2590,7 @@ function ContentView() {
                 </TableRow>
               ) : (
                 filteredItems.map((item) => (
-                  <TableRow key={item.id} className={selectedIds.has(item.id) ? "bg-teal-50/50 dark:bg-teal-950/20" : ""}>
+                  <TableRow key={item.id} className={selectedIds.has(item.id) ? "bg-secondary/50 dark:bg-secondary/20" : ""}>
                     <TableCell>
                       <input
                         type="checkbox"
@@ -2624,7 +2624,7 @@ function ContentView() {
                         variant="secondary"
                         className={
                           item.status === "published"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 border-0"
+                            ? "bg-primary-100 text-primary dark:bg-accent dark:text-primary-300 border-0"
                             : "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 border-0"
                         }
                       >
@@ -2639,9 +2639,9 @@ function ContentView() {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {item.isFree ? (
-                        <span className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">{t("common.free")}</span>
+                        <span className="text-sm text-primary dark:text-accent font-medium">{t("common.free")}</span>
                       ) : item.price ? (
-                        <span className="text-sm font-semibold text-teal-600 dark:text-teal-400">{item.price.toLocaleString()} {t("common.currency")}</span>
+                        <span className="text-sm font-semibold text-primary dark:text-accent">{item.price.toLocaleString()} {t("common.currency")}</span>
                       ) : (
                         <span className="text-sm text-muted-foreground">{t("admin.noPriceSet")}</span>
                       )}
@@ -2992,7 +2992,7 @@ function ContentView() {
             >
               <Eye className="size-4 me-1.5" /> {t("admin.preview") || "معاينة"}
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-accent text-white">
               {saving ? <Skeleton className="h-4 w-16" /> : t("admin.saveChanges")}
             </Button>
           </DialogFooter>
@@ -3027,11 +3027,11 @@ function ContentView() {
                   <div className="text-xs leading-relaxed prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: formContentAr }} />
                 )}
                 <div className="flex items-center gap-2">
-                  <Badge className={getPreviewItem()?.status === "published" ? "bg-emerald-100 text-emerald-700 border-0" : "bg-amber-100 text-amber-700 border-0"}>
+                  <Badge className={getPreviewItem()?.status === "published" ? "bg-primary-100 text-primary border-0" : "bg-amber-100 text-amber-700 border-0"}>
                     {getPreviewItem()?.status === "published" ? t("admin.published") : t("admin.draft")}
                   </Badge>
                   {getPreviewItem()?.isFree ? (
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-300">{t("common.free")}</Badge>
+                    <Badge variant="outline" className="text-primary border-primary-300">{t("common.free")}</Badge>
                   ) : (
                     <Badge variant="secondary">{getPreviewItem()?.price?.toLocaleString()} {t("common.currency")}</Badge>
                   )}
@@ -3093,7 +3093,7 @@ function ContentView() {
                         ))}
                         <Input type="number" placeholder={t("admin.orderField") || "الترتيب"} value={chapterForm.order} onChange={(e) => setChapterForm((prev) => ({ ...prev, order: parseInt(e.target.value) || 0 }))} dir="ltr" className="h-8 text-sm" />
                         <div className="flex gap-2">
-                          <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveChapter} disabled={chapterSaving}>
+                          <Button size="sm" className="h-7 text-xs bg-primary hover:bg-accent text-white" onClick={handleSaveChapter} disabled={chapterSaving}>
                             {chapterSaving ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}
                           </Button>
                           <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setEditingChapterId(null); setChapterForm({ titleAr: "", titleFr: "", titleEn: "", order: 0 }); }}>
@@ -3151,7 +3151,7 @@ function ContentView() {
                                   <Label className="text-xs">{t("admin.isFreeLesson") || "درس مجاني"}</Label>
                                 </div>
                                 <div className="flex gap-1">
-                                  <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveLesson} disabled={chapterSaving}>
+                                  <Button size="sm" className="h-7 text-xs bg-primary hover:bg-accent text-white" onClick={handleSaveLesson} disabled={chapterSaving}>
                                     {chapterSaving ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3" />}
                                   </Button>
                                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setEditingLessonId(null); setAddingLessonChapterId(null); setLessonForm({ titleAr: "", titleFr: "", titleEn: "", videoUrl: "", duration: "", order: 0, isFree: false }); }}>
@@ -3164,7 +3164,7 @@ function ContentView() {
                             <>
                               <span className="text-xs font-medium flex-1">{lesson.titleAr || lesson.title}</span>
                               {lesson.isFree && (
-                                <Badge variant="outline" className="text-[9px] px-1 py-0 text-emerald-600 border-emerald-300">{t("common.free")}</Badge>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0 text-primary border-primary-300">{t("common.free")}</Badge>
                               )}
                               <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setEditingLessonId(lesson.id); setAddingLessonChapterId(chapter.id); setLessonForm({ titleAr: lesson.titleAr || "", titleFr: lesson.titleFr || "", titleEn: lesson.titleEn || "", videoUrl: lesson.videoUrl || "", duration: lesson.duration || "", order: lesson.order || 0, isFree: lesson.isFree || false }); }}>
                                 <Pencil className="size-2.5" />
@@ -3181,8 +3181,8 @@ function ContentView() {
 
                   {/* Add Lesson inline form */}
                   {addingLessonChapterId === chapter.id && editingLessonId === null && (
-                    <div className="ms-6 p-2 rounded border bg-teal-50/50 dark:bg-teal-950/20 space-y-2">
-                      <p className="text-xs font-medium text-teal-700 dark:text-teal-300">{t("admin.addLesson") || "إضافة درس"}</p>
+                    <div className="ms-6 p-2 rounded border bg-secondary/50 dark:bg-secondary/20 space-y-2">
+                      <p className="text-xs font-medium text-accent dark:text-primary-300">{t("admin.addLesson") || "إضافة درس"}</p>
                       {(["ar", "fr", "en"] as const).map((lang) => (
                         <Input
                           key={`new-ls-${lang}`}
@@ -3203,7 +3203,7 @@ function ContentView() {
                           <Label className="text-xs">{t("admin.isFreeLesson") || "درس مجاني"}</Label>
                         </div>
                         <div className="flex gap-1">
-                          <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveLesson} disabled={chapterSaving}>
+                          <Button size="sm" className="h-7 text-xs bg-primary hover:bg-accent text-white" onClick={handleSaveLesson} disabled={chapterSaving}>
                             {chapterSaving ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3 me-1" />} {t("admin.save") || "حفظ"}
                           </Button>
                           <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setAddingLessonChapterId(null); setLessonForm({ titleAr: "", titleFr: "", titleEn: "", videoUrl: "", duration: "", order: 0, isFree: false }); }}>
@@ -3217,7 +3217,7 @@ function ContentView() {
                   {/* Add Lesson button */}
                   {addingLessonChapterId !== chapter.id && (
                     <div className="ms-6">
-                      <Button variant="ghost" size="sm" className="h-7 text-xs text-teal-600" onClick={() => { setAddingLessonChapterId(chapter.id); setEditingLessonId(null); setLessonForm({ titleAr: "", titleFr: "", titleEn: "", videoUrl: "", duration: "", order: 0, isFree: false }); }}>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => { setAddingLessonChapterId(chapter.id); setEditingLessonId(null); setLessonForm({ titleAr: "", titleFr: "", titleEn: "", videoUrl: "", duration: "", order: 0, isFree: false }); }}>
                         <Plus className="size-3 me-1" /> {t("admin.addLesson") || "إضافة درس"}
                       </Button>
                     </div>
@@ -3228,8 +3228,8 @@ function ContentView() {
 
             {/* Add Chapter inline form */}
             {addingChapter && (
-              <div className="p-3 rounded-lg border-2 border-dashed border-teal-300 dark:border-teal-700 bg-teal-50/50 dark:bg-teal-950/20 space-y-2">
-                <p className="text-xs font-medium text-teal-700 dark:text-teal-300">{t("admin.addChapter") || "إضافة فصل"}</p>
+              <div className="p-3 rounded-lg border-2 border-dashed border-primary-300 dark:border-accent bg-secondary/50 dark:bg-secondary/20 space-y-2">
+                <p className="text-xs font-medium text-accent dark:text-primary-300">{t("admin.addChapter") || "إضافة فصل"}</p>
                 {(["ar", "fr", "en"] as const).map((lang) => (
                   <Input
                     key={`new-ch-${lang}`}
@@ -3242,7 +3242,7 @@ function ContentView() {
                 ))}
                 <Input type="number" placeholder={t("admin.orderField") || "الترتيب"} value={chapterForm.order} onChange={(e) => setChapterForm((prev) => ({ ...prev, order: parseInt(e.target.value) || 0 }))} dir="ltr" className="h-8 text-sm" />
                 <div className="flex gap-2">
-                  <Button size="sm" className="h-8 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveChapter} disabled={chapterSaving}>
+                  <Button size="sm" className="h-8 text-xs bg-primary hover:bg-accent text-white" onClick={handleSaveChapter} disabled={chapterSaving}>
                     {chapterSaving ? <Loader2 className="size-3 animate-spin" /> : <Check className="size-3 me-1" />} {t("admin.save") || "حفظ"}
                   </Button>
                   <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setAddingChapter(false); setChapterForm({ titleAr: "", titleFr: "", titleEn: "", order: 0 }); }}>
@@ -3430,7 +3430,7 @@ function PurchasesView() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <ShoppingBag className="size-6 text-teal-600" />
+          <ShoppingBag className="size-6 text-primary" />
           {t("admin.individualPurchases")}
         </h1>
         <p className="text-muted-foreground text-sm mt-1">{t("admin.individualPurchasesDesc")}</p>
@@ -3441,7 +3441,7 @@ function PurchasesView() {
         {[
           { label: t("admin.all"), count: counts.total, color: "bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800" },
           { label: t("admin.pending"), count: counts.pending, color: "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900" },
-          { label: t("admin.approved"), count: counts.approved, color: "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900" },
+          { label: t("admin.approved"), count: counts.approved, color: "bg-primary-50 dark:bg-secondary text-primary dark:text-primary-300 border-primary-200 dark:border-accent" },
           { label: t("admin.rejected"), count: counts.rejected, color: "bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900" },
         ].map((stat) => (
           <Card key={stat.label} className={`border ${stat.color}`}>
@@ -3494,7 +3494,7 @@ function PurchasesView() {
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     {/* Content type icon */}
-                    <div className="p-2.5 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 shrink-0">
+                    <div className="p-2.5 rounded-lg bg-secondary dark:bg-secondary text-primary dark:text-accent shrink-0">
                       <CTIcon className="size-5" />
                     </div>
 
@@ -3509,7 +3509,7 @@ function PurchasesView() {
                             purchase.status === "pending"
                               ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 border-0 text-[10px]"
                               : purchase.status === "approved"
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 border-0 text-[10px]"
+                              ? "bg-primary-100 text-primary dark:bg-accent dark:text-primary-300 border-0 text-[10px]"
                               : "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300 border-0 text-[10px]"
                           }
                         >
@@ -3550,7 +3550,7 @@ function PurchasesView() {
                         <>
                           <Button
                             size="sm"
-                            className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-8 text-xs bg-primary hover:bg-accent text-white"
                             onClick={() => setConfirmAction({ type: "approve", payment: purchase })}
                           >
                             <Check className="size-3.5 me-1" />
@@ -3633,7 +3633,7 @@ function PurchasesView() {
             <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleAction}
-              className={confirmAction.type === "delete" ? "bg-red-600 hover:bg-red-700" : confirmAction.type === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}
+              className={confirmAction.type === "delete" ? "bg-red-600 hover:bg-red-700" : confirmAction.type === "approve" ? "bg-primary hover:bg-accent" : "bg-rose-600 hover:bg-rose-700"}
             >
               {confirmAction.type === "delete"
                 ? (locale === "ar" ? "حذف نهائي" : locale === "fr" ? "Supprimer définitivement" : "Delete Permanently")
@@ -3654,12 +3654,12 @@ function PurchasesView() {
 
 const SUBSCRIPTION_PLANS: Array<{ id: string; labelKey: string; icon: typeof Crown; gradient: string }> = [
   { id: "full", labelKey: "subscriptions.fullAccess", icon: Crown, gradient: "from-amber-400 via-orange-500 to-rose-500" },
-  { id: "courses", labelKey: "subscriptions.coursesOnly", icon: BookOpen, gradient: "from-emerald-400 to-teal-600" },
-  { id: "articles", labelKey: "subscriptions.articlesOnly", icon: FileText, gradient: "from-cyan-400 to-sky-600" },
+  { id: "courses", labelKey: "subscriptions.coursesOnly", icon: BookOpen, gradient: "from-accent to-primary" },
+  { id: "articles", labelKey: "subscriptions.articlesOnly", icon: FileText, gradient: "from-accent to-primary" },
   { id: "podcasts", labelKey: "subscriptions.podcastsOnly", icon: Headphones, gradient: "from-violet-400 to-purple-600" },
   { id: "videos", labelKey: "subscriptions.videosOnly", icon: Video, gradient: "from-rose-400 to-pink-600" },
   { id: "pdfs", labelKey: "subscriptions.pdfsOnly", icon: FileDown, gradient: "from-amber-400 to-yellow-600" },
-  { id: "live", labelKey: "subscriptions.liveOnly", icon: Radio, gradient: "from-teal-400 to-emerald-600" },
+  { id: "live", labelKey: "subscriptions.liveOnly", icon: Radio, gradient: "from-accent to-primary" },
   { id: "coaching", labelKey: "subscriptions.coachingOnly", icon: Star, gradient: "from-indigo-400 to-blue-600" },
 ];
 
@@ -3897,8 +3897,8 @@ function PricesView() {
   };
 
   const typeColorMap: Record<string, string> = {
-    courses: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
-    articles: "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300",
+    courses: "bg-primary-100 text-primary dark:bg-accent dark:text-primary-300",
+    articles: "bg-primary-100 text-accent dark:bg-accent dark:text-primary-300",
     podcasts: "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
     videos: "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
     pdfs: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
@@ -3988,7 +3988,7 @@ function PricesView() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            className="h-8 text-xs bg-teal-600 hover:bg-teal-700 text-white flex-1"
+                            className="h-8 text-xs bg-primary hover:bg-accent text-white flex-1"
                             onClick={() => handleSubPriceSave(plan.id)}
                             disabled={savingSubPrice}
                           >
@@ -4014,7 +4014,7 @@ function PricesView() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 text-teal-600 hover:text-teal-700 hover:bg-teal-50 dark:hover:bg-teal-950"
+                          className="h-8 w-8 p-0 text-primary hover:text-accent hover:bg-secondary dark:hover:bg-secondary"
                           onClick={() => startEditSubPrice(plan.id)}
                         >
                           <Pencil className="size-3.5" />
@@ -4050,7 +4050,7 @@ function PricesView() {
             {ALL_CONTENT_TYPES.map((type) => {
               const typeLabels: Record<string, string> = { courses: t("nav.courses"), articles: t("nav.articles"), podcasts: t("nav.podcasts"), videos: t("nav.videos"), pdfs: t("nav.pdfs"), live: t("nav.live"), coaching: t("nav.coaching") };
               const typeIcons: Record<string, typeof BookOpen> = { courses: BookOpen, articles: FileText, podcasts: Headphones, videos: Video, pdfs: FileDown, live: Radio, coaching: Sparkles };
-              const typeGradients: Record<string, string> = { courses: "from-emerald-400 to-teal-600", articles: "from-cyan-400 to-sky-600", podcasts: "from-violet-400 to-purple-600", videos: "from-rose-400 to-pink-600", pdfs: "from-amber-400 to-yellow-600", live: "from-teal-400 to-emerald-600", coaching: "from-indigo-400 to-blue-600" };
+              const typeGradients: Record<string, string> = { courses: "from-accent to-primary", articles: "from-accent to-primary", podcasts: "from-violet-400 to-purple-600", videos: "from-rose-400 to-pink-600", pdfs: "from-amber-400 to-yellow-600", live: "from-accent to-primary", coaching: "from-indigo-400 to-blue-600" };
               const isChecked = fullPlanIncludes.includes(type);
               const TypeIcon = typeIcons[type];
               const isExpanded = expandedType === type;
@@ -4169,7 +4169,7 @@ function PricesView() {
                                   </span>
                                 </div>
                                 {item.isFree ? (
-                                  <Badge variant="outline" className="text-[9px] h-4 px-1 border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400 shrink-0">
+                                  <Badge variant="outline" className="text-[9px] h-4 px-1 border-primary-300 text-primary dark:border-accent dark:text-accent shrink-0">
                                     {t("common.free")}
                                   </Badge>
                                 ) : excluded ? (
@@ -4286,16 +4286,16 @@ function PricesView() {
                     </TableCell>
                     <TableCell>
                       {item.isFree ? (
-                        <Badge variant="outline" className="text-emerald-600 border-emerald-300 dark:text-emerald-400 dark:border-emerald-700">{t("common.free")}</Badge>
+                        <Badge variant="outline" className="text-primary border-primary-300 dark:text-accent dark:border-accent">{t("common.free")}</Badge>
                       ) : (
                         <Badge variant="secondary">{t("common.paid")}</Badge>
                       )}
                     </TableCell>
                     <TableCell>
                       {item.isFree ? (
-                        <span className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">—</span>
+                        <span className="text-sm text-primary dark:text-accent font-medium">—</span>
                       ) : item.price ? (
-                        <span className="text-sm font-bold text-teal-600 dark:text-teal-400">{item.price.toLocaleString()} {t("common.currency")}</span>
+                        <span className="text-sm font-bold text-primary dark:text-accent">{item.price.toLocaleString()} {t("common.currency")}</span>
                       ) : (
                         <span className="text-sm text-muted-foreground">{t("admin.noPriceSet")}</span>
                       )}
@@ -4322,7 +4322,7 @@ function PricesView() {
           <DialogHeader>
             <DialogTitle>
               <div className="flex items-center gap-2">
-                <Banknote className="size-5 text-teal-600" />
+                <Banknote className="size-5 text-primary" />
                 {t("admin.updatePrice")}
               </div>
             </DialogTitle>
@@ -4355,7 +4355,7 @@ function PricesView() {
             <Button variant="outline" onClick={() => setPriceDialog({ open: false, contentType: "courses", item: null })}>
               {t("admin.cancel")}
             </Button>
-            <Button onClick={handlePriceSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handlePriceSave} disabled={saving} className="bg-primary hover:bg-accent text-white">
               <Check className="size-4 me-1.5" />
               {t("admin.saveChanges")}
             </Button>
@@ -4823,7 +4823,7 @@ function SettingsView() {
             </div>
           ))}
           <div className="pt-2">
-            <Button onClick={handleSaveSiteInfo} disabled={saving === "siteInfo"} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSaveSiteInfo} disabled={saving === "siteInfo"} className="bg-primary hover:bg-accent text-white">
               {saving === "siteInfo" ? <Skeleton className="h-4 w-20" /> : t("admin.saveChanges")}
             </Button>
           </div>
@@ -4834,7 +4834,7 @@ function SettingsView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <BookOpen className="size-5 text-teal-600" />
+            <BookOpen className="size-5 text-primary" />
             {t("admin.homepageEditor")}
           </CardTitle>
         </CardHeader>
@@ -4843,7 +4843,7 @@ function SettingsView() {
 
           {/* Hero Title - Trilingual */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-teal-700">{t("admin.heroTitle")}</Label>
+            <Label className="text-sm font-semibold text-accent">{t("admin.heroTitle")}</Label>
             {(["ar", "fr", "en"] as const).map((lang) => (
               <div key={`heroTitle-${lang}`} className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4861,7 +4861,7 @@ function SettingsView() {
 
           {/* Hero Subtitle - Trilingual */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-teal-700">{t("admin.heroSubtitle")}</Label>
+            <Label className="text-sm font-semibold text-accent">{t("admin.heroSubtitle")}</Label>
             {(["ar", "fr", "en"] as const).map((lang) => (
               <div key={`heroSub-${lang}`} className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4879,7 +4879,7 @@ function SettingsView() {
 
           {/* Hero Description - Trilingual */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-teal-700">{t("admin.heroDescription")}</Label>
+            <Label className="text-sm font-semibold text-accent">{t("admin.heroDescription")}</Label>
             {(["ar", "fr", "en"] as const).map((lang) => (
               <div key={`heroDesc-${lang}`} className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4898,7 +4898,7 @@ function SettingsView() {
 
           {/* Site Owner Name - Trilingual */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-teal-700">{t("admin.siteOwnerName")}</Label>
+            <Label className="text-sm font-semibold text-accent">{t("admin.siteOwnerName")}</Label>
             {(["ar", "fr", "en"] as const).map((lang) => (
               <div key={`ownerName-${lang}`} className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4917,7 +4917,7 @@ function SettingsView() {
           {/* CTA Buttons - Trilingual */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.ctaButton1")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.ctaButton1")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`cta1-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4931,7 +4931,7 @@ function SettingsView() {
               ))}
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.ctaButton2")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.ctaButton2")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`cta2-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -4950,7 +4950,7 @@ function SettingsView() {
 
           {/* Intro Video URL */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-teal-700 flex items-center gap-2">
+            <Label className="text-sm font-semibold text-accent flex items-center gap-2">
               <Video className="size-4" />
               {t("admin.introVideoUrl")}
             </Label>
@@ -4978,7 +4978,7 @@ function SettingsView() {
             {/* Video upload button */}
             <div className="flex items-center gap-2">
               <label
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-dashed border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-950/30 dark:text-teal-400 dark:hover:bg-teal-950/50"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-dashed border-primary-300 bg-secondary px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-primary-100 dark:border-accent dark:bg-secondary/30 dark:text-accent dark:hover:bg-secondary/50"
               >
                 <Upload className="size-3.5" />
                 {t("admin.uploadVideo")}
@@ -5020,7 +5020,7 @@ function SettingsView() {
               </label>
               {introVideoUrl && introVideoUrl.includes('res.cloudinary.com') && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Check className="size-3 text-green-500" />
+                  <Check className="size-3 text-primary" />
                   {t("admin.videoUploadedSuccess")}
                 </span>
               )}
@@ -5052,7 +5052,7 @@ function SettingsView() {
           </div>
 
           <div className="pt-2">
-            <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-primary hover:bg-accent text-white">
               {saving === "homepage" ? <Skeleton className="h-4 w-20" /> : t("admin.saveChanges")}
             </Button>
           </div>
@@ -5078,7 +5078,7 @@ function SettingsView() {
             </div>
           ))}
           <div className="pt-2">
-            <Button onClick={handleSaveSocialLinks} disabled={saving === "social"} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSaveSocialLinks} disabled={saving === "social"} className="bg-primary hover:bg-accent text-white">
               {saving === "social" ? <Skeleton className="h-4 w-20" /> : t("admin.saveChanges")}
             </Button>
           </div>
@@ -5089,7 +5089,7 @@ function SettingsView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCard className="size-5 text-teal-600" />
+            <CreditCard className="size-5 text-primary" />
             معلومات الدفع CCP
           </CardTitle>
         </CardHeader>
@@ -5124,7 +5124,7 @@ function SettingsView() {
             />
           </div>
           <div className="pt-2">
-            <Button onClick={handleSaveCCP} disabled={saving === "ccp"} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSaveCCP} disabled={saving === "ccp"} className="bg-primary hover:bg-accent text-white">
               {saving === "ccp" ? <Skeleton className="h-4 w-20" /> : t("admin.saveChanges")}
             </Button>
           </div>
@@ -5135,7 +5135,7 @@ function SettingsView() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">{t("admin.sliders")}</CardTitle>
-          <Button size="sm" onClick={() => openSliderDialog(null, true)} className="bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" onClick={() => openSliderDialog(null, true)} className="bg-primary hover:bg-accent text-white">
             <Plus className="size-4 me-1.5" />
             {t("admin.addSlider")}
           </Button>
@@ -5179,7 +5179,7 @@ function SettingsView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <ShoppingBag className="size-5 text-teal-600" />
+            <ShoppingBag className="size-5 text-primary" />
             {t("admin.individualPurchases")}
           </CardTitle>
         </CardHeader>
@@ -5196,7 +5196,7 @@ function SettingsView() {
             />
           </div>
           <div className="pt-2">
-            <Button onClick={handleSavePurchaseSettings} disabled={saving === "purchaseSettings"} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSavePurchaseSettings} disabled={saving === "purchaseSettings"} className="bg-primary hover:bg-accent text-white">
               {saving === "purchaseSettings" ? <Skeleton className="h-4 w-20" /> : t("admin.saveChanges")}
             </Button>
           </div>
@@ -5207,7 +5207,7 @@ function SettingsView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="size-5 text-teal-600" />
+            <Shield className="size-5 text-primary" />
             {t("admin.security")}
           </CardTitle>
         </CardHeader>
@@ -5237,7 +5237,7 @@ function SettingsView() {
             <Button
               onClick={handleChangeAdminCode}
               disabled={saving === "adminCode"}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
+              className="bg-primary hover:bg-accent text-white"
             >
               {saving === "adminCode" ? <Skeleton className="h-4 w-20" /> : (
                 <>
@@ -5291,7 +5291,7 @@ function SettingsView() {
             <Button variant="outline" onClick={() => setSliderDialog({ open: false, slider: null, isNew: false })}>
               {t("admin.cancel")}
             </Button>
-            <Button onClick={handleSliderSave} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={handleSliderSave} className="bg-primary hover:bg-accent text-white">
               {t("admin.saveChanges")}
             </Button>
           </DialogFooter>
@@ -5484,7 +5484,7 @@ function HomepageCustomizer() {
 
       setIntroVideoUrl(uploadResult.url);
       setVideoUploadProgress(100);
-      toast.success(t("admin.videoUploaded") || "تم رفع الفيديو بنجاح");
+      toast.success(t("admin.videoUploaded") || "��م رفع الفيديو بنجاح");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "";
       if (message.includes("cancelled")) {
@@ -5567,7 +5567,7 @@ function HomepageCustomizer() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <BookOpen className="size-6 text-teal-600" />
+          <BookOpen className="size-6 text-primary" />
           {locale === "ar" ? "تخصيص الصفحة الرئيسية" : locale === "fr" ? "Personnaliser la page d'accueil" : "Customize Homepage"}
         </h1>
       </div>
@@ -5583,7 +5583,7 @@ function HomepageCustomizer() {
               onClick={() => setActiveSection(tab.key)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                 isActive
-                  ? "bg-teal-600 text-white shadow-lg shadow-teal-500/25"
+                  ? "bg-primary text-white shadow-lg shadow-primary/25"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               }`}
             >
@@ -5599,14 +5599,14 @@ function HomepageCustomizer() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <BookOpen className="size-5 text-teal-600" />
+              <BookOpen className="size-5 text-primary" />
               {locale === "ar" ? "تعديل البانر الرئيسي" : "Edit Hero Banner"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             {/* Hero Title */}
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.heroTitle")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.heroTitle")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`heroTitle-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5617,7 +5617,7 @@ function HomepageCustomizer() {
             <Separator />
             {/* Hero Subtitle */}
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.heroSubtitle")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.heroSubtitle")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`heroSub-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5628,7 +5628,7 @@ function HomepageCustomizer() {
             <Separator />
             {/* Hero Description */}
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.heroDescription")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.heroDescription")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`heroDesc-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5639,7 +5639,7 @@ function HomepageCustomizer() {
             <Separator />
             {/* Site Owner Name */}
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-teal-700">{t("admin.siteOwnerName")}</Label>
+              <Label className="text-sm font-semibold text-accent">{t("admin.siteOwnerName")}</Label>
               {(["ar", "fr", "en"] as const).map((lang) => (
                 <div key={`ownerName-${lang}`} className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5651,7 +5651,7 @@ function HomepageCustomizer() {
             {/* CTA Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-teal-700">{t("admin.ctaButton1")}</Label>
+                <Label className="text-sm font-semibold text-accent">{t("admin.ctaButton1")}</Label>
                 {(["ar", "fr", "en"] as const).map((lang) => (
                   <div key={`cta1-${lang}`} className="space-y-1">
                     <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5660,7 +5660,7 @@ function HomepageCustomizer() {
                 ))}
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-teal-700">{t("admin.ctaButton2")}</Label>
+                <Label className="text-sm font-semibold text-accent">{t("admin.ctaButton2")}</Label>
                 {(["ar", "fr", "en"] as const).map((lang) => (
                   <div key={`cta2-${lang}`} className="space-y-1">
                     <Label className="text-xs text-muted-foreground">{t(`admin.${lang}`)}</Label>
@@ -5670,7 +5670,7 @@ function HomepageCustomizer() {
               </div>
             </div>
             <div className="pt-2">
-              <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+              <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-primary hover:bg-accent text-white gap-2">
                 {saving === "homepage" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                 {t("admin.saveChanges") || "حفظ التغييرات"}
               </Button>
@@ -5694,7 +5694,7 @@ function HomepageCustomizer() {
             </p>
 
             {/* Video Upload Button - PROMINENT */}
-            <div className="rounded-xl border-2 border-dashed border-teal-300 bg-teal-50/50 dark:border-teal-700 dark:bg-teal-950/20 p-6">
+            <div className="rounded-xl border-2 border-dashed border-primary-300 bg-secondary/50 dark:border-accent dark:bg-secondary/20 p-6">
               <div className="flex flex-col items-center gap-4">
                 <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 shadow-lg shadow-rose-500/25">
                   <Video className="size-8 text-white" />
@@ -5710,12 +5710,12 @@ function HomepageCustomizer() {
 
                 {uploadingVideo ? (
                   <div className="w-full max-w-sm space-y-2">
-                    <div className="flex items-center justify-center gap-2 text-sm text-teal-600">
+                    <div className="flex items-center justify-center gap-2 text-sm text-primary">
                       <Loader2 className="size-5 animate-spin" />
                       {locale === "ar" ? "جارٍ رفع الفيديو..." : "Uploading video..."}
                     </div>
                     <div className="w-full bg-muted rounded-full h-2.5">
-                      <div className="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style={{ width: `${Math.min(videoUploadProgress, 100)}%` }} />
+                      <div className="bg-secondary0 h-2.5 rounded-full transition-all duration-300" style={{ width: `${Math.min(videoUploadProgress, 100)}%` }} />
                     </div>
                     <p className="text-xs text-center text-muted-foreground">{Math.round(videoUploadProgress)}%</p>
                   </div>
@@ -5765,13 +5765,13 @@ function HomepageCustomizer() {
                       ? (locale === "ar" ? "فيديو يوتيوب" : "YouTube video")
                       : (locale === "ar" ? "فيديو مباشر" : "Direct video")}
                   </span>
-                  <Check className="size-4 text-green-500 shrink-0" />
+                  <Check className="size-4 text-primary shrink-0" />
                 </div>
               </div>
             )}
 
             <div className="pt-2">
-              <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+              <Button onClick={handleSaveHomepage} disabled={saving === "homepage"} className="bg-primary hover:bg-accent text-white gap-2">
                 {saving === "homepage" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                 {t("admin.saveChanges") || "حفظ التغييرات"}
               </Button>
@@ -5790,7 +5790,7 @@ function HomepageCustomizer() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button onClick={() => { setSliderForm({ imageUrl: "", title: "", titleAr: "", titleFr: "", titleEn: "", order: sliders.length + 1, link: "" }); setSliderDialog({ open: true, slider: null, isNew: true }); }} className="gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={() => { setSliderForm({ imageUrl: "", title: "", titleAr: "", titleFr: "", titleEn: "", order: sliders.length + 1, link: "" }); setSliderDialog({ open: true, slider: null, isNew: true }); }} className="gap-2 bg-primary hover:bg-accent text-white">
               <Plus className="size-4" />
               {locale === "ar" ? "إضافة شريحة" : "Add Slider"}
             </Button>
@@ -5853,7 +5853,7 @@ function HomepageCustomizer() {
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setSliderDialog({ open: false, slider: null, isNew: false })}>{locale === "ar" ? "إلغاء" : "Cancel"}</Button>
-                  <Button onClick={handleSliderSave} className="bg-teal-600 hover:bg-teal-700 text-white">{locale === "ar" ? "حفظ" : "Save"}</Button>
+                  <Button onClick={handleSliderSave} className="bg-primary hover:bg-accent text-white">{locale === "ar" ? "حفظ" : "Save"}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

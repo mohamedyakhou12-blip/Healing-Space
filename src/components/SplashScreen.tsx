@@ -90,8 +90,8 @@ export function SplashScreen() {
             style={{
               background:
                 theme === "dark"
-                  ? "radial-gradient(circle at 50% 45%, hsla(173, 70%, 42%, 0.15) 0%, transparent 60%)"
-                  : "radial-gradient(circle at 50% 45%, hsla(173, 80%, 50%, 0.12) 0%, transparent 60%)",
+                  ? "radial-gradient(circle at 50% 45%, hsla(31, 38%, 48%, 0.15) 0%, transparent 60%)"
+                  : "radial-gradient(circle at 50% 45%, hsla(31, 38%, 58%, 0.12) 0%, transparent 60%)",
             }}
           />
 
@@ -101,28 +101,28 @@ export function SplashScreen() {
             animate={{ y: [0, -15, 0], rotate: [0, 10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Leaf className="size-20 text-emerald-600" />
+            <Leaf className="size-20 text-amber-600" />
           </motion.div>
           <motion.div
             className="absolute bottom-[20%] right-[10%] opacity-[0.06] dark:opacity-[0.04]"
             animate={{ y: [0, -12, 0], rotate: [0, -8, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           >
-            <Leaf className="size-16 text-teal-600" />
+            <Leaf className="size-16 text-stone-600" />
           </motion.div>
           <motion.div
             className="absolute top-[25%] right-[18%] opacity-[0.05] dark:opacity-[0.03]"
             animate={{ y: [0, -10, 0], rotate: [0, 15, 0] }}
             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
           >
-            <Leaf className="size-12 text-emerald-500" />
+            <Leaf className="size-12 text-amber-500" />
           </motion.div>
 
           {/* Center content */}
           <div className="relative z-10 flex flex-col items-center gap-5">
             {/* Leaf icon with breathing animation */}
             <motion.div
-              className="relative flex size-24 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/50"
+              className="relative flex size-24 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50"
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{
                 scale: [1, 1.08, 1],
@@ -140,16 +140,16 @@ export function SplashScreen() {
             >
               {/* Inner glow ring */}
               <motion.div
-                className="absolute inset-0 rounded-full bg-emerald-200/50 dark:bg-emerald-800/30"
+                className="absolute inset-0 rounded-full bg-amber-200/50 dark:bg-amber-800/30"
                 animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
-              <Leaf className="relative z-10 size-12 text-emerald-600 dark:text-emerald-400" />
+              <Leaf className="relative z-10 size-12 text-amber-600 dark:text-amber-400" />
             </motion.div>
 
             {/* Title: "Healing Space" */}
             <motion.h1
-              className="text-3xl font-bold tracking-wide text-emerald-800 dark:text-emerald-100 sm:text-4xl"
+              className="text-3xl font-bold tracking-wide text-amber-800 dark:text-amber-100 sm:text-4xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
@@ -159,7 +159,7 @@ export function SplashScreen() {
 
             {/* Subtitle: "By Doc Nessrine" */}
             <motion.p
-              className="text-sm font-medium tracking-wider text-emerald-600/70 dark:text-emerald-300/60 sm:text-base"
+              className="text-sm font-medium tracking-wider text-amber-600/70 dark:text-amber-300/60 sm:text-base"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}

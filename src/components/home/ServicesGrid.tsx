@@ -11,7 +11,7 @@ const services = [
     title: 'الدورات التعليمية',
     description: 'دورات متخصصة في العلاج النفسي والتطوير الذاتي مع شهادات معتمدة',
     href: '/courses',
-    color: 'text-teal-600 bg-teal-50',
+    color: 'text-primary bg-secondary',
   },
   {
     icon: FileText,

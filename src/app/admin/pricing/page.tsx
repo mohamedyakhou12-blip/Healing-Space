@@ -35,7 +35,7 @@ export default function AdminPricingPage() {
                 </div>
               </div>
             ))}
-            <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">حفظ الأسعار</Button>
+            <Button className="w-full bg-primary hover:bg-accent text-primary-foreground">حفظ الأسعار</Button>
           </CardContent>
         </Card>
 
@@ -53,7 +53,7 @@ export default function AdminPricingPage() {
                 <span className="text-sm text-gray-500">دج</span>
               </div>
             </div>
-            <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">حفظ الإعدادات</Button>
+            <Button className="w-full bg-primary hover:bg-accent text-primary-foreground">حفظ الإعدادات</Button>
           </CardContent>
         </Card>
       </div>
