@@ -778,3 +778,4 @@ https://react.dev/link/hydration-mismatch
  GET /api/auth/session 200 in 68ms (next.js: 21ms, proxy.ts: 34ms, application-code: 14ms)
  GET /api/public-settings 200 in 59ms (next.js: 33ms, proxy.ts: 22ms, application-code: 4ms)
  GET /api/live 200 in 475ms (next.js: 328ms, proxy.ts: 9ms, application-code: 137ms)
+ GET / 200 in 270ms (next.js: 50ms, application-code: 220ms)
