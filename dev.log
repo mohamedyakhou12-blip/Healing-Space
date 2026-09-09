@@ -388,3 +388,18 @@ https://react.dev/link/hydration-mismatch
 ✓ Compiled in 135ms
 ✓ Compiled in 135ms
 ✓ Compiled in 135ms
+ GET / 200 in 413ms (next.js: 16ms, application-code: 397ms)
+ GET /api/courses?status=published&limit=4 200 in 267ms (next.js: 81ms, proxy.ts: 6ms, application-code: 180ms)
+ GET /api/public-settings 200 in 376ms (next.js: 198ms, proxy.ts: 13ms, application-code: 165ms)
+ GET /api/public-settings 200 in 366ms (next.js: 158ms, proxy.ts: 205ms, application-code: 3ms)
+ GET /api/auth/session 200 in 414ms (next.js: 141ms, proxy.ts: 202ms, application-code: 71ms)
+ GET /api/auth/profile 401 in 341ms (next.js: 129ms, proxy.ts: 203ms, application-code: 10ms)
+ GET /api/csrf-token 200 in 325ms (next.js: 162ms, proxy.ts: 155ms, application-code: 8ms)
+ GET /api/homepage-images 200 in 544ms (next.js: 259ms, proxy.ts: 79ms, application-code: 206ms)
+ GET /api/sliders 200 in 558ms (next.js: 262ms, proxy.ts: 14ms, application-code: 283ms)
+ GET /api/public-settings?_t=1788971505011 200 in 551ms (next.js: 206ms, proxy.ts: 148ms, application-code: 197ms)
+ GET /api/podcasts?status=published&limit=4 200 in 630ms (next.js: 137ms, proxy.ts: 11ms, application-code: 482ms)
+ GET /api/articles?status=published&limit=4 200 in 638ms (next.js: 73ms, proxy.ts: 9ms, application-code: 557ms)
+  Reload env: .env.development.local
+ GET / 200 in 192ms (next.js: 96ms, application-code: 96ms)
+ GET / 200 in 30ms (next.js: 3ms, application-code: 27ms)
