@@ -472,3 +472,13 @@ https://react.dev/link/hydration-mismatch
  GET /api/public-settings 200 in 103ms (next.js: 8ms, proxy.ts: 5ms, application-code: 89ms)
  GET /api/articles?status=published&limit=4 200 in 302ms (next.js: 24ms, proxy.ts: 10ms, application-code: 268ms)
  GET /api/podcasts?status=published&limit=4 200 in 314ms (next.js: 27ms, proxy.ts: 12ms, application-code: 275ms)
+  Reload env: .env.development.local
+ GET /login 200 in 206ms (next.js: 107ms, application-code: 99ms)
+ GET / 200 in 40ms (next.js: 10ms, application-code: 30ms)
+ GET / 200 in 30ms (next.js: 3ms, application-code: 28ms)
+ GET /videos 200 in 793ms (next.js: 762ms, application-code: 31ms)
+ GET /api/subscription-prices?_t=1788971915763 200 in 249ms (next.js: 50ms, proxy.ts: 66ms, application-code: 133ms)
+ GET /api/subscription-prices?_t=1788971915764 200 in 116ms (next.js: 2ms, proxy.ts: 6ms, application-code: 108ms)
+ GET /api/videos 200 in 442ms (next.js: 188ms, proxy.ts: 8ms, application-code: 246ms)
+ GET /api/videos 200 in 18ms (next.js: 3ms, proxy.ts: 4ms, application-code: 12ms)
+ GET / 200 in 506ms (next.js: 9ms, application-code: 497ms)
