@@ -6,19 +6,18 @@ import { NextRequest, NextResponse } from "next/server";
  * we protect API routes and add security headers.
  */
 
+// Private routes that REQUIRE a session cookie at the middleware layer.
+// Public content read endpoints (/api/courses, /api/articles, /api/podcasts,
+// /api/videos, /api/pdfs, /api/live, /api/coaching(s), /api/reviews) are NOT
+// listed here: guests must be able to browse published content, and every
+// mutation (POST/PUT/DELETE) is already protected inside each route handler
+// via requireAuth()/requireAdmin()/verifyAdminAccess().
 const PROTECTED_API_ROUTES = [
   "/api/auth/profile",
   "/api/auth/logout",
-  "/api/courses",
-  "/api/articles",
-  "/api/podcasts",
-  "/api/videos",
-  "/api/pdfs",
-  "/api/live",
-  "/api/coaching",
   "/api/subscriptions",
   "/api/payments",
-  "/api/reviews",
+  "/api/purchases",
   "/api/notifications",
   "/api/upload",
   "/api/prices",
@@ -78,10 +77,20 @@ export function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  response.headers.set(
-    "Access-Control-Allow-Origin",
-    request.headers.get("origin") || "*"
-  );
+
+  // Restrict CORS to the site's own origin only. Reflecting any arbitrary
+  // Origin alongside Access-Control-Allow-Credentials would let a malicious
+  // site read (credentialed) responses of private APIs keyed by the victim's
+  // session cookie (subscriptions, payments, notifications, ...). Same-origin
+  // requests do not need these headers, so preview deployments keep working.
+  const allowedOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://healing-space-henna.vercel.app";
+  const origin = request.headers.get("origin");
+  if (origin && origin === allowedOrigin) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
   response.headers.set(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
@@ -90,7 +99,6 @@ export function middleware(request: NextRequest) {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, X-CSRF-Token, X-Admin-Code"
   );
-  response.headers.set("Access-Control-Allow-Credentials", "true");
 
   if (request.method === "OPTIONS") {
     return new NextResponse(null, { status: 204, headers: response.headers });
