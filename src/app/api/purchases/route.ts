@@ -78,12 +78,16 @@ export async function GET(request: NextRequest) {
         try {
           const tenDaysAgo = new Date();
           tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-          // Use a targeted query instead of fetching ALL purchases
-          const oldRejected = await db.purchase.findMany({
-            where: {
-              status: "rejected",
-              updatedAt: { lt: tenDaysAgo.toISOString() },
-            },
+          // NB: the db layer only applies userId/status where-clauses and
+          // silently ignores `updatedAt`. Fetching defined with `updatedAt: { lt }`
+          // deleted ALL rejected purchases on every admin GET.
+          // Fix: query rejected only, then filter by age in JS.
+          const rejected = await db.purchase.findMany({
+            where: { status: "rejected" },
+          });
+          const oldRejected = rejected.filter((p: any) => {
+            const t = p.updatedAt || p.createdAt;
+            return t && new Date(t) < tenDaysAgo;
           });
           if (oldRejected.length > 0) {
             // Delete in parallel using individual delete calls
