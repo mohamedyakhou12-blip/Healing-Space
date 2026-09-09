@@ -28,7 +28,7 @@ function getServiceAccount(): any {
       try {
         const decoded = Buffer.from(raw, "base64").toString("utf-8");
         sa = JSON.parse(decoded);
-      } catch (e) {
+      } catch {
         console.error("[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY as JSON or base64");
       }
     }
@@ -38,15 +38,13 @@ function getServiceAccount(): any {
   if (!sa && process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     try {
       sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    } catch (e) {
-      console.error("[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:", e);
+    } catch {
+      console.error("[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON");
     }
   }
 
   if (sa && sa.private_key) {
     // Fix PEM private key newlines
-    // Vercel env vars may cause double-escaping: literal \n instead of newlines
-    // PEM keys require actual newline characters between lines
     sa.private_key = sa.private_key
       .replace(/\\n/g, "\n")
       .replace(/\\r/g, "\r");
@@ -61,7 +59,6 @@ function initializeAdmin() {
   const existingApp = getApps().find((a) => a.name === ADMIN_APP_NAME);
   if (existingApp) {
     adminApp = existingApp;
-    // Check if the existing app was properly initialized
     const sa = getServiceAccount();
     if (sa && sa.private_key && sa.private_key.includes("-----BEGIN")) {
       _firebaseReady = true;
@@ -91,8 +88,7 @@ function initializeAdmin() {
     } catch (e: any) {
       _initError = e?.message || String(e);
       console.error("[Firebase Admin] Failed to initialize with service account:", _initError);
-      // Still create a minimal app so the server doesn't crash on import,
-      // but API routes MUST check firebaseReady before using Firestore
+      // Create minimal app so server doesn't crash on import
       adminApp = initializeApp(
         { 
           projectId: sa.project_id || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f",
@@ -108,10 +104,13 @@ function initializeAdmin() {
     else if (!sa.private_key) reasons.push("service account missing private_key");
     else if (!sa.private_key.includes("-----BEGIN")) reasons.push("service account private_key does not contain PEM header");
     _initError = reasons.join(", ");
-    console.error("[Firebase Admin] CRITICAL: No valid Firebase service account configured!", _initError);
-    console.error("[Firebase Admin] CRITICAL: All Firestore operations will FAIL. Set FIREBASE_SERVICE_ACCOUNT_KEY env var.");
-    // Still create a minimal app so the server doesn't crash on import,
-    // but API routes MUST check firebaseReady before using Firestore
+    
+    // Only log warning in production, not during build
+    if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build") {
+      console.warn("[Firebase Admin] No valid service account configured:", _initError);
+    }
+    
+    // Create minimal app so server doesn't crash on import
     adminApp = initializeApp(
       { 
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f",
