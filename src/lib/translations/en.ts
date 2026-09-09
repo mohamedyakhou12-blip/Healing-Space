@@ -393,6 +393,7 @@ const en = {
     security: "Security",
     subscriptionPrices: "Subscription Prices",
     subscriptionPricesDesc: "Manage subscription plan pricing",
+    recommended: "Recommended",
     uploadFile: "Upload File",
     externalUrl: "External URL",
     uploading: "Uploading...",
