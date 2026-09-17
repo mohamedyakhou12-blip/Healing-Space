@@ -395,7 +395,7 @@ export default function PaymentPage() {
     },
     approved: {
       label: t("payment.approved"),
-      color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
       icon: ShieldCheck,
     },
     rejected: {
@@ -497,7 +497,7 @@ export default function PaymentPage() {
                     className="shrink-0"
                   >
                     {copiedCCP ? (
-                      <Check className="h-4 w-4 text-amber-500" />
+                      <Check className="h-4 w-4 text-emerald-500" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
@@ -581,7 +581,7 @@ export default function PaymentPage() {
                     : isUploadingReceipt
                       ? "border-primary bg-primary/5"
                       : receiptPreview
-                        ? "border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10"
+                        ? "border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-900/10"
                         : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30"
                 }`}
               >
@@ -612,7 +612,7 @@ export default function PaymentPage() {
                         />
                       )}
                     </div>
-                    <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                       {locale === "ar" ? "تم رفع الإيصال بنجاح ✅" : locale === "fr" ? "Reçu téléchargé avec succès ✅" : "Receipt uploaded successfully ✅"}
                     </p>
                     <p className="text-xs text-muted-foreground">

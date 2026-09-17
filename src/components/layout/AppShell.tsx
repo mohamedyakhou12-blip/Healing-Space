@@ -28,7 +28,7 @@ import { initCSRFProtection } from "@/lib/csrf-client";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { dir } = useTranslation();
-  const [bgLoaded] = useState(true);
+  const [bgLoaded, setBgLoaded] = useState(false);
 
   // ── Initialize CSRF Protection ──
   useEffect(() => {
@@ -138,7 +138,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
-  // Background is pure CSS and available immediately.
+  // Background is now pure CSS — no image preload needed
+  useEffect(() => { setBgLoaded(true); }, []);
 
   // ── Set SPA mode and sync initial route from browser URL ──
   useEffect(() => {

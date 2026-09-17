@@ -43,7 +43,7 @@ interface PodcastEpisode {
 }
 
 const GRADIENTS = [
-  "from-amber-400 to-amber-600",
+  "from-emerald-400 to-teal-600",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
@@ -70,7 +70,7 @@ const mockEpisodes: PodcastEpisode[] = [
     date: "2025-01-10",
     isFree: true,
     price: 0,
-    gradient: "from-amber-400 to-amber-600",
+    gradient: "from-emerald-400 to-teal-600",
     audioUrl: "",
   },
   {

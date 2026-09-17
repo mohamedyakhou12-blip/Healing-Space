@@ -38,7 +38,7 @@ interface PdfItem {
 }
 
 const GRADIENTS = [
-  "from-amber-400 to-amber-600",
+  "from-emerald-400 to-teal-600",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
@@ -63,7 +63,7 @@ const mockPdfs: PdfItem[] = [
     pages: 45,
     isFree: true,
     price: 0,
-    gradient: "from-amber-400 to-amber-600",
+    gradient: "from-emerald-400 to-teal-600",
     category: { ar: "التأمل", en: "Meditation", fr: "Méditation" },
     fileUrl: "",
   },
@@ -381,11 +381,11 @@ export default function PdfsPage() {
                       )}
                       <div className="absolute top-4 start-4">
                         {pdf.isFree ? (
-                          <Badge className="bg-white/90 text-amber-700 border-0">
+                          <Badge className="bg-white/90 text-emerald-700 border-0">
                             {t("common.free")}
                           </Badge>
                         ) : pdf.price > 0 ? (
-                          <Badge className="bg-amber-600 text-white border-0">
+                          <Badge className="bg-teal-600 text-white border-0">
                             {pdf.price.toLocaleString()} {t("common.currency")}
                           </Badge>
                         ) : (
