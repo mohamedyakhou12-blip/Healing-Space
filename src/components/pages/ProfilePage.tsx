@@ -136,7 +136,7 @@ function contentTypeName(type: string, locale: Locale): string {
 
 const SUB_GRADIENTS: Record<string, string> = {
   full: "from-amber-400 to-orange-600",
-  courses: "from-emerald-400 to-teal-600",
+  courses: "from-amber-400 to-amber-600",
   articles: "from-violet-400 to-purple-600",
   podcasts: "from-rose-400 to-pink-600",
   videos: "from-sky-400 to-blue-600",
@@ -249,7 +249,7 @@ function ChangePasswordCard({ locale }: { locale: Locale }) {
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0">
               <Lock className="h-5 w-5 text-white" />
             </div>
             <div className="text-start">
@@ -262,7 +262,7 @@ function ChangePasswordCard({ locale }: { locale: Locale }) {
             </div>
           </div>
           {isSuccess ? (
-            <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <CheckCircle className="h-5 w-5 text-amber-500" />
           ) : (
             <svg
               className={`h-5 w-5 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
@@ -364,7 +364,7 @@ function ChangePasswordCard({ locale }: { locale: Locale }) {
 
             {/* Submit */}
             <Button
-              className="w-full gap-2 bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600"
+              className="w-full gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600"
               onClick={handleChangePassword}
               disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
             >
@@ -567,7 +567,7 @@ export default function ProfilePage() {
       label: t("payment.pending"),
     },
     approved: {
-      color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
       icon: ShieldCheck,
       label: t("payment.approved"),
     },
@@ -599,7 +599,7 @@ export default function ProfilePage() {
         <CardContent className="p-0">
           <div className="relative">
             {/* Cover */}
-            <div className="h-32 sm:h-40 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500" />
+            <div className="h-32 sm:h-40 bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-500" />
 
             {/* Avatar & Info */}
             <div className="px-4 sm:px-6 pb-6">
@@ -613,7 +613,7 @@ export default function ProfilePage() {
                       className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-background object-cover shadow-xl"
                     />
                   ) : (
-                    <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-background bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-xl">
+                    <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-background bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-xl">
                       <User className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
                     </div>
                   )}
@@ -850,10 +850,10 @@ export default function ProfilePage() {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {hasSubscription && (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
-                        <CreditCard className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                        <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <div>
-                          <p className="font-medium text-teal-700 dark:text-teal-300">
+                          <p className="font-medium text-amber-700 dark:text-amber-300">
                             {locale === "ar" ? "اشتراك نشط" : locale === "fr" ? "Abonnement actif" : "Active Subscription"}
                           </p>
                           <p className="text-sm text-muted-foreground">
@@ -962,7 +962,7 @@ export default function ProfilePage() {
                                 <Badge
                                   className={
                                     isActive
-                                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0"
+                                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0"
                                       : "bg-muted text-muted-foreground border-0"
                                   }
                                 >
@@ -1051,7 +1051,7 @@ export default function ProfilePage() {
                 {purchases.map((purchase, index) => {
                   const TypeIcon = CONTENT_TYPE_ICONS[purchase.contentType] || FileText;
                   const statusConfig = purchase.status === 'approved'
-                    ? { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', label: locale === "ar" ? "مفعّل" : locale === "fr" ? "Actif" : "Active" }
+                    ? { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', label: locale === "ar" ? "مفعّل" : locale === "fr" ? "Actif" : "Active" }
                     : purchase.status === 'rejected'
                     ? { color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', label: locale === "ar" ? "مرفوض" : locale === "fr" ? "Rejeté" : "Rejected" }
                     : { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', label: locale === "ar" ? "قيد المراجعة" : locale === "fr" ? "En attente" : "Pending" };
@@ -1065,9 +1065,9 @@ export default function ProfilePage() {
                       <Card className="overflow-hidden">
                         <CardContent className="p-0">
                           <div className="flex flex-col sm:flex-row">
-                            <div className="w-full sm:w-2 bg-gradient-to-b from-teal-400 to-emerald-600" />
+                            <div className="w-full sm:w-2 bg-gradient-to-b from-amber-400 to-amber-600" />
                             <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shrink-0">
+                              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0">
                                 <TypeIcon className="h-5 w-5 text-white" />
                               </div>
                               <div className="flex-1 space-y-1">

@@ -169,7 +169,7 @@ export default function SubscriptionsPage() {
       icon: BookOpen,
       nameKey: "subscriptions.coursesOnly",
       price: planPrice("courses"),
-      gradient: "from-emerald-400 to-teal-600",
+      gradient: "from-amber-400 to-amber-600",
       features: [
         { ar: "الوصول لجميع الدورات", en: "Access to all courses", fr: "Accès à tous les cours" },
         { ar: "شهادات إتمام الدورات", en: "Course completion certificates", fr: "Certificats de complétion" },
@@ -229,7 +229,7 @@ export default function SubscriptionsPage() {
       icon: Radio,
       nameKey: "subscriptions.liveOnly",
       price: planPrice("live"),
-      gradient: "from-teal-400 to-emerald-600",
+      gradient: "from-amber-400 to-amber-600",
       features: [
         { ar: "الوصول لجميع البث المباشر", en: "Access to all live streams", fr: "Accès à tous les directs" },
         { ar: "تسجيلات البث السابق", en: "Past stream recordings", fr: "Enregistrements des directs précédents" },

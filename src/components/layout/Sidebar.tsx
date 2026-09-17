@@ -84,18 +84,11 @@ function SidebarNav({
 }) {
   const { t } = useTranslation();
   const { navigate, currentPage, pageParams, user, isAdmin } = useAppStore();
-  const [adminExpanded, setAdminExpanded] = useState(false);
 
   // Auto-expand admin section when on admin page
   const isOnAdmin = currentPage === "admin";
+  const [adminExpanded, setAdminExpanded] = useState(isOnAdmin);
   const currentAdminTab = (pageParams?.tab as string) || "dashboard";
-
-  // Keep admin section expanded while on admin page
-  useEffect(() => {
-    if (isOnAdmin) {
-      setAdminExpanded(true);
-    }
-  }, [isOnAdmin]);
 
   const handleNav = (page: PageName) => {
     navigate(page);

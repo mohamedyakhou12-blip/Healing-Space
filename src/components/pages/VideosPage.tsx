@@ -42,7 +42,7 @@ interface VideoItem {
 }
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-amber-400 to-amber-600",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
@@ -55,7 +55,7 @@ const mockVideos: VideoItem[] = [
     title: { ar: "مقدمة في العلاج النفسي: ما تحتاج أن تعرفه", en: "Introduction to Psychotherapy: What You Need to Know", fr: "Introduction à la Psychothérapie: Ce Que Vous Devez Savoir" },
     description: { ar: "في هذا الفيديو نقدم مقدمة شاملة عن العلاج النفسي وأنواعه المختلفة ومتى يجب التفكير في زيارة معالج نفسي.", en: "In this video we present a comprehensive introduction to psychotherapy, its different types, and when to consider visiting a therapist.", fr: "Dans cette vidéo, nous présentons une introduction complète à la psychothérapie." },
     duration: "18:45", views: 12450, likes: 892, publishedDate: "2025-01-20",
-    gradient: "from-emerald-400 to-teal-600",
+    gradient: "from-amber-400 to-amber-600",
     image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop",
     isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
   },
