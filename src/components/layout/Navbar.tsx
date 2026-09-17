@@ -84,10 +84,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
               <span className="text-white text-lg font-bold">ف</span>
             </div>
-            <span className="text-xl font-bold text-teal-800 dark:text-teal-300 hidden sm:block">فضاء الشفاء</span>
+            <span className="text-xl font-bold text-primary hidden sm:block">فضاء الشفاء</span>
           </Link>
 
           {/* Desktop nav */}
@@ -98,7 +98,7 @@ export default function Navbar() {
                 href={link.href}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+                    ? 'bg-secondary text-primary'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
@@ -118,8 +118,8 @@ export default function Navbar() {
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-full" />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                        <span className="text-teal-700 dark:text-teal-300 font-medium">
+                      <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+                        <span className="text-primary font-medium">
                           {user.name?.charAt(0) || 'م'}
                         </span>
                       </div>
@@ -159,7 +159,7 @@ export default function Navbar() {
                   <Button variant="ghost" size="sm">{t('auth.login')}</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <Button size="sm" className="bg-primary hover:bg-teal-700 text-white">
                     {t('auth.register')}
                   </Button>
                 </Link>
@@ -189,7 +189,7 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     pathname === link.href
-                      ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+                      ? 'bg-secondary text-primary'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >

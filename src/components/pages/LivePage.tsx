@@ -213,7 +213,7 @@ export default function LivePage() {
             isFree: s.isFree || false,
             meetingUrl: s.meetingUrl || s.videoUrl || "",
           }))
-        if (sessions.length > 0) setApiSessions(sessions);
+        setApiSessions(sessions);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -222,7 +222,7 @@ export default function LivePage() {
   const localizedText = (obj: { ar: string; en: string; fr: string }) =>
     obj[locale] || obj.ar;
 
-  const displaySessions = apiSessions || mockSessions;
+  const displaySessions = apiSessions ?? [];
 
   const sessionsByTab = useMemo(() => {
     const liveSessions = displaySessions.filter((s) => s.status === "live");
@@ -296,7 +296,7 @@ export default function LivePage() {
                 {localizedText(session.category)}
               </Badge>
               {!session.isFree && session.price > 0 && (
-                <Badge className="absolute top-3 end-3 bg-teal-600 text-white border-0 text-[10px]">
+                <Badge className="absolute top-3 end-3 bg-primary text-white border-0 text-[10px]">
                   {session.price.toLocaleString()} {t("common.currency")}
                 </Badge>
               )}
@@ -360,7 +360,7 @@ export default function LivePage() {
               <div className="pt-1">
                 {session.price > 0 && (session.status === "live" || session.status === "upcoming") && (
                   <div className="mb-2">
-                    <span className="font-bold text-teal-600 dark:text-teal-400">{session.price.toLocaleString()} {t("common.currency")}</span>
+                    <span className="font-bold text-primary">{session.price.toLocaleString()} {t("common.currency")}</span>
                   </div>
                 )}
                 {session.status === "live" && (

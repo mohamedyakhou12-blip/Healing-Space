@@ -33,7 +33,7 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLocale(lang.code)}
-            className={locale === lang.code ? 'bg-teal-50 dark:bg-teal-950/30' : ''}
+            className={locale === lang.code ? 'bg-secondary dark:bg-secondary/30' : ''}
           >
             <span className="ms-2 me-2">{lang.flag}</span>
             {lang.label}

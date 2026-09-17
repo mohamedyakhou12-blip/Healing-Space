@@ -96,7 +96,7 @@ export function PurchaseDialog({
         <div className="py-2">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">{t("common.priceLabel")}</p>
-            <p className="text-3xl font-bold text-teal-600 dark:text-teal-400">
+            <p className="text-3xl font-bold text-primary">
               {displayPrice.toLocaleString()}{" "}
               <span className="text-base font-normal">{t("common.currency")}</span>
             </p>

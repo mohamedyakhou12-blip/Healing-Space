@@ -53,8 +53,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" />
+      <div className="min-h-screen bg-background px-4 py-8" dir="rtl">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center justify-center rounded-3xl border border-border bg-card shadow-sm">
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-secondary border-t-primary" aria-label="جاري التحميل" />
+        </div>
       </div>
     );
   }
@@ -64,17 +66,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col bg-white border-l border-gray-200 shadow-sm transition-all duration-300 ${
+        className={`fixed inset-y-0 right-0 z-30 hidden flex-col border-l border-border bg-card shadow-sm transition-[width] duration-300 lg:flex ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
           {!isCollapsed && (
-            <span className="text-lg font-bold text-teal-800">لوحة التحكم</span>
+            <span className="text-lg font-bold text-primary">لوحة التحكم</span>
           )}
           <Button
             variant="ghost"
@@ -96,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href={link.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-teal-50 text-teal-700'
+                    ? 'bg-secondary text-primary'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
@@ -124,7 +126,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Button variant="ghost" size="icon" onClick={() => setIsMobileOpen(!isMobileOpen)}>
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="mr-3 text-lg font-bold text-teal-800">لوحة التحكم</span>
+        <span className="mr-3 text-lg font-bold text-primary">لوحة التحكم</span>
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -133,7 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
           <aside className="fixed right-0 top-0 bottom-0 w-64 bg-white shadow-xl z-50">
             <div className="h-14 flex items-center justify-between px-4 border-b">
-              <span className="text-lg font-bold text-teal-800">لوحة التحكم</span>
+              <span className="text-lg font-bold text-primary">لوحة التحكم</span>
               <Button variant="ghost" size="icon" onClick={() => setIsMobileOpen(false)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -146,7 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setIsMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
                     pathname === link.href
-                      ? 'bg-teal-50 text-teal-700'
+                      ? 'bg-secondary text-primary'
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -160,8 +162,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main content */}
-      <main className="flex-1 lg:mt-0 mt-14">
-        <div className="p-4 lg:p-8">
+      <main className="min-w-0 flex-1 lg:mr-64 lg:mt-0 mt-14">
+        <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>

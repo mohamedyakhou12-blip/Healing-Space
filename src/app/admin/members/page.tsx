@@ -48,8 +48,8 @@ export default function AdminMembersPage() {
                   <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
-                          <span className="text-teal-700 text-xs font-bold">{member.name.charAt(0)}</span>
+                        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
+                          <span className="text-primary text-xs font-bold">{member.name.charAt(0)}</span>
                         </div>
                         <span className="text-sm font-medium">{member.name}</span>
                       </div>
@@ -57,7 +57,7 @@ export default function AdminMembersPage() {
                     <td className="px-6 py-4 text-sm text-gray-500" dir="ltr">{member.email}</td>
                     <td className="px-6 py-4 text-sm">{member.plan}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${member.status === 'نشط' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${member.status === 'نشط' ? 'bg-secondary text-primary' : 'bg-red-50 text-red-600'}`}>
                         {member.status}
                       </span>
                     </td>

@@ -183,13 +183,13 @@ export default function PdfsPage() {
             category: { ar: p.category || "", en: p.category || "", fr: p.category || "" },
             fileUrl: p.fileUrl || "",
           }));
-        if (pdfs.length > 0) setApiPdfs(pdfs);
+        setApiPdfs(pdfs);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const displayPdfs = apiPdfs || mockPdfs;
+  const displayPdfs = apiPdfs || [];
 
   const filteredPdfs = useMemo(() => {
     return displayPdfs.filter((pdf) => {

@@ -51,7 +51,7 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">حفظ جميع الإعدادات</Button>
+        <Button className="w-full bg-primary hover:bg-accent text-primary-foreground">حفظ جميع الإعدادات</Button>
       </div>
     </div>
   );

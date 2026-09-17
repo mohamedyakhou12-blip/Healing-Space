@@ -45,14 +45,13 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* ── Healing Palette (Static) ── */
-  --color-healing-teal: #0D9488;
-  --color-healing-teal-light: #5EEAD4;
-  --color-healing-gold: #D4A853;
-  --color-healing-gold-light: #F0D48A;
-  --color-healing-sage: #A8C5A0;
-  --color-healing-lavender: #B4A7D6;
-  --color-healing-rose: #D4A0A0;
-  --color-healing-sky: #7FB5C9;
+  --color-healing-beige: #b89b7a;
+  --color-healing-beige-light: #eadfce;
+  --color-healing-sand: #d8c4aa;
+  --color-healing-cream: #f7f3ed;
+  --color-healing-brown: #6f5843;
+  --color-healing-rose: #c99d91;
+  --color-healing-sky: #b8aaa0;
 
   /* ── Border Radius ── */
   --radius-sm: calc(var(--radius) - 4px);
@@ -82,8 +81,8 @@
   --radius: 0.75rem;
 
   /* Background & Foreground */
-  --background: hsl(150, 20%, 98%);
-  --foreground: hsl(220, 15%, 15%);
+  --background: hsl(38, 35%, 97%);
+  --foreground: hsl(28, 22%, 19%);
 
   /* Card */
   --card: hsl(0, 0%, 100%);
@@ -93,33 +92,33 @@
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(220, 15%, 15%);
 
-  /* Primary – Soft Teal */
-  --primary: hsl(173, 80%, 32%);
-  --primary-foreground: hsl(0, 0%, 100%);
+  /* Primary – Warm Beige */
+  --primary: hsl(29, 28%, 43%);
+  --primary-foreground: hsl(38, 35%, 98%);
 
-  /* Secondary – Sage Wash */
-  --secondary: hsl(150, 25%, 94%);
-  --secondary-foreground: hsl(173, 60%, 25%);
+  /* Secondary – Cream Wash */
+  --secondary: hsl(38, 30%, 92%);
+  --secondary-foreground: hsl(29, 28%, 30%);
 
   /* Muted */
-  --muted: hsl(150, 15%, 94%);
-  --muted-foreground: hsl(220, 10%, 45%);
+  --muted: hsl(38, 22%, 93%);
+  --muted-foreground: hsl(28, 12%, 45%);
 
-  /* Accent – Warm Gold */
-  --accent: hsl(41, 60%, 58%);
-  --accent-foreground: hsl(220, 15%, 15%);
+  /* Accent – Soft Sand */
+  --accent: hsl(31, 38%, 72%);
+  --accent-foreground: hsl(28, 22%, 19%);
 
   /* Destructive */
   --destructive: hsl(0, 65%, 55%);
   --destructive-foreground: hsl(0, 0%, 100%);
 
   /* Borders & Inputs */
-  --border: hsl(150, 15%, 88%);
-  --input: hsl(150, 15%, 88%);
-  --ring: hsl(173, 70%, 45%);
+  --border: hsl(38, 15%, 88%);
+  --input: hsl(38, 15%, 88%);
+  --ring: hsl(31, 70%, 45%);
 
   /* Charts */
-  --chart-1: hsl(173, 70%, 40%);
+  --chart-1: hsl(31, 70%, 40%);
   --chart-2: hsl(41, 60%, 58%);
   --chart-3: hsl(130, 35%, 55%);
   --chart-4: hsl(260, 40%, 68%);
@@ -128,60 +127,60 @@
   /* Sidebar */
   --sidebar: hsl(0, 0%, 100%);
   --sidebar-foreground: hsl(220, 15%, 15%);
-  --sidebar-primary: hsl(173, 80%, 32%);
+  --sidebar-primary: hsl(31, 80%, 32%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(150, 25%, 94%);
-  --sidebar-accent-foreground: hsl(173, 60%, 25%);
-  --sidebar-border: hsl(150, 15%, 88%);
-  --sidebar-ring: hsl(173, 70%, 45%);
+  --sidebar-accent: hsl(38, 25%, 94%);
+  --sidebar-accent-foreground: hsl(31, 60%, 25%);
+  --sidebar-border: hsl(38, 15%, 88%);
+  --sidebar-ring: hsl(31, 70%, 45%);
 }
 
 /* ============================================================
    Dark Mode
    ============================================================ */
 .dark {
-  --background: hsl(223, 26%, 14%);
-  --foreground: hsl(150, 15%, 90%);
+  --background: hsl(32, 18%, 16%);
+  --foreground: hsl(38, 28%, 92%);
 
-  --card: hsl(223, 20%, 18%);
-  --card-foreground: hsl(150, 15%, 90%);
+  --card: hsl(31, 17%, 21%);
+  --card-foreground: hsl(38, 28%, 92%);
 
-  --popover: hsl(223, 20%, 18%);
-  --popover-foreground: hsl(150, 15%, 90%);
+  --popover: hsl(31, 17%, 21%);
+  --popover-foreground: hsl(38, 28%, 92%);
 
-  --primary: hsl(173, 70%, 42%);
-  --primary-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(31, 38%, 68%);
+  --primary-foreground: hsl(32, 18%, 16%);
 
-  --secondary: hsl(223, 18%, 22%);
-  --secondary-foreground: hsl(173, 60%, 70%);
+  --secondary: hsl(31, 15%, 25%);
+  --secondary-foreground: hsl(35, 30%, 78%);
 
-  --muted: hsl(223, 15%, 22%);
-  --muted-foreground: hsl(220, 10%, 60%);
+  --muted: hsl(31, 14%, 25%);
+  --muted-foreground: hsl(35, 12%, 68%);
 
-  --accent: hsl(41, 55%, 50%);
-  --accent-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(31, 32%, 48%);
+  --accent-foreground: hsl(38, 28%, 96%);
 
   --destructive: hsl(0, 60%, 50%);
   --destructive-foreground: hsl(0, 0%, 100%);
 
   --border: hsl(223, 15%, 25%);
   --input: hsl(223, 15%, 25%);
-  --ring: hsl(173, 60%, 40%);
+  --ring: hsl(31, 60%, 40%);
 
-  --chart-1: hsl(173, 65%, 50%);
+  --chart-1: hsl(31, 65%, 50%);
   --chart-2: hsl(41, 55%, 55%);
   --chart-3: hsl(130, 30%, 50%);
   --chart-4: hsl(260, 45%, 60%);
   --chart-5: hsl(200, 40%, 55%);
 
   --sidebar: hsl(223, 22%, 12%);
-  --sidebar-foreground: hsl(150, 15%, 90%);
-  --sidebar-primary: hsl(173, 70%, 42%);
+  --sidebar-foreground: hsl(38, 15%, 90%);
+  --sidebar-primary: hsl(31, 70%, 42%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
   --sidebar-accent: hsl(223, 18%, 20%);
-  --sidebar-accent-foreground: hsl(173, 60%, 70%);
+  --sidebar-accent-foreground: hsl(31, 60%, 70%);
   --sidebar-border: hsl(223, 15%, 22%);
-  --sidebar-ring: hsl(173, 60%, 40%);
+  --sidebar-ring: hsl(31, 60%, 40%);
 }
 
 /* ============================================================
@@ -288,30 +287,30 @@ html.theme-transitioning *::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(173, 30%, 70%);
+  background: hsl(31, 30%, 70%);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(173, 50%, 50%);
+  background: hsl(31, 50%, 50%);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: hsl(173, 30%, 35%);
+  background: hsl(31, 30%, 35%);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(173, 50%, 45%);
+  background: hsl(31, 50%, 45%);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(173, 30%, 70%) transparent;
+  scrollbar-color: hsl(31, 30%, 70%) transparent;
 }
 
 .dark * {
-  scrollbar-color: hsl(173, 30%, 35%) transparent;
+  scrollbar-color: hsl(31, 30%, 35%) transparent;
 }
 
 /* ── Scrollbar Thin Utility ── */
@@ -329,12 +328,12 @@ html.theme-transitioning *::after {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: hsl(173, 30%, 70%);
+  background: hsl(31, 30%, 70%);
   border-radius: 2px;
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: hsl(173, 30%, 35%);
+  background: hsl(31, 30%, 35%);
 }
 
 /* ── Scrollbar None Utility ── */
@@ -458,9 +457,9 @@ html.theme-transitioning *::after {
 .gradient-text {
   background: linear-gradient(
     135deg,
-    hsl(173, 80%, 32%) 0%,
-    hsl(41, 60%, 58%) 50%,
-    hsl(130, 35%, 50%) 100%
+    hsl(29, 28%, 43%) 0%,
+    hsl(31, 38%, 68%) 50%,
+    hsl(38, 35%, 82%) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -474,7 +473,7 @@ html.theme-transitioning *::after {
 
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px hsl(173 30% 30% / 12%);
+  box-shadow: 0 12px 40px hsl(31 30% 30% / 12%);
 }
 
 .dark .hover-lift:hover {
@@ -493,7 +492,7 @@ html.theme-transitioning *::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: hsl(150 20% 98% / 30%);
+  background: hsl(38 20% 98% / 30%);
   border-radius: var(--radius);
 }
 
@@ -575,7 +574,7 @@ html.theme-transitioning *::after {
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(173 60% 45% / 0.035) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(31 60% 45% / 0.035) 0%, transparent 70%),
     radial-gradient(ellipse 80% 70% at 85% 70%, hsl(41 50% 55% / 0.025) 0%, transparent 65%);
   pointer-events: none;
   animation: gradientWash 18s ease-in-out infinite alternate;
@@ -583,7 +582,7 @@ html.theme-transitioning *::after {
 
 .dark .healing-site-bg::before {
   background:
-    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(173 50% 40% / 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 60% at 15% 30%, hsl(31 50% 40% / 0.06) 0%, transparent 70%),
     radial-gradient(ellipse 80% 70% at 85% 70%, hsl(41 45% 40% / 0.04) 0%, transparent 65%);
 }
 

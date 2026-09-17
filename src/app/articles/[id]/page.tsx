@@ -48,7 +48,7 @@ export default function ArticleDetailPage() {
       <main className="flex-1 bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back button */}
-          <Link href="/articles" className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 mb-6">
+          <Link href="/articles" className="inline-flex items-center gap-1 text-primary hover:text-accent mb-6">
             <ArrowLeft className="h-4 w-4" />
             العودة للمقالات
           </Link>
@@ -63,7 +63,7 @@ export default function ArticleDetailPage() {
               <div className="flex items-center gap-1"><Calendar className="h-4 w-4" />{articleData.date}</div>
               <div className="flex items-center gap-1"><Clock className="h-4 w-4" />{articleData.readTime}</div>
             </div>
-            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed [&_h2]:text-teal-800 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-4 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-3 [&_p]:mb-4" dangerouslySetInnerHTML={{ __html: articleData.content }} />
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed [&_h2]:text-primary [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-4 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-3 [&_p]:mb-4" dangerouslySetInnerHTML={{ __html: articleData.content }} />
           </article>
 
           {/* Related articles */}

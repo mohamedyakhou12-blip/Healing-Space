@@ -13,7 +13,7 @@ const samplePayments = [
 
 const statusLabels: Record<string, { text: string; color: string }> = {
   pending: { text: 'قيد المراجعة', color: 'bg-amber-50 text-amber-600' },
-  approved: { text: 'مقبول', color: 'bg-green-50 text-green-600' },
+  approved: { text: 'مقبول', color: 'bg-secondary text-primary' },
   rejected: { text: 'مرفوض', color: 'bg-red-50 text-red-600' },
 };
 
@@ -39,8 +39,8 @@ export default function AdminPaymentsPage() {
         </Card>
         <Card className="shadow-sm border-0">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-              <span className="text-green-600 text-lg">✓</span>
+            <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+              <span className="text-primary text-lg">✓</span>
             </div>
             <div>
               <p className="text-sm text-gray-500">مقبولة</p>
@@ -94,7 +94,7 @@ export default function AdminPaymentsPage() {
                           <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-4 w-4" /></Button>
                           {payment.status === 'pending' && (
                             <>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600"><Check className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary"><Check className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600"><X className="h-4 w-4" /></Button>
                             </>
                           )}
