@@ -317,3 +317,4 @@ https://react.dev/link/hydration-mismatch
  GET /api/public-settings?_t=1789686084183 200 in 136ms (next.js: 10ms, proxy.ts: 8ms, application-code: 117ms)
  GET /api/public-settings 200 in 169ms (next.js: 12ms, proxy.ts: 13ms, application-code: 143ms)
  GET /api/public-settings?_t=1789686084190 200 in 248ms (next.js: 15ms, proxy.ts: 12ms, application-code: 221ms)
+ GET / 200 in 120ms (next.js: 7ms, application-code: 113ms)
