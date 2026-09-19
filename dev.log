@@ -6,3 +6,17 @@
   Applying modifyConfig from v0-preview
 
  GET / 200 in 640ms (next.js: 209ms, application-code: 430ms)
+[Firebase Admin] Initialized with service account credentials.
+ GET /api/auth/profile 401 in 284ms (next.js: 206ms, proxy.ts: 16ms, application-code: 63ms)
+ GET /api/auth/session 200 in 279ms (next.js: 246ms, proxy.ts: 13ms, application-code: 20ms)
+ GET /api/csrf-token 200 in 315ms (next.js: 209ms, proxy.ts: 99ms, application-code: 7ms)
+ GET /api/courses?status=published&limit=4 200 in 1411ms (next.js: 701ms, proxy.ts: 69ms, application-code: 640ms)
+ GET /api/sliders 200 in 566ms (next.js: 152ms, proxy.ts: 89ms, application-code: 326ms)
+ GET /api/public-settings 200 in 1364ms (next.js: 94ms, proxy.ts: 873ms, application-code: 397ms)
+ GET /api/homepage-images 200 in 480ms (next.js: 146ms, proxy.ts: 211ms, application-code: 122ms)
+ GET /api/public-settings?_t=1789786906903 200 in 508ms (next.js: 153ms, proxy.ts: 160ms, application-code: 194ms)
+ GET /api/public-settings 200 in 513ms (next.js: 99ms, proxy.ts: 177ms, application-code: 236ms)
+ GET /api/podcasts?status=published&limit=4 200 in 1638ms (next.js: 56ms, proxy.ts: 874ms, application-code: 708ms)
+ GET /api/articles?status=published&limit=4 200 in 1793ms (next.js: 849ms, proxy.ts: 69ms, application-code: 876ms)
+ GET / 200 in 121ms (next.js: 3ms, application-code: 118ms)
+ GET / 200 in 92ms (next.js: 4ms, application-code: 88ms)
