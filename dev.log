@@ -1,0 +1,8 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://169.254.0.2:3000
+- Environments: .env.development.local, .env
+✓ Ready in 657ms
+  Applying modifyConfig from v0-preview
+
+ GET / 200 in 640ms (next.js: 209ms, application-code: 430ms)
