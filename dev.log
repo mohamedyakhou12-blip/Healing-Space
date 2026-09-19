@@ -56,3 +56,167 @@
  GET / 200 in 113ms (next.js: 3ms, application-code: 110ms)
  GET /api/courses?status=published&limit=4 200 in 15ms (next.js: 4ms, proxy.ts: 7ms, application-code: 4ms)
  GET /api/articles?status=published&limit=4 200 in 34ms (next.js: 15ms, proxy.ts: 14ms, application-code: 5ms)
+ GET /api/podcasts?status=published&limit=4 200 in 52ms (next.js: 34ms, proxy.ts: 13ms, application-code: 5ms)
+ GET /api/public-settings 200 in 73ms (next.js: 48ms, proxy.ts: 23ms, application-code: 3ms)
+ GET /api/sliders 200 in 83ms (next.js: 44ms, proxy.ts: 33ms, application-code: 6ms)
+ GET /api/homepage-images 200 in 80ms (next.js: 45ms, proxy.ts: 31ms, application-code: 4ms)
+ GET /api/public-settings?_t=1789786946256 200 in 77ms (next.js: 25ms, proxy.ts: 50ms, application-code: 2ms)
+ GET /api/csrf-token 200 in 73ms (next.js: 26ms, proxy.ts: 44ms, application-code: 3ms)
+ GET /api/auth/session 200 in 68ms (next.js: 23ms, proxy.ts: 39ms, application-code: 6ms)
+ GET /api/auth/profile 401 in 60ms (next.js: 15ms, proxy.ts: 41ms, application-code: 4ms)
+ GET /api/public-settings 200 in 33ms (next.js: 10ms, proxy.ts: 21ms, application-code: 2ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="ar" dir="rtl" suppressHydrationWarning={true}>
+                          <head>
+                            <script
++                             type="application/ld+json"
+-                             type={null}
+                              dangerouslySetInnerHTML={{
++                               __html: "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebSite\",\"@id..."
+-                               __html: "window.__V0_SANDBOX_ID__=\"sb-60t18x4xnq6q\";window.__V0_CHAT_ID__=\"HisowKWt..."
+                              }}
+                            >
+                            ...
+                          ...
+                            <LoadableComponent>
+                              <HomePage>
+                                <div className="min-h-screen" dir="rtl">
+-                                 <section className="bg-background px-4 py-20 sm:px-6 lg:px-8">
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at div (<anonymous>)
+    at HomePage (src/components/pages/HomePage.tsx:573:5)
+    at Page (src/app/page.tsx:74:11)
+  571 |
+  572 |   return (
+> 573 |     <div className="min-h-screen" dir={dir}>
+      |     ^
+  574 |       {/* ============================================================ */}
+  575 |       {/* HERO SECTION                                                  */}
+  576 |       {/* ============================================================ */}
+ GET / 200 in 134ms (next.js: 6ms, application-code: 128ms)
+ GET /api/csrf-token 200 in 41ms (next.js: 15ms, proxy.ts: 23ms, application-code: 3ms)
+ GET /api/auth/session 200 in 42ms (next.js: 19ms, proxy.ts: 18ms, application-code: 5ms)
+ GET /api/auth/profile 401 in 36ms (next.js: 17ms, proxy.ts: 16ms, application-code: 3ms)
+ GET /api/courses?status=published&limit=4 200 in 128ms (next.js: 12ms, proxy.ts: 7ms, application-code: 109ms)
+ GET /api/public-settings 200 in 130ms (next.js: 26ms, proxy.ts: 9ms, application-code: 95ms)
+ GET /api/sliders 200 in 136ms (next.js: 26ms, proxy.ts: 13ms, application-code: 97ms)
+ GET /api/homepage-images 200 in 147ms (next.js: 21ms, proxy.ts: 19ms, application-code: 107ms)
+ GET /api/public-settings 200 in 7ms (next.js: 1644µs, proxy.ts: 3ms, application-code: 2ms)
+ GET /api/public-settings?_t=1789786997413 200 in 169ms (next.js: 17ms, proxy.ts: 23ms, application-code: 128ms)
+ GET /api/articles?status=published&limit=4 200 in 268ms (next.js: 22ms, proxy.ts: 9ms, application-code: 237ms)
+ GET /api/podcasts?status=published&limit=4 200 in 333ms (next.js: 16ms, proxy.ts: 8ms, application-code: 309ms)
+ GET /login 200 in 132ms (next.js: 18ms, application-code: 113ms)
+ GET /api/csrf-token 200 in 22ms (next.js: 12ms, proxy.ts: 7ms, application-code: 3ms)
+ GET /api/auth/session 200 in 25ms (next.js: 10ms, proxy.ts: 6ms, application-code: 9ms)
+ GET /api/public-settings 200 in 24ms (next.js: 14ms, proxy.ts: 8ms, application-code: 2ms)
+ GET /api/auth/profile 401 in 30ms (next.js: 14ms, proxy.ts: 8ms, application-code: 7ms)
+ GET /api/public-settings?_t=1789787024505 200 in 26ms (next.js: 15ms, proxy.ts: 10ms, application-code: 2ms)
+ GET /videos 200 in 78ms (next.js: 12ms, application-code: 66ms)
+ GET /api/public-settings?_t=1789787050893 200 in 108ms (next.js: 57ms, proxy.ts: 48ms, application-code: 3ms)
+ GET /api/csrf-token 200 in 113ms (next.js: 61ms, proxy.ts: 48ms, application-code: 3ms)
+ GET /api/auth/profile 401 in 77ms (next.js: 7ms, proxy.ts: 65ms, application-code: 4ms)
+ GET /api/public-settings 200 in 22ms (next.js: 13ms, proxy.ts: 7ms, application-code: 3ms)
+ GET /api/auth/session 200 in 30ms (next.js: 11ms, proxy.ts: 11ms, application-code: 8ms)
+ GET /api/subscription-prices?_t=1789787050890 200 in 213ms (next.js: 39ms, proxy.ts: 4ms, application-code: 170ms)
+ GET /api/videos 200 in 521ms (next.js: 90ms, proxy.ts: 7ms, application-code: 425ms)
+ GET /podcasts 200 in 103ms (next.js: 19ms, application-code: 84ms)
+ GET /api/csrf-token 200 in 28ms (next.js: 10ms, proxy.ts: 16ms, application-code: 3ms)
+ GET /api/auth/session 200 in 27ms (next.js: 10ms, proxy.ts: 14ms, application-code: 3ms)
+ GET /api/auth/profile 401 in 27ms (next.js: 12ms, proxy.ts: 10ms, application-code: 6ms)
+ GET /api/subscription-prices?_t=1789787077335 200 in 116ms (next.js: 6ms, proxy.ts: 4ms, application-code: 105ms)
+ GET /api/public-settings?_t=1789787077342 200 in 156ms (next.js: 10ms, proxy.ts: 12ms, application-code: 134ms)
+ GET /api/public-settings 200 in 162ms (next.js: 13ms, proxy.ts: 8ms, application-code: 141ms)
+ GET /api/podcasts 200 in 393ms (next.js: 12ms, proxy.ts: 5ms, application-code: 375ms)
+ GET /pdfs 200 in 104ms (next.js: 17ms, application-code: 87ms)
+ GET /api/public-settings?_t=1789787103837 200 in 23ms (next.js: 13ms, proxy.ts: 7ms, application-code: 3ms)
+ GET /api/csrf-token 200 in 77ms (next.js: 64ms, proxy.ts: 10ms, application-code: 3ms)
+ GET /api/auth/session 200 in 87ms (next.js: 66ms, proxy.ts: 15ms, application-code: 6ms)
+ GET /api/public-settings 200 in 83ms (next.js: 19ms, proxy.ts: 62ms, application-code: 2ms)
+ GET /api/auth/profile 401 in 88ms (next.js: 22ms, proxy.ts: 59ms, application-code: 7ms)
+ GET /api/subscription-prices?_t=1789787103834 200 in 232ms (next.js: 61ms, proxy.ts: 10ms, application-code: 161ms)
+ GET /api/pdfs 200 in 252ms (next.js: 56ms, proxy.ts: 8ms, application-code: 188ms)
+ GET /subscriptions 200 in 123ms (next.js: 18ms, application-code: 104ms)
+ GET /api/public-settings?_t=1789787130305 200 in 20ms (next.js: 11ms, proxy.ts: 6ms, application-code: 3ms)
+ GET /api/public-settings 200 in 24ms (next.js: 14ms, proxy.ts: 7ms, application-code: 2ms)
+ GET /api/csrf-token 200 in 27ms (next.js: 16ms, proxy.ts: 9ms, application-code: 2ms)
+ GET /api/auth/profile 401 in 34ms (next.js: 17ms, proxy.ts: 11ms, application-code: 5ms)
+ GET /api/auth/session 200 in 32ms (next.js: 15ms, proxy.ts: 14ms, application-code: 4ms)
+ GET /api/subscription-prices?_t=1789787130303 200 in 112ms (next.js: 16ms, proxy.ts: 9ms, application-code: 87ms)
+ GET /videos 200 in 79ms (next.js: 3ms, application-code: 76ms)
+ GET /api/public-settings 200 in 131ms (next.js: 5ms, proxy.ts: 7ms, application-code: 118ms)
+ GET /api/courses 200 in 102ms (next.js: 3ms, proxy.ts: 3ms, application-code: 96ms)
+ GET /api/public-settings?_t=1789787182085 200 in 27ms (next.js: 11ms, proxy.ts: 14ms, application-code: 3ms)
+ GET /api/csrf-token 200 in 31ms (next.js: 12ms, proxy.ts: 15ms, application-code: 3ms)
+ GET /api/auth/profile 401 in 36ms (next.js: 15ms, proxy.ts: 16ms, application-code: 5ms)
+ GET /api/public-settings 200 in 30ms (next.js: 18ms, proxy.ts: 10ms, application-code: 2ms)
+ GET /api/auth/session 200 in 35ms (next.js: 19ms, proxy.ts: 8ms, application-code: 8ms)
+ GET /api/subscription-prices?_t=1789787182077 200 in 95ms (next.js: 5ms, proxy.ts: 3ms, application-code: 86ms)
+ GET /api/articles 200 in 545ms (next.js: 2ms, proxy.ts: 3ms, application-code: 540ms)
+ GET /api/videos 200 in 312ms (next.js: 8ms, proxy.ts: 8ms, application-code: 296ms)
+ GET /api/videos 200 in 381ms (next.js: 5ms, proxy.ts: 3ms, application-code: 373ms)
+ GET /api/podcasts 200 in 245ms (next.js: 2ms, proxy.ts: 3ms, application-code: 239ms)
+ GET /api/pdfs 200 in 93ms (next.js: 6ms, proxy.ts: 3ms, application-code: 84ms)
+ GET /api/live 200 in 152ms (next.js: 56ms, proxy.ts: 5ms, application-code: 91ms)
+ GET /api/subscription-prices 200 in 89ms (next.js: 2ms, proxy.ts: 3ms, application-code: 85ms)
+✓ Compiled in 1212ms
+ GET /podcasts 200 in 78ms (next.js: 6ms, application-code: 72ms)
+ GET /api/public-settings?_t=1789787208419 200 in 32ms (next.js: 13ms, proxy.ts: 17ms, application-code: 2ms)
+ GET /api/podcasts 200 in 35ms (next.js: 11ms, proxy.ts: 16ms, application-code: 9ms)
+ GET /api/csrf-token 200 in 27ms (next.js: 16ms, proxy.ts: 8ms, application-code: 3ms)
+ GET /api/auth/session 200 in 30ms (next.js: 14ms, proxy.ts: 11ms, application-code: 5ms)
+ GET /api/auth/profile 401 in 32ms (next.js: 15ms, proxy.ts: 14ms, application-code: 3ms)
+ GET /api/public-settings 200 in 33ms (next.js: 13ms, proxy.ts: 17ms, application-code: 3ms)
+ GET /api/subscription-prices?_t=1789787208413 200 in 100ms (next.js: 6ms, proxy.ts: 4ms, application-code: 90ms)
+ GET /pdfs 200 in 57ms (next.js: 3ms, application-code: 54ms)
+ GET /api/public-settings?_t=1789787234713 200 in 23ms (next.js: 14ms, proxy.ts: 7ms, application-code: 2ms)
+ GET /api/csrf-token 200 in 26ms (next.js: 16ms, proxy.ts: 7ms, application-code: 2ms)
+ GET /api/auth/profile 401 in 29ms (next.js: 18ms, proxy.ts: 9ms, application-code: 3ms)
+ GET /api/public-settings 200 in 32ms (next.js: 14ms, proxy.ts: 16ms, application-code: 1938µs)
+ GET /api/auth/session 200 in 36ms (next.js: 19ms, proxy.ts: 10ms, application-code: 7ms)
+ GET /api/pdfs 200 in 114ms (next.js: 12ms, proxy.ts: 18ms, application-code: 83ms)
+ GET /api/subscription-prices?_t=1789787234711 200 in 161ms (next.js: 20ms, proxy.ts: 10ms, application-code: 131ms)
+ GET /live 200 in 81ms (next.js: 16ms, application-code: 64ms)
+ GET /api/csrf-token 200 in 35ms (next.js: 18ms, proxy.ts: 14ms, application-code: 3ms)
+ GET /api/auth/session 200 in 41ms (next.js: 21ms, proxy.ts: 13ms, application-code: 7ms)
+ GET /api/auth/profile 401 in 42ms (next.js: 19ms, proxy.ts: 15ms, application-code: 7ms)
+ GET /api/subscription-prices?_t=1789787261142 200 in 129ms (next.js: 12ms, proxy.ts: 8ms, application-code: 109ms)
+ GET /api/public-settings?_t=1789787261148 200 in 132ms (next.js: 17ms, proxy.ts: 9ms, application-code: 106ms)
+ GET /api/live 200 in 195ms (next.js: 16ms, proxy.ts: 9ms, application-code: 171ms)
+ GET /api/public-settings 200 in 270ms (next.js: 14ms, proxy.ts: 16ms, application-code: 239ms)
+ GET / 200 in 116ms (next.js: 4ms, application-code: 112ms)
