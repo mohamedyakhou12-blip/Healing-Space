@@ -50,3 +50,4 @@
  GET /api/public-settings 200 in 9ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
  GET /api/public-settings 200 in 9ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
  GET /api/public-settings 200 in 9ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
+ GET / 200 in 244ms (next.js: 8ms, application-code: 236ms)
