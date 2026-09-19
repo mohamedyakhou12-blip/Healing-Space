@@ -51,7 +51,7 @@ export async function GET(
 
     return NextResponse.json(
       { article },
-      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+      { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

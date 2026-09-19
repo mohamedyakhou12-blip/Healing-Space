@@ -12,7 +12,7 @@
 
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { canAccessContent, type ContentType } from "@/lib/content-access";
+import { canAccessContent, ALL_CONTENT_TYPES, type ContentType, type ExcludedItem } from "@/lib/content-access";
 
 // ---------------------------------------------------------------
 // Fields to strip per content type
@@ -38,6 +38,8 @@ interface AccessContext {
   isAdmin: boolean;
   activePlans: string[];
   purchasedContentIds: Set<string>;
+  fullPlanIncludes: ContentType[];
+  fullPlanExcludedItems: ExcludedItem[];
 }
 
 // ---------------------------------------------------------------
@@ -63,12 +65,26 @@ async function resolveAccessContext(): Promise<AccessContext> {
     // This is a critical performance optimization: previously every API call
     // to /api/articles (even for unauthenticated users) was making 2 Firestore
     // queries that always returned empty results.
-    return { userId: null, isAdmin: false, activePlans: [], purchasedContentIds: new Set() };
+    return {
+      userId: null,
+      isAdmin: false,
+      activePlans: [],
+      purchasedContentIds: new Set(),
+      fullPlanIncludes: ALL_CONTENT_TYPES,
+      fullPlanExcludedItems: [],
+    };
   }
 
   if (isAdmin) {
     // Admins get full access — no need to query subscriptions/purchases
-    return { userId, isAdmin: true, activePlans: [], purchasedContentIds: new Set() };
+    return {
+      userId,
+      isAdmin: true,
+      activePlans: [],
+      purchasedContentIds: new Set(),
+      fullPlanIncludes: ALL_CONTENT_TYPES,
+      fullPlanExcludedItems: [],
+    };
   }
 
   // Check in-memory cache first (avoids 2 Firestore queries per API call)
@@ -96,7 +112,40 @@ async function resolveAccessContext(): Promise<AccessContext> {
     purchases.map((p: Record<string, any>) => String(p.contentId || ""))
   );
 
-  const ctx: AccessContext = { userId, isAdmin, activePlans, purchasedContentIds };
+  const settings = await db.siteSetting.findMany({ orderBy: { key: "asc" } });
+  const settingsMap = new Map(settings.map((setting: { key: string; value: string }) => [setting.key, setting.value]));
+
+  let fullPlanIncludes: ContentType[] = ALL_CONTENT_TYPES;
+  try {
+    const parsed = JSON.parse(settingsMap.get("full_plan_includes") || "[]");
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      fullPlanIncludes = parsed.filter((type: string): type is ContentType => ALL_CONTENT_TYPES.includes(type as ContentType));
+    }
+  } catch {
+    fullPlanIncludes = ALL_CONTENT_TYPES;
+  }
+
+  let fullPlanExcludedItems: ExcludedItem[] = [];
+  try {
+    const parsed = JSON.parse(settingsMap.get("full_plan_excluded_items") || "[]");
+    if (Array.isArray(parsed)) {
+      fullPlanExcludedItems = parsed.filter(
+        (item: { id?: string; type?: string }): item is ExcludedItem =>
+          Boolean(item.id && item.type && ALL_CONTENT_TYPES.includes(item.type as ContentType))
+      );
+    }
+  } catch {
+    fullPlanExcludedItems = [];
+  }
+
+  const ctx: AccessContext = {
+    userId,
+    isAdmin,
+    activePlans,
+    purchasedContentIds,
+    fullPlanIncludes,
+    fullPlanExcludedItems,
+  };
 
   // Cache for 30 seconds
   accessCtxCache.set(userId, { ctx, expiry: Date.now() + ACCESS_CTX_TTL });
@@ -139,18 +188,18 @@ function itemIsAccessible(
   // Individually purchased → accessible
   if (item.id && ctx.purchasedContentIds.has(item.id)) return true;
 
-  // Check subscription access
-  if (canAccessContent(null, contentType, false, ctx.activePlans)) {
-    // canAccessContent with null user + activePlans still checks plans correctly
-    // But we need to pass a user-like object for the fallback path.
-    // Since we already extracted activePlans, let's just check directly.
+  const fullPlanCoversType = ctx.fullPlanIncludes.includes(contentType);
+  const excludedFromFullPlan = ctx.fullPlanExcludedItems.some(
+    (excluded) => excluded.id === String(item.id) && excluded.type === contentType
+  );
+
+  // A full plan is limited by the admin's included types and item exclusions.
+  if (ctx.activePlans.includes("full") && fullPlanCoversType && !excludedFromFullPlan) {
     return true;
   }
 
-  // Also check if any active plan covers this content type
-  if (ctx.activePlans.includes("full") || ctx.activePlans.includes(contentType)) {
-    return true;
-  }
+  // A dedicated plan grants access only to its matching content type.
+  if (ctx.activePlans.includes(contentType)) return true;
 
   return false;
 }
