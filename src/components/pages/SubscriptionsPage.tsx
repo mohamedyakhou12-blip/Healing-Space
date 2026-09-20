@@ -55,15 +55,8 @@ export default function SubscriptionsPage() {
   const { navigate, pageParams, user } = useAppStore();
 
   // ── Fetch subscription prices + fullPlanIncludes from API ──
-  const [apiPrices, setApiPrices] = useState<Record<string, number> | null>(() => {
-    // Initialize from localStorage cache to prevent flash of default prices
-    if (typeof window === 'undefined') return null;
-    try {
-      const cached = localStorage.getItem('hs_subPrices');
-      if (cached) return JSON.parse(cached);
-    } catch { /* ignore */ }
-    return null;
-  });
+  // Prices always come from the server so admin updates are reflected immediately.
+  const [apiPrices, setApiPrices] = useState<Record<string, number> | null>(null);
   const [fullPlanIncludes, setFullPlanIncludes] = useState<ContentType[]>(ALL_CONTENT_TYPES);
 
   useEffect(() => {
@@ -74,8 +67,6 @@ export default function SubscriptionsPage() {
           const data = await res.json();
           if (data.prices) {
             setApiPrices(data.prices);
-            // Cache for instant load on refresh
-            localStorage.setItem('hs_subPrices', JSON.stringify(data.prices));
           }
           if (data.fullPlanIncludes) {
             setFullPlanIncludes(data.fullPlanIncludes);
@@ -197,7 +188,7 @@ export default function SubscriptionsPage() {
       features: [
         { ar: "الوصول لجميع حلقات البودكاست", en: "Access to all podcast episodes", fr: "Accès à tous les épisodes" },
         { ar: "حلقات حصرية مع ضيوف مميزين", en: "Exclusive episodes with special guests", fr: "Épisodes exclusifs avec invités spéciaux" },
-        { ar: "تحميل الحلقات للاستماع بدون إنترنت", en: "Download episodes for offline listening", fr: "Télécharger pour écoute hors ligne" },
+        { ar: "تحميل الحلقات للاستماع بدون إنتر��ت", en: "Download episodes for offline listening", fr: "Télécharger pour écoute hors ligne" },
       ],
     },
     {
@@ -245,7 +236,7 @@ export default function SubscriptionsPage() {
       features: [
         { ar: "جلسة شهرية مع مدربة", en: "Monthly coaching session", fr: "Séance mensuelle avec coach" },
         { ar: "ورش عمل وتمارين", en: "Workshops & exercises", fr: "Ateliers et exercices" },
-        { ar: "تأمل وتأكيدات إيجابية", en: "Meditation & affirmations", fr: "Méditation et affirmations" },
+        { ar: "��أمل وتأكيدات إيجابية", en: "Meditation & affirmations", fr: "Méditation et affirmations" },
       ],
     },
   ];
