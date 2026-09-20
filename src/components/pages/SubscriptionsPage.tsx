@@ -69,7 +69,7 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/subscription-prices?_t=" + Date.now());
+        const res = await fetch("/api/subscription-prices?_t=" + Date.now(), { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.prices) {

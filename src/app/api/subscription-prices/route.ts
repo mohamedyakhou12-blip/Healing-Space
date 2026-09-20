@@ -71,13 +71,13 @@ export async function GET() {
     }
 
     return NextResponse.json({ prices, fullPlanIncludes, fullPlanExcludedItems }, {
-      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+      headers: { "Cache-Control": "no-store, max-age=0" },
     });
   } catch (error) {
     console.error("Fetch subscription prices error:", error);
     // Return defaults on error
     return NextResponse.json({ prices: DEFAULT_PRICES, fullPlanIncludes: ALL_CONTENT_TYPES, fullPlanExcludedItems: [] }, {
-      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+      headers: { "Cache-Control": "no-store, max-age=0" },
     });
   }
 }
