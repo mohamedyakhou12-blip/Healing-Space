@@ -192,3 +192,18 @@ https://react.dev/link/hydration-mismatch
  GET /api/public-settings 200 in 222ms (next.js: 19ms, proxy.ts: 25ms, application-code: 178ms)
  GET /api/public-settings 200 in 323ms (next.js: 38ms, proxy.ts: 9ms, application-code: 275ms)
  GET /api/articles?status=published&limit=4 200 in 438ms (next.js: 26ms, proxy.ts: 8ms, application-code: 404ms)
+✓ Compiled in 804ms
+✓ Compiled in 585ms
+ GET / 200 in 131ms (next.js: 73ms, application-code: 58ms)
+ GET / 200 in 28ms (next.js: 3ms, application-code: 25ms)
+ GET / 200 in 21ms (next.js: 2ms, application-code: 19ms)
+ GET / 200 in 24ms (next.js: 3ms, application-code: 21ms)
+ GET / 200 in 22ms (next.js: 3ms, application-code: 20ms)
+ GET /pdfs 200 in 274ms (next.js: 29ms, application-code: 245ms)
+ GET /api/subscription-prices?_t=1790015750012 200 in 233ms (next.js: 52ms, proxy.ts: 56ms, application-code: 125ms)
+ GET /api/csrf-token 200 in 203ms (next.js: 92ms, proxy.ts: 105ms, application-code: 6ms)
+ GET /api/public-settings?_t=1790015750019 200 in 358ms (next.js: 92ms, proxy.ts: 60ms, application-code: 206ms)
+ GET /api/auth/profile 401 in 241ms (next.js: 80ms, proxy.ts: 112ms, application-code: 49ms)
+ GET /api/auth/session 200 in 193ms (next.js: 113ms, proxy.ts: 65ms, application-code: 14ms)
+ GET /api/pdfs 200 in 364ms (next.js: 150ms, proxy.ts: 63ms, application-code: 150ms)
+ GET /api/public-settings 200 in 398ms (next.js: 47ms, proxy.ts: 105ms, application-code: 246ms)
