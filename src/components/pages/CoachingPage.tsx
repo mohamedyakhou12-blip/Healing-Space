@@ -213,6 +213,17 @@ export default function CoachingPage() {
           </div>
         </div>
 
+        {/* Hero image */}
+        <div className="relative h-56 sm:h-72 rounded-2xl overflow-hidden shadow-lg">
+          <img
+            src="https://res.cloudinary.com/dooxcfe94/image/upload/v1790031559/healing-space/coaching/file_ditzw6.jpg"
+            alt={t("coaching.title")}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        </div>
+
         {/* Coaching Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -251,7 +262,27 @@ export default function CoachingPage() {
                     className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${!accessible ? "opacity-85" : ""}`}
                   >
                     <CardContent className="p-0">
-                      {/* Top colored section with icon */}
+                      {/* Image banner when available, otherwise colored icon section */}
+                      {item.image ? (
+                        <div className="relative h-40 overflow-hidden">
+                          <img
+                            src={item.image}
+                            alt={localizedTitle(item)}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                          {!item.isFree ? (
+                            <Badge className="shrink-0 bg-healing-brown text-white border-0 text-xs absolute top-3 start-3">
+                              {item.price.toLocaleString()} {t("common.currency")}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="shrink-0 text-xs border-healing-beige bg-white/90 text-healing-brown absolute top-3 start-3">
+                              {t("common.free")}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
                       <div className={`relative flex items-center gap-4 p-5 ${bgColor}`}>
                         <div
                           className={`flex size-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-md`}
@@ -274,17 +305,17 @@ export default function CoachingPage() {
                           )}
                         </div>
                         {/* Price badge */}
-                        {!item.isFree && (
+                        {!item.isFree ? (
                           <Badge className="shrink-0 bg-healing-brown text-white border-0 text-xs">
                             {item.price.toLocaleString()} {t("common.currency")}
                           </Badge>
-                        )}
-                        {item.isFree && (
+                        ) : (
                           <Badge variant="outline" className="shrink-0 text-xs border-healing-beige text-healing-brown">
                             {t("common.free")}
                           </Badge>
                         )}
                       </div>
+                      )}
 
                       {/* Description section */}
                       <div className="px-5 pb-5 pt-3 space-y-3">

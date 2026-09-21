@@ -37,6 +37,11 @@ const createArticleSchema = z.object({
   metaDescFr: z.string().max(1000).optional(),
   metaDescEn: z.string().max(1000).optional(),
   ogImage: z.string().max(500).optional(),
+  attachments: z.array(z.object({
+    name: z.string().max(500),
+    url: z.string().max(1000),
+    size: z.string().max(100).optional(),
+  })).max(50).optional(),
 });
 
 export async function GET(request: NextRequest) {

@@ -32,10 +32,19 @@ import {
   Play,
   Award,
   ChevronRight,
+  FileText,
+  ExternalLink,
+  FileUp,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
 import { getOptimizedImageUrl } from "@/lib/cloudinary-utils";
 import Link from "next/link";
+
+interface Attachment {
+  name: string;
+  url: string;
+  size?: string;
+}
 
 interface Lesson {
   id: string;
@@ -57,6 +66,7 @@ interface Course {
   description: { ar: string; en: string; fr: string };
   instructor: { ar: string; en: string; fr: string };
   image: string;
+  attachments: Attachment[];
   gradient: string;
   chapters: Chapter[];
   totalLessons: number;
@@ -116,6 +126,7 @@ export default function CoursesPage() {
             description: { ar: c.descriptionAr || c.description, en: c.descriptionEn || c.description, fr: c.descriptionFr || c.description },
             instructor: { ar: c.instructor || "", en: c.instructor || "", fr: c.instructor || "" },
             image: c.image || c.thumbnail || "",
+            attachments: (c.attachments as Array<{name: string; url: string; size?: string}> || []),
             gradient: GRADIENTS[i % GRADIENTS.length],
             chapters: (c.chapters || []).map((ch: any) => ({
               id: ch.id,
@@ -251,6 +262,7 @@ export default function CoursesPage() {
             <div
               className={`relative h-48 sm:h-64 md:h-80 rounded-2xl bg-gradient-to-br ${course.gradient} overflow-hidden`}
             >
+              {course.image && <img src={getOptimizedImageUrl(course.image, { width: 800, height: 450, quality: "auto:good" })} alt={localizedText(course.title)} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />}
               <div className="absolute inset-0 bg-black/20 flex items-end p-6">
                 <div className="text-white">
                   {course.isFree && (
@@ -377,8 +389,35 @@ export default function CoursesPage() {
                     </AccordionContent>
                   </AccordionItem>
                 ))}
-              </Accordion>
-            </div>
+</Accordion>
+             </div>
+
+            {/* Attachments */}
+            {course.attachments && course.attachments.length > 0 && (
+              <div className="space-y-4">
+                <Separator />
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <FileUp className="h-5 w-5" />
+                  {t("admin.attachments") || "الملفات المرفقة"}
+                </h2>
+                <div className="space-y-2">
+                  {course.attachments.map((att, idx) => (
+                    <a
+                      key={idx}
+                      href={att.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <FileText className="size-5 text-primary" />
+                      <span className="font-medium truncate flex-1">{att.name}</span>
+                      {att.size && <span className="text-xs text-muted-foreground">{att.size}</span>}
+                      <ExternalLink className="size-4 text-muted-foreground" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Separator />
 

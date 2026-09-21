@@ -107,7 +107,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { adminHeaders, adminFormDataHeaders, setStoredAdminCode } from "@/lib/api-helpers";
-import { cachedFetch } from "@/lib/client-cache";
+import { cachedFetch, invalidateClientCache } from "@/lib/client-cache";
 import { directCloudinaryUpload, shouldUseDirectUpload } from "@/lib/cloudinary-client";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -144,6 +144,12 @@ interface Payment {
   timestamp: string;
   isPurchase?: boolean; // true = individual content purchase, false/undefined = subscription payment
   purchaseEndpoint?: string; // API endpoint for approve/reject
+}
+
+interface Attachment {
+  name: string;
+  url: string;
+  size?: string;
 }
 
 interface ContentItem {
@@ -192,6 +198,7 @@ interface ContentItem {
   metaDescFr?: string;
   metaDescEn?: string;
   ogImage?: string;
+  attachments?: Attachment[];
 }
 
 interface Slider {
@@ -278,6 +285,7 @@ function normalizeContentItem(raw: Record<string, unknown>): ContentItem {
     metaDescFr: raw.metaDescFr as string | undefined,
     metaDescEn: raw.metaDescEn as string | undefined,
     ogImage: raw.ogImage as string | undefined,
+    attachments: (raw.attachments as Attachment[] | undefined) || [],
   };
 }
 
@@ -1951,6 +1959,7 @@ function ContentView() {
   const [formMetaDescFr, setFormMetaDescFr] = useState("");
   const [formMetaDescEn, setFormMetaDescEn] = useState("");
   const [formOgImage, setFormOgImage] = useState("");
+  const [formAttachments, setFormAttachments] = useState<Attachment[]>([]);
   const [showSeo, setShowSeo] = useState(false);
   // Preview
   const [previewDialog, setPreviewDialog] = useState<{ open: boolean; item: ContentItem | null }>({ open: false, item: null });
@@ -2064,6 +2073,7 @@ function ContentView() {
     setFormMetaDescFr(item?.metaDescFr || (raw.metaDescFr as string) || "");
     setFormMetaDescEn(item?.metaDescEn || (raw.metaDescEn as string) || "");
     setFormOgImage(item?.ogImage || (raw.ogImage as string) || "");
+    setFormAttachments((raw.attachments as Attachment[] | undefined) || item?.attachments || []);
     setShowSeo(false);
     setEditDialog({ open: true, item, isNew });
   };
@@ -2112,6 +2122,7 @@ function ContentView() {
         metaDescFr: formMetaDescFr || undefined,
         metaDescEn: formMetaDescEn || undefined,
         ogImage: formOgImage || undefined,
+        attachments: formAttachments.length > 0 ? formAttachments : undefined,
       };
 
       if (contentSubTab === "videos" && formVideoUrl) {
@@ -2167,6 +2178,7 @@ function ContentView() {
 
       if (res.ok) {
         toast.success(t("admin.changesSaved"));
+        invalidateClientCache();
         fetchContent();
       } else {
         const errData = await res.json().catch(() => ({}));
@@ -2192,6 +2204,7 @@ function ContentView() {
       });
       if (res.ok) {
         toast.success(t("admin.itemDeleted"));
+        invalidateClientCache();
         fetchContent();
       } else {
         toast.error(t("common.error"));
@@ -2697,7 +2710,7 @@ function ContentView() {
       </Card>
 
       {/* Add/Edit Dialog - with scrollable body and fixed footer */}
-      <Dialog open={editDialog.open} onOpenChange={(open) => { if (!open) setEditDialog({ open: false, item: null, isNew: false }); }}>
+      <Dialog open={editDialog.open} onOpenChange={(open) => { if (!open) { setEditDialog({ open: false, item: null, isNew: false }); setFormAttachments([]); } }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
@@ -2767,6 +2780,54 @@ function ContentView() {
               contentType={contentSubTab}
               maxSizeMB={100}
             />
+
+            {/* Attachments for articles and courses */}
+            {(contentSubTab === "articles" || contentSubTab === "courses") && (
+              <div className="space-y-2">
+                <Label className="text-sm flex items-center gap-1.5">
+                  <FileUp className="size-3.5" /> {t("admin.attachments") || "الملفات المرفقة"}
+                </Label>
+                <div className="space-y-2 max-h-64 overflow-y-auto border rounded-lg p-3 bg-muted/30">
+                  {formAttachments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      {t("admin.noAttachments") || "لا توجد ملفات مرفقة"}
+                    </p>
+                  ) : (
+                    formAttachments.map((att, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-background rounded border">
+                        <FileText className="size-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{att.name}</p>
+                          {att.size && <p className="text-xs text-muted-foreground">{att.size}</p>}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700"
+                          onClick={() => setFormAttachments(formAttachments.filter((_, i) => i !== idx))}
+                        >
+                          <X className="size-3.5" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <FileUploadComponent
+                  value=""
+                  onChange={(url) => {
+                    if (url) {
+                      const name = url.split("/").pop()?.split("?")[0] || "Attachment";
+                      setFormAttachments([...formAttachments, { name, url }]);
+                    }
+                  }}
+                  label=""
+                  placeholder="ارفع ملفاً مرفقاً (PDF، صورة، فيديو، صوت، مستند...)"
+                  uploadType="content"
+                  contentType={contentSubTab}
+                  maxSizeMB={100}
+                />
+              </div>
+            )}
 
             {/* Video URL field (required) — Upload or paste YouTube/URL */}
             {contentSubTab === "videos" && (

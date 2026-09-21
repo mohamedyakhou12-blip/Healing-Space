@@ -71,7 +71,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "category", "tags", "viewCount",
     "metaTitleAr", "metaTitleFr", "metaTitleEn",
     "metaDescAr", "metaDescFr", "metaDescEn",
-    "ogImage",
+    "ogImage", "attachments",
     "createdAt", "updatedAt",
   ]),
   courseChapters: new Set([
@@ -97,7 +97,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "author", "readTime", "category", "tags", "viewCount",
     "metaTitleAr", "metaTitleFr", "metaTitleEn",
     "metaDescAr", "metaDescFr", "metaDescEn",
-    "ogImage",
+    "ogImage", "attachments",
     "createdAt", "updatedAt",
   ]),
   podcasts: new Set([

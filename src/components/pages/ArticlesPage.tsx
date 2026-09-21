@@ -7,6 +7,7 @@ import { useAppStore } from "@/lib/store";
 import { useUserWithFreshSubscription } from "@/hooks/useSubscription";
 import { canAccessContentById } from "@/lib/content-access";
 import { cachedFetch } from "@/lib/client-cache";
+import { getOptimizedImageUrl } from "@/lib/cloudinary-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +26,16 @@ import {
   Calendar,
   ShoppingBag,
   Crown,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
+
+interface Attachment {
+  name: string;
+  url: string;
+  size?: string;
+}
 
 interface Article {
   id: string;
@@ -35,6 +44,8 @@ interface Article {
   content: { ar: string; en: string; fr: string };
   author: { name: { ar: string; en: string; fr: string }; bio: { ar: string; en: string; fr: string } };
   category: { ar: string; en: string; fr: string };
+  image: string;
+  attachments: Attachment[];
   gradient: string;
   readTime: number;
   publishedDate: string;
@@ -99,6 +110,8 @@ export default function ArticlesPage() {
               bio: { ar: a.author || "", en: a.author || "", fr: a.author || "" },
             },
             category: { ar: a.category || "", en: a.category || "", fr: a.category || "" },
+            image: a.image || a.thumbnail || "",
+            attachments: (a.attachments as Array<{name: string; url: string; size?: string}> || []),
             gradient: GRADIENTS[i % GRADIENTS.length],
             readTime: a.readTime || 5,
             publishedDate: a.createdAt ? new Date(a.createdAt).toISOString().split('T')[0] : "",
@@ -290,12 +303,35 @@ export default function ArticlesPage() {
                   <div
                     className={`relative h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${article.gradient} mb-6 overflow-hidden`}
                   >
+                    {article.image && <img src={getOptimizedImageUrl(article.image, { width: 800, height: 450, quality: "auto:good" })} alt={localizedText(article.title)} className="h-full w-full object-cover" loading="lazy" />}
                     <Newspaper className="absolute bottom-4 start-4 h-12 w-12 text-white/20" />
                   </div>
                   <div
                     className="prose prose-neutral dark:prose-invert max-w-none text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: localizedText(article.content) }}
                   />
+                  {/* Attachments */}
+                  {article.attachments && article.attachments.length > 0 && (
+                    <div className="mt-6 pt-4 border-t">
+                      <h3 className="font-semibold mb-3">{t("admin.attachments") || "الملفات المرفقة"}</h3>
+                      <div className="space-y-2">
+                        {article.attachments.map((att, idx) => (
+                          <a
+                            key={idx}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                          >
+                            <FileText className="size-5 text-primary" />
+                            <span className="font-medium truncate flex-1">{att.name}</span>
+                            {att.size && <span className="text-xs text-muted-foreground">{att.size}</span>}
+                            <ExternalLink className="size-4 text-muted-foreground" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -446,6 +482,7 @@ export default function ArticlesPage() {
                 >
                   {/* Image */}
                   <div className={`relative h-40 bg-gradient-to-br ${article.gradient} overflow-hidden`}>
+                    {article.image && <img src={getOptimizedImageUrl(article.image, { width: 400, height: 250, quality: "auto:good" })} alt={localizedText(article.title)} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />}
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                     {!canAccessContentById(userWithSub, 'articles', article.id, article.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems) && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">

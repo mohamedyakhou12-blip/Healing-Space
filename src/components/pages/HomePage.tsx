@@ -157,7 +157,7 @@ const services: ServiceConfig[] = [
   { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop" },
   { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=250&fit=crop" },
   { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
-  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
+  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "https://res.cloudinary.com/dooxcfe94/image/upload/v1790031559/healing-space/coaching/file_ditzw6.jpg" },
 ];
 
 /* ------------------------------------------------------------------ */
