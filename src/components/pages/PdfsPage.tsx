@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
+import { UniversalFileViewer } from "@/components/media/UniversalFileViewer";
 
 interface PdfItem {
   id: string;
@@ -276,40 +277,10 @@ export default function PdfsPage() {
           <p className="text-muted-foreground">{localizedText(selectedPdf.description)}</p>
         </div>
 
-        {/* PDF Viewer */}
-        <div className="w-full border rounded-xl overflow-hidden bg-muted" style={{ height: '80vh' }}>
-          <iframe
-            src={selectedPdf.fileUrl}
-            className="w-full h-full"
-            title={localizedText(selectedPdf.title)}
-          />
-          {/* Fallback: if iframe fails, show download link */}
-          <noscript>
-            <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
-              <FileText className="h-16 w-16 text-muted-foreground/50" />
-              <p className="text-muted-foreground text-center">
-                {locale === "ar" ? "متصفحك لا يدعم عرض PDF مباشرة" : locale === "fr" ? "Votre navigateur ne supporte pas l'affichage PDF" : "Your browser doesn't support inline PDF viewing"}
-              </p>
-            </div>
-          </noscript>
-        </div>
-
-        {/* Download button */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button className="w-full sm:w-auto" onClick={() => window.open(selectedPdf.fileUrl, '_blank')}>
-            <Download className="h-4 w-4 me-2" />
-            {t("pdfs.download")}
-          </Button>
-          {/* Alternative: Open in Google Docs Viewer for browsers without PDF support */}
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(selectedPdf.fileUrl)}&embedded=true`, '_blank')}
-          >
-            <FileText className="h-4 w-4 me-2" />
-            {locale === "ar" ? "عرض في عارض Google" : locale === "fr" ? "Voir dans Google Viewer" : "Open in Google Viewer"}
-          </Button>
-        </div>
+        <UniversalFileViewer
+          src={selectedPdf.fileUrl}
+          title={localizedText(selectedPdf.title)}
+        />
       </motion.div>
     )}
 

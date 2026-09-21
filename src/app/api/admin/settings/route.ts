@@ -15,7 +15,7 @@ const ALLOWED_SETTINGS_KEYS = [
   "heroTitle", "heroSubtitle", "heroDescription", "siteOwnerNameSetting",
   "ctaButton1", "ctaButton2", "introVideoUrl", "sectionVisibility",
   "ccpNumber", "ccpHolderName", "ccpWilaya",
-  "individualPurchasesEnabled", "siteName", "siteDescription",
+  "individualPurchasesEnabled", "individualContentPrice", "siteName", "siteDescription",
   "contactEmail", "contactPhone", "socialFacebook", "socialInstagram",
   "socialYoutube", "socialTwitter", "socialTikTok",
   "ogImage", "ogTitle", "ogDescription",

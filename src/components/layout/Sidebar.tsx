@@ -84,18 +84,12 @@ function SidebarNav({
 }) {
   const { t } = useTranslation();
   const { navigate, currentPage, pageParams, user, isAdmin } = useAppStore();
-  const [adminExpanded, setAdminExpanded] = useState(false);
 
-  // Auto-expand admin section when on admin page
+  // Auto-expand admin section when on admin page without an effect-driven render.
   const isOnAdmin = currentPage === "admin";
   const currentAdminTab = (pageParams?.tab as string) || "dashboard";
-
-  // Keep admin section expanded while on admin page
-  useEffect(() => {
-    if (isOnAdmin) {
-      setAdminExpanded(true);
-    }
-  }, [isOnAdmin]);
+  const [adminExpanded, setAdminExpanded] = useState(isOnAdmin);
+  const isAdminSectionExpanded = adminExpanded || isOnAdmin;
 
   const handleNav = (page: PageName) => {
     navigate(page);
@@ -233,14 +227,14 @@ function SidebarNav({
               <ChevronDown
                 className={cn(
                   "ms-auto size-4 shrink-0 transition-transform duration-200",
-                  adminExpanded ? "rotate-180" : ""
+                  isAdminSectionExpanded ? "rotate-180" : ""
                 )}
               />
             </button>
 
             {/* Admin sub-items - expanded */}
-            {adminExpanded && (
-              <ul className="mt-1 space-y-0.5 me-2" role="menubar">
+  {isAdminSectionExpanded && (
+  <ul className="mt-1 space-y-0.5 me-2" role="menubar">
                 {adminSubItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = isOnAdmin && currentAdminTab === item.tab;

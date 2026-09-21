@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       { articles: gatedResult },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+          "Cache-Control": "private, no-store",
         },
       }
     );

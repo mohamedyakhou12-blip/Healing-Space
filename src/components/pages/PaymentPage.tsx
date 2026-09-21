@@ -100,7 +100,7 @@ export default function PaymentPage() {
     if (isIndividualPurchase) return;
     (async () => {
       try {
-        const res = await fetch("/api/subscription-prices?_t=" + Date.now());
+        const res = await fetch("/api/subscription-prices?_t=" + Date.now(), { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.prices?.[selectedPlanId]) {
@@ -209,7 +209,7 @@ export default function PaymentPage() {
     const trimmed = text.trim();
     if (trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html") || trimmed.startsWith("<HTML")) {
       const htmlError = locale === "ar"
-        ? "الملف كبير جداً للرفع المباشر. يرجى استخدام ملف أصغر أو الاتصال بالدعم."
+        ? "الملف كبي�� جداً للرفع المباشر. يرجى استخدام ملف أصغر أو الاتصال بالدعم."
         : locale === "fr"
           ? "Fichier trop volumineux pour un téléchargement direct. Veuillez utiliser un fichier plus petit ou contacter le support."
           : "File too large for direct upload. Please use a smaller file or contact support.";
@@ -634,7 +634,7 @@ export default function PaymentPage() {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {locale === "ar"
-                          ? "أو انقر لاختيار صورة أو ملف PDF (الحد الأقصى 20MB)"
+                          ? "أو انقر لاختيار صور�� أو ملف PDF (الحد الأقصى 20MB)"
                           : locale === "fr"
                             ? "Ou cliquez pour sélectionner une image ou PDF (max 20 Mo)"
                             : "Or click to select an image or PDF (max 20MB)"}

@@ -28,7 +28,7 @@ export default function AdminPricingPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/public-settings?_t=' + Date.now())
+    fetch('/api/public-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((response) => response.json())
       .then((data) => {
         if (cancelled) return;
