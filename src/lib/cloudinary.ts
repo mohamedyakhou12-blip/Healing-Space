@@ -50,7 +50,7 @@ export async function uploadToCloudinary(
         folder,
         resource_type: resourceType,
         public_id: publicId,
-        transformation: transformation || (resourceType === "image" ? "q_auto,f_auto" : undefined),
+        transformation: transformation || (resourceType === "image" ? [{ quality: "auto", fetch_format: "auto" }] : undefined),
         // For videos: generate a thumbnail automatically
         eager: resourceType === "video" 
           ? [{ width: 640, height: 360, crop: "pad", format: "jpg" }]
