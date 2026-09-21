@@ -65,6 +65,8 @@ const PUBLIC_KEYS = new Set([
   // Full plan config — needed for content access checks on client
   "full_plan_includes",
   "full_plan_excluded_items",
+  // Social links (trilingual JSON object consumed by the public footer)
+  "socialLinks",
 ]);
 
 export async function GET() {

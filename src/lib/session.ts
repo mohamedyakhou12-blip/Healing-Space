@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 /**
  * Server-side session management using iron-session.
- * Sessions are encrypted cookies ó no data stored server-side.
+ * Sessions are encrypted cookies — no data stored server-side.
  */
 
 export interface SessionData {
@@ -33,28 +33,17 @@ function getSessionSecret(): string {
   }
 
   if (process.env.NEXT_PHASE === "phase-production-build") {
-    console.warn("[SESSION] Build phase ó using temporary build secret");
+    console.warn("[SESSION] Build phase — using temporary build secret");
     return "build-phase-temporary-secret-do-not-use-at-runtime-32ch";
   }
 
   if (process.env.NODE_ENV === "production") {
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || "";
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "healing-space-5a76f";
-    const derived = `hs-session-${projectId}-${Buffer.from(serviceAccount).toString("base64").substring(0, 32)}-key`;
-
-    if (derived.length >= 32) {
-      console.warn(
-        "[SESSION] Warning: SESSION_SECRET not set! Deriving from service account. " +
-        "SET SESSION_SECRET env var for proper security!"
-      );
-      return derived;
-    }
-
-    console.error(
-      "[SESSION] Warning: SESSION_SECRET not set! Using insecure fallback. " +
-      "SET SESSION_SECRET env var immediately!"
+    // Fail closed: never sign session cookies without a real secret.
+    throw new Error(
+      "[SECURITY] SESSION_SECRET is not set. Refusing to start in production. " +
+      "Set SESSION_SECRET (at least 32 characters) in your environment before deploying. " +
+      "Generate one with: openssl rand -base64 32"
     );
-    return "production-fallback-please-set-session-secret-32ch";
   }
 
   console.warn(

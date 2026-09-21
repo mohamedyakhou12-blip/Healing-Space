@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       endDate = new Date(now);
-      endDate.setDate(endDate.getDate() + 30); // Exactly 30 days
+      endDate.setMonth(endDate.getMonth() + 1); // Full calendar month
     }
 
     // Prevent duplicate active subscription of the same type
@@ -159,13 +159,13 @@ export async function POST(request: NextRequest) {
     if (existingActive) {
       // Extend the existing subscription instead of creating a duplicate
       const newEndDate = new Date(existingActive.endDate);
-      newEndDate.setDate(newEndDate.getDate() + 30);
+      newEndDate.setMonth(newEndDate.getMonth() + 1);
       const updated = await db.subscription.update({
         where: { id: existingActive.id },
         data: { endDate: newEndDate.toISOString() },
       });
       return NextResponse.json(
-        { subscription: updated, message: "Existing subscription extended by 30 days" },
+        { subscription: updated, message: "Existing subscription extended by 1 month" },
         { status: 200 }
       );
     }

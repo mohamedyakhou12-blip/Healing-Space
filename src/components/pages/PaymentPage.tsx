@@ -52,19 +52,6 @@ const planNames: Record<string, { ar: string; en: string; fr: string }> = {
   coaching: { ar: "الكوتشنغ فقط", en: "Coaching Only", fr: "Coaching uniquement" },
 };
 
-const DEFAULT_PLAN_PRICES: Record<string, number> = {
-  full: 2000,
-  courses: 500,
-  articles: 500,
-  podcasts: 500,
-  videos: 500,
-  pdfs: 500,
-  live: 500,
-  coaching: 500,
-};
-
-const DEFAULT_CCP = "12345 67890 12";
-
 const localizedText = (obj: { ar: string; en: string; fr: string }, locale: string) =>
   obj[locale as keyof typeof obj] || obj.ar;
 
@@ -82,18 +69,9 @@ export default function PaymentPage() {
 
   const selectedPlanId = (pageParams?.plan as string) || "full";
   const selectedPlanName = planNames[selectedPlanId] || planNames.full;
-  const [apiPrice, setApiPrice] = useState<number>(() => {
-    // Initialize from localStorage cache to prevent flash of default prices
-    if (typeof window === 'undefined') return DEFAULT_PLAN_PRICES[selectedPlanId] ?? 2000;
-    try {
-      const cached = localStorage.getItem('hs_subPrices');
-      if (cached) {
-        const prices = JSON.parse(cached);
-        if (prices[selectedPlanId]) return prices[selectedPlanId];
-      }
-    } catch { /* use default */ }
-    return DEFAULT_PLAN_PRICES[selectedPlanId] ?? 2000;
-  });
+  const [apiPrice, setApiPrice] = useState<number | null>(null);
+  const [priceLoaded, setPriceLoaded] = useState(isIndividualPurchase);
+  const selectedPrice = isIndividualPurchase ? contentPrice : (apiPrice ?? 0);
 
   // Fetch subscription price from API (only for subscription mode)
   useEffect(() => {
@@ -105,14 +83,13 @@ export default function PaymentPage() {
           const data = await res.json();
           if (data.prices?.[selectedPlanId]) {
             setApiPrice(data.prices[selectedPlanId]);
-            // Cache all prices for instant load on refresh
-            localStorage.setItem('hs_subPrices', JSON.stringify(data.prices));
           }
         }
-      } catch { /* use default */ }
+      } catch { /* ignore */ } finally {
+        setPriceLoaded(true);
+      }
     })();
   }, [selectedPlanId, isIndividualPurchase]);
-  const selectedPrice = isIndividualPurchase ? contentPrice : apiPrice;
 
   const [ccpInput, setCcpInput] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -123,7 +100,7 @@ export default function PaymentPage() {
   const [submitted, setSubmitted] = useState(false);
   const [copiedCCP, setCopiedCCP] = useState(false);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const [ccpAccount, setCcpAccount] = useState(DEFAULT_CCP);
+  const [ccpAccount, setCcpAccount] = useState("");
   const [ccpHolderName, setCcpHolderName] = useState("");
   const [ccpWilaya, setCcpWilaya] = useState("");
 
@@ -319,6 +296,17 @@ export default function PaymentPage() {
 
   const handleSubmit = useCallback(async () => {
     if (!user || !receiptPreview) return;
+    if (!isIndividualPurchase && !priceLoaded) return;
+    if (!isIndividualPurchase && apiPrice == null) {
+      toast.error(
+        locale === "ar"
+          ? "سعر الاشتراك غير مضبوط. يرجى التواصل مع الدعم."
+          : locale === "fr"
+            ? "Le prix de l'abonnement n'est pas configuré. Veuillez contacter le support."
+            : "Subscription price is not configured. Please contact support."
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -395,7 +383,7 @@ export default function PaymentPage() {
     },
     approved: {
       label: t("payment.approved"),
-      color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      color: "bg-healing-cream text-healing-brown dark:bg-healing-brown/30 dark:text-healing-beige",
       icon: ShieldCheck,
     },
     rejected: {
@@ -486,23 +474,31 @@ export default function PaymentPage() {
               {/* CCP Account Number */}
               <div className="space-y-2">
                 <p className="text-sm font-medium">{t("payment.ccpNumber")}</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-muted rounded-lg p-3 font-mono text-lg tracking-wider text-center font-bold">
-                    {ccpAccount}
+                {ccpAccount ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-muted rounded-lg p-3 font-mono text-lg tracking-wider text-center font-bold">
+                      {ccpAccount}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleCopyCCP}
+                      className="shrink-0"
+                    >
+                      {copiedCCP ? (
+                        <Check className="h-4 w-4 text-healing-brown" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleCopyCCP}
-                    className="shrink-0"
-                  >
-                    {copiedCCP ? (
-                      <Check className="h-4 w-4 text-emerald-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-muted rounded-lg p-3 font-mono text-base tracking-wider text-center">
+                      {locale === "ar" ? "جارٍ تحميل رقم الحساب..." : locale === "fr" ? "Chargement du numéro de compte..." : "Loading account number..."}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CCP Wilaya */}
@@ -581,7 +577,7 @@ export default function PaymentPage() {
                     : isUploadingReceipt
                       ? "border-primary bg-primary/5"
                       : receiptPreview
-                        ? "border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-900/10"
+                        ? "border-healing-beige-light dark:border-healing-brown bg-healing-cream/50 dark:bg-healing-brown/10"
                         : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30"
                 }`}
               >
@@ -612,7 +608,7 @@ export default function PaymentPage() {
                         />
                       )}
                     </div>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                    <p className="text-sm text-healing-brown dark:text-healing-beige font-medium">
                       {locale === "ar" ? "تم رفع الإيصال بنجاح ✅" : locale === "fr" ? "Reçu téléchargé avec succès ✅" : "Receipt uploaded successfully ✅"}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -665,7 +661,13 @@ export default function PaymentPage() {
               {/* Amount Display */}
               <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
                 <span className="text-sm font-medium">{t("payment.amount")}</span>
-                <span className="font-bold text-lg">{selectedPrice.toLocaleString()} DA</span>
+                {!isIndividualPurchase && !priceLoaded ? (
+                  <span className="font-bold text-lg">
+                    {locale === "ar" ? "جارٍ التحميل..." : locale === "fr" ? "Chargement..." : "Loading..."}
+                  </span>
+                ) : (
+                  <span className="font-bold text-lg">{selectedPrice.toLocaleString()} DA</span>
+                )}
               </div>
 
               {/* Submit Button */}
@@ -673,7 +675,7 @@ export default function PaymentPage() {
                 className="w-full"
                 size="lg"
                 onClick={handleSubmit}
-                disabled={!receiptPreview || !ccpInput || isSubmitting || isUploadingReceipt}
+                disabled={!receiptPreview || !ccpInput || isSubmitting || isUploadingReceipt || (!isIndividualPurchase && !priceLoaded)}
               >
                 {isSubmitting || isUploadingReceipt ? (
                   <motion.div

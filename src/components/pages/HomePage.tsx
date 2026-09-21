@@ -98,114 +98,43 @@ function useAnimatedCounter(target: number, duration = 2000) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock data                                                          */
+/*  Featured content item types                                        */
 /* ------------------------------------------------------------------ */
 
-const mockFeaturedCourses = [
-  {
-    id: 1,
-    title: "أساسيات العلاج النفسي",
-    description: "تعرف على مبادئ العلاج النفسي وأساسياته",
-    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop",
-    progress: 75,
-    lessons: 24,
-    duration: "12 ساعة",
-  },
-  {
-    id: 2,
-    title: "الذكاء العاطفي",
-    description: "طور مهاراتك في فهم وإدارة مشاعرك",
-    image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&h=250&fit=crop",
-    progress: 40,
-    lessons: 18,
-    duration: "8 ساعات",
-  },
-  {
-    id: 3,
-    title: "التأمل والاسترخاء",
-    description: "تقنيات التأمل العميق والاسترخاء العضلي",
-    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-    progress: 0,
-    lessons: 15,
-    duration: "6 ساعات",
-  },
-  {
-    id: 4,
-    title: "بناء الثقة بالنفس",
-    description: "استراتيجيات فعالة لتعزيز الثقة بالنفس",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
-    progress: 90,
-    lessons: 20,
-    duration: "10 ساعات",
-  },
-];
+type FeaturedCourseItem = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  progress: number;
+  lessons: number;
+  duration: string;
+};
 
-const mockArticles = [
-  {
-    id: 1,
-    title: "كيف تتغلب على القلق والخوف",
-    excerpt: "تعرف على أفضل التقنيات العلمية للتعامل مع القلق والخوف في حياتك اليومية...",
-    image: "https://images.unsplash.com/photo-1474418397713-7ede21d49118?w=400&h=250&fit=crop",
-    readTime: "5 دقائق",
-    author: "د. سارة أحمد",
-  },
-  {
-    id: 2,
-    title: "أهمية النوم في الصحة النفسية",
-    excerpt: "العلاقة الوثيقة بين جودة النوم والصحة النفسية وكيفية تحسين عادات النوم...",
-    image: "https://images.unsplash.com/photo-1515894203077-9cd36032142f?w=400&h=250&fit=crop",
-    readTime: "7 دقائق",
-    author: "د. محمد علي",
-  },
-  {
-    id: 3,
-    title: "فن التواصل الفعّال",
-    excerpt: "مهارات التواصل التي ستغير علاقاتك وتحسن حياتك الشخصية والمهنية...",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-    readTime: "4 دقائق",
-    author: "أ. نورة الخالدي",
-  },
-  {
-    id: 4,
-    title: "التعامل مع ضغوط الحياة",
-    excerpt: "استراتيجيات عملية لإدارة التوتر والضغوط اليومية بفعالية...",
-    image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&h=250&fit=crop",
-    readTime: "6 دقائق",
-    author: "د. خالد العمري",
-  },
-];
+type FeaturedArticleItem = {
+  id: string;
+  title: string;
+  excerpt: string;
+  image: string;
+  readTime: string;
+  author: string;
+};
 
-const mockPodcasts = [
-  { id: 1, episode: 1, title: "بداية رحلة التعافي", duration: "45:30" },
-  { id: 2, episode: 2, title: "فهم المشاعر والعواطف", duration: "38:15" },
-  { id: 3, episode: 3, title: "العلاقات الصحية", duration: "52:00" },
-  { id: 4, episode: 4, title: "قوة التفكير الإيجابي", duration: "41:20" },
-  { id: 5, episode: 5, title: "التوازن بين العمل والحياة", duration: "35:45" },
-];
+type FeaturedPodcastItem = {
+  id: string;
+  title: string;
+  host: string;
+  duration: string;
+  episode: number;
+};
 
-const mockTestimonials = [
-  {
-    id: 1,
-    name: "فاطمة الزهراء",
-    text: "منصة رائعة غيّرت نظرتي للحياة. الدورات متميزة والمحتوى علمي وموثوق. أنصح بها كل من يبحث عن التطوير الذاتي.",
-    rating: 5,
-    avatar: "FZ",
-  },
-  {
-    id: 2,
-    name: "أحمد بن عمر",
-    text: "بدأت رحلتي مع فضاء الشفاء منذ ستة أشهر والنتائج مذهلة. أفضل استثمار قمت به في صحتي النفسية.",
-    rating: 5,
-    avatar: "AB",
-  },
-  {
-    id: 3,
-    name: "سارة محمود",
-    text: "المحتوى متنوع وغني والمدربون محترفون. ساعدتني المنصة كثيراً في التغلب على تحدياتي النفسية.",
-    rating: 4,
-    avatar: "SM",
-  },
-];
+type FeaturedTestimonialItem = {
+  id: string;
+  name: string;
+  text: string;
+  rating: number;
+  avatar: string;
+};
 
 /* ------------------------------------------------------------------ */
 /*  Service card config                                                */
@@ -329,70 +258,32 @@ export default function HomePage() {
   const [showVideo, setShowVideo] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [apiFeaturedCourses, setApiFeaturedCourses] = useState<typeof mockFeaturedCourses | null>(null);
-  const [apiArticles, setApiArticles] = useState<typeof mockArticles | null>(null);
-  const [apiPodcasts, setApiPodcasts] = useState<typeof mockPodcasts | null>(null);
+  const [apiFeaturedCourses, setApiFeaturedCourses] = useState<FeaturedCourseItem[]>([]);
+  const [apiArticles, setApiArticles] = useState<FeaturedArticleItem[]>([]);
+  const [apiPodcasts, setApiPodcasts] = useState<FeaturedPodcastItem[]>([]);
+  const [apiTestimonials, setApiTestimonials] = useState<FeaturedTestimonialItem[]>([]);
 
-  // Helper: read cached homepage settings from localStorage (prevents flash of default content)
-  const getCachedSettings = (key: string): Record<string, string> | null => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const cached = localStorage.getItem(`hs_${key}`);
-      if (!cached) return null;
-      const parsed = JSON.parse(cached);
-      if (parsed && (parsed.ar || parsed.fr || parsed.en)) return parsed;
-      return null;
-    } catch { return null; }
-  };
-
-  // Dynamic homepage settings from API (initialized from localStorage cache to prevent flash)
-  const [heroTitleOverride, setHeroTitleOverride] = useState<Record<string, string> | null>(() => getCachedSettings('heroTitle'));
-  const [heroSubtitleOverride, setHeroSubtitleOverride] = useState<Record<string, string> | null>(() => getCachedSettings('heroSubtitle'));
-  const [heroDescriptionOverride, setHeroDescriptionOverride] = useState<Record<string, string> | null>(() => getCachedSettings('heroDescription'));
-  const [siteOwnerNameOverride, setSiteOwnerNameOverride] = useState<Record<string, string> | null>(() => getCachedSettings('siteOwnerNameSetting'));
-  const [ctaButton1Override, setCtaButton1Override] = useState<Record<string, string> | null>(() => getCachedSettings('ctaButton1'));
-  const [ctaButton2Override, setCtaButton2Override] = useState<Record<string, string> | null>(() => getCachedSettings('ctaButton2'));
-  const [introVideoUrl, setIntroVideoUrl] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const cached = localStorage.getItem('hs_introVideoUrl');
-      if (cached) return cached;
-    } catch { /* ignore */ }
-    return null;
-  });
+  // Dynamic homepage settings fetched from the API (no localStorage persistence)
+  const [heroTitleOverride, setHeroTitleOverride] = useState<Record<string, string> | null>(null);
+  const [heroSubtitleOverride, setHeroSubtitleOverride] = useState<Record<string, string> | null>(null);
+  const [heroDescriptionOverride, setHeroDescriptionOverride] = useState<Record<string, string> | null>(null);
+  const [siteOwnerNameOverride, setSiteOwnerNameOverride] = useState<Record<string, string> | null>(null);
+  const [ctaButton1Override, setCtaButton1Override] = useState<Record<string, string> | null>(null);
+  const [ctaButton2Override, setCtaButton2Override] = useState<Record<string, string> | null>(null);
+  const [introVideoUrl, setIntroVideoUrl] = useState<string | null>(null);
 
   // Section visibility state
-  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>(() => {
-    if (typeof window === 'undefined') return {};
-    try {
-      const cached = localStorage.getItem('hs_sectionVisibility');
-      if (cached) return JSON.parse(cached);
-    } catch { /* ignore */ }
-    return {};
-  });
+  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({});
 
   const isSectionVisible = (key: string) => sectionVisibility[key] !== false; // Default: visible
-  const [sliders, setSliders] = useState<SliderItem[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const cached = localStorage.getItem('hs_sliders');
-      if (!cached) return [];
-      return JSON.parse(cached);
-    } catch { return []; }
-  });
+  const [sliders, setSliders] = useState<SliderItem[]>([]);
+  const [liveStats, setLiveStats] = useState(stats);
 
-  const [homepageImages, setHomepageImages] = useState<HomepageImageItem[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const cached = localStorage.getItem('hs_homepageImages');
-      if (!cached) return [];
-      return JSON.parse(cached);
-    } catch { return []; }
-  });
+  const [homepageImages, setHomepageImages] = useState<HomepageImageItem[]>([]);
 
-  const displayFeaturedCourses = apiFeaturedCourses || mockFeaturedCourses;
-  const displayArticles = apiArticles || mockArticles;
-  const displayPodcasts = apiPodcasts || mockPodcasts;
+  const displayFeaturedCourses = apiFeaturedCourses;
+  const displayArticles = apiArticles;
+  const displayPodcasts = apiPodcasts;
 
   // Helper: get localized override value, fallback to i18n translation
   const getOverride = (override: Record<string, string> | null, fallback: string) => {
@@ -433,7 +324,8 @@ export default function HomePage() {
       cachedFetch('/api/public-settings', 120_000).catch(() => ({})),
       cachedFetch('/api/sliders', 120_000).catch(() => ({})),
       cachedFetch('/api/homepage-images', 120_000).catch(() => ({})),
-    ]).then(([coursesData, articlesData, podcastsData, settingsData, slidersData, homepageImagesData]: any[]) => {
+      cachedFetch('/api/reviews', 60_000).catch(() => ({})),
+    ]).then(([coursesData, articlesData, podcastsData, settingsData, slidersData, homepageImagesData, reviewsData]: any[]) => {
       // Courses (already filtered by API)
       const courses = (coursesData.courses || [])
         .map((c: any) => ({
@@ -445,7 +337,7 @@ export default function HomePage() {
           lessons: (c.chapters || []).reduce((acc: number, ch: any) => acc + (ch.lessons || []).length, 0),
           duration: c.duration || "",
         }));
-      if (courses.length > 0) setApiFeaturedCourses(courses);
+      setApiFeaturedCourses(courses);
 
       // Articles (already filtered by API)
       const articles = (articlesData.articles || [])
@@ -457,7 +349,7 @@ export default function HomePage() {
           readTime: a.readTime ? `${a.readTime} ${t("articles.minute")}` : "5 دقائق",
           author: a.author || "",
         }));
-      if (articles.length > 0) setApiArticles(articles);
+      setApiArticles(articles);
 
       // Podcasts from API (already filtered by API)
       const podcasts = (podcastsData.podcasts || [])
@@ -466,9 +358,39 @@ export default function HomePage() {
           title: locale === 'fr' ? (p.titleFr || p.titleAr || p.title) : locale === 'en' ? (p.titleEn || p.titleAr || p.title) : (p.titleAr || p.title),
           host: p.author || p.instructor || "",
           duration: p.duration || "",
-          episodes: 1,
+          episode: p.episodeNumber || 1,
         }));
-      if (podcasts.length > 0) setApiPodcasts(podcasts);
+      setApiPodcasts(podcasts);
+
+      // Testimonials from real user reviews (API)
+      const testimonials = (reviewsData.reviews || [])
+        .slice(0, 6)
+        .map((r: any) => {
+          const reviewerName = r.user?.name || r.userName || "";
+          return {
+            id: r.id,
+            name: reviewerName || (locale === "ar" ? "مستخدم" : locale === "fr" ? "Utilisateur" : "User"),
+            text: r.comment || "",
+            rating: r.rating || 5,
+            avatar: r.user?.avatar || (reviewerName || "؟").charAt(0).toUpperCase(),
+          };
+        })
+        .filter((t: any) => t.text.trim().length > 0);
+      setApiTestimonials(testimonials);
+
+      // Stats derived from real fetched data
+      const reviewsArr = (reviewsData.reviews || []);
+      const uniqueReviewers = new Set<string>();
+      reviewsArr.forEach((r: any) => { if (r.user?.id) uniqueReviewers.add(r.user.id); });
+      const avgRating = reviewsArr.length > 0
+        ? Math.round((reviewsArr.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviewsArr.length) * 10) / 10
+        : 0;
+      setLiveStats([
+        { value: uniqueReviewers.size, suffix: "", labelKey: "admin.totalMembers", icon: Users },
+        { value: (coursesData.courses || []).length, suffix: "+", labelKey: "admin.totalCourses", icon: BookMarked },
+        { value: (articlesData.articles || []).length, suffix: "+", labelKey: "articles.title", icon: FileText },
+        { value: avgRating, suffix: "", labelKey: "reviews.rating", icon: Star, isFloat: true },
+      ]);
 
       // Homepage settings from API
       const settings = settingsData.settings || {};
@@ -491,15 +413,11 @@ export default function HomePage() {
       // Intro video URL (simple string, not trilingual)
       const introVideo = settings.introVideoUrl || null;
       setIntroVideoUrl(introVideo);
-      if (introVideo) localStorage.setItem('hs_introVideoUrl', introVideo);
-      else localStorage.removeItem('hs_introVideoUrl');
 
       // Section visibility
       if (settings.sectionVisibility) {
         try {
-          const parsed = JSON.parse(settings.sectionVisibility);
-          setSectionVisibility(parsed);
-          localStorage.setItem('hs_sectionVisibility', JSON.stringify(parsed));
+          setSectionVisibility(JSON.parse(settings.sectionVisibility));
         } catch { /* keep defaults */ }
       }
 
@@ -509,14 +427,6 @@ export default function HomePage() {
       setSiteOwnerNameOverride(ownerNameVal);
       setCtaButton1Override(cta1Val);
       setCtaButton2Override(cta2Val);
-
-      // Cache to localStorage for instant load on refresh
-      if (heroTitleVal) localStorage.setItem('hs_heroTitle', JSON.stringify(heroTitleVal));
-      if (heroSubtitleVal) localStorage.setItem('hs_heroSubtitle', JSON.stringify(heroSubtitleVal));
-      if (heroDescVal) localStorage.setItem('hs_heroDescription', JSON.stringify(heroDescVal));
-      if (ownerNameVal) localStorage.setItem('hs_siteOwnerNameSetting', JSON.stringify(ownerNameVal));
-      if (cta1Val) localStorage.setItem('hs_ctaButton1', JSON.stringify(cta1Val));
-      if (cta2Val) localStorage.setItem('hs_ctaButton2', JSON.stringify(cta2Val));
 
       // Sliders
       const sliderItems = (slidersData.sliders || [])
@@ -533,7 +443,6 @@ export default function HomePage() {
           link: s.link || "",
         }));
       setSliders(sliderItems);
-      if (sliderItems.length > 0) localStorage.setItem('hs_sliders', JSON.stringify(sliderItems));
 
       // Homepage Images
       const imageItems = (homepageImagesData.images || [])
@@ -551,8 +460,6 @@ export default function HomePage() {
           order: img.order || 0,
         }));
       setHomepageImages(imageItems);
-      if (imageItems.length > 0) localStorage.setItem('hs_homepageImages', JSON.stringify(imageItems));
-      else localStorage.removeItem('hs_homepageImages');
     });
   }, []);
 
@@ -598,7 +505,7 @@ export default function HomePage() {
                     {sliders.map((slider, idx) => (
                       <div
                         key={slider.id}
-                        className="flex-shrink-0 w-full snap-center relative cursor-pointer"
+                        className={`flex-shrink-0 w-full snap-center relative ${slider.link ? "cursor-pointer" : ""}`}
                         onClick={() => slider.link ? window.open(slider.link, '_blank') : undefined}
                       >
                         <div className="relative h-48 sm:h-64 md:h-72">
@@ -921,7 +828,7 @@ export default function HomePage() {
                     viewport={{ once: true, amount: 0.1 }}
                     variants={fadeUp}
                     transition={{ delay: Math.min(idx * 0.05, 0.4) }}
-                    className="group relative aspect-square overflow-hidden rounded-2xl border bg-card shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                    className={`group relative aspect-square overflow-hidden rounded-2xl border bg-card shadow-sm hover:shadow-xl transition-all ${image.link ? "cursor-pointer" : ""}`}
                     onClick={() => image.link ? window.open(image.link, "_blank") : undefined}
                   >
                     {image.imageUrl ? (
@@ -1133,9 +1040,9 @@ export default function HomePage() {
                 icon: Leaf,
                 titleKey: "subscriptions.coachingHolistic",
                 subtitle: "Médecine holistique et Integrative",
-                gradient: "from-lime-400 to-amber-500",
-                bg: "bg-lime-50 dark:bg-lime-950/20",
-                border: "border-lime-200 dark:border-lime-800",
+                gradient: "from-healing-beige to-amber-500",
+                bg: "bg-healing-cream dark:bg-healing-brown/20",
+                border: "border-healing-beige-light dark:border-healing-brown",
               },
               {
                 icon: HandHeart,
@@ -1232,7 +1139,7 @@ export default function HomePage() {
                 variants={scaleIn}
                 custom={i}
               >
-                <Card className="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <Card className="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" onClick={() => navigate("courses", { courseId: course.id })}>
                   <div className="relative h-44 overflow-hidden">
                     <img
                       src={course.image}
@@ -1267,7 +1174,7 @@ export default function HomePage() {
                       size="sm"
                       variant={course.progress > 0 ? "outline" : "default"}
                       className="w-full rounded-full"
-                      onClick={() => navigate("courses")}
+                      onClick={() => navigate("courses", { courseId: course.id })}
                     >
                       {course.progress > 0 ? t("courses.continue") : t("courses.enroll")}
                     </Button>
@@ -1431,7 +1338,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
           >
-            {stats.map((stat) => (
+            {liveStats.map((stat) => (
               <StatCard key={stat.labelKey} stat={stat} label={t(stat.labelKey)} />
             ))}
           </motion.div>
@@ -1442,7 +1349,7 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* TESTIMONIALS                                                  */}
       {/* ============================================================ */}
-      {isSectionVisible("testimonials") && (
+      {isSectionVisible("testimonials") && apiTestimonials.length > 0 && (
       <section className="bg-background px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <motion.div
@@ -1457,7 +1364,7 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {mockTestimonials.map((testimonial, i) => (
+            {apiTestimonials.map((testimonial, i) => (
               <motion.div
                 key={testimonial.id}
                 initial="hidden"

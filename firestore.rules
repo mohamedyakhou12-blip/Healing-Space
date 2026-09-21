@@ -2,171 +2,92 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper Functions ──
+    // ── Security Model ──
+    // 100% of Firestore reads/writes are performed by the Next.js server
+    // (Admin SDK on API routes). The Firebase client only uses Auth
+    // (email/password) and never accesses Firestore directly.
+    //
+    // Therefore ALL document access from rules is DENIED:
+    // - No public reads of users (email/phone/hash/birthday), content
+    //   (published OR draft, including media URLs), site settings
+    //   (including admin_access_code), subscriptions, payments, purchases,
+    //   notifications, or reviews.
+    // - No client writes to any collection.
+    //
+    // Content access control is enforced server-side by the API content
+    // gate (see src/lib/api-content-gate.ts), not by Firestore rules.
 
-    // Check if the user is authenticated via Firebase Auth
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Check if the user is accessing their own document
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Validate that a string field doesn't contain script injection patterns
-    // This is a defense-in-depth measure (primary sanitization is server-side)
-    function isSafeString(value) {
-      return value == null ||
-        (value is string &&
-         !value.matches('/<script/i') &&
-         !value.matches('/javascript:/i'));
-    }
-
-    // ── Users Collection ──
-    // Users can read their own profile
-    // Only the user themselves can update their profile (but NOT their role or isActive)
-    // Admin operations go through the server (service account), bypassing these rules
+    // Users — server-only (protects email, phone, password hash, birthday)
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId)
-                     && !(request.resource.data.diff(resource.data).affectedKeys()
-                       .hasAny(['role', 'isActive']));
-      allow delete: if false; // Deletion only via Admin SDK (server-side)
+      allow read, write: if false;
     }
 
-    // ── Content Collections ──
-    // Any authenticated user can READ published content
-    // WRITE operations only via Admin SDK (server-side API routes)
-    // This prevents client-side tampering
-
+    // Content collections — server-only (articles/podcasts/videos/pdfs are
+    // gated per-subscription server-side; drafts are never exposed)
     match /courses/{courseId} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Server-only via Admin SDK
+      allow read, write: if false;
     }
     match /courseChapters/{chapterId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /courseLessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /courseProgress/{progressId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated()
-                     && request.resource.data.userId == request.auth.uid;
-      allow update: if isAuthenticated()
-                     && resource.data.userId == request.auth.uid
-                     && !(request.resource.data.diff(resource.data).affectedKeys()
-                       .hasAny(['userId', 'courseId']));
-      allow delete: if false;
+      allow read, write: if false;
     }
     match /articles/{articleId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /podcasts/{podcastId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /videos/{videoId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /pdfResources/{pdfId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
     }
     match /liveSessions/{sessionId} {
-      allow read: if isAuthenticated();
-      allow write: if false;
+      allow read, write: if false;
+    }
+    match /coaching/{coachingId} {
+      allow read, write: if false;
     }
 
-    // ── Subscriptions ──
-    // Users can read their own subscriptions
-    // Only server (Admin SDK) can create/update/delete
+    // Subscriptions / payments / purchases — server-only
     match /subscriptions/{subId} {
-      allow read: if isAuthenticated()
-                   && resource.data.userId == request.auth.uid;
-      allow write: if false; // Server-only via Admin SDK
+      allow read, write: if false;
     }
-
-    // ── Payments ──
-    // Users can create their own payments (submit receipt)
-    // Users can read their own payments
-    // Only server can update (approve/reject)
     match /payments/{paymentId} {
-      allow read: if isAuthenticated()
-                   && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated()
-                     && request.resource.data.userId == request.auth.uid
-                     && isSafeString(request.resource.data.receiptUrl);
-      allow update: if false; // Server-only via Admin SDK
-      allow delete: if false;
+      allow read, write: if false;
     }
-
-    // ── Purchases ──
-    // Users can create their own purchases
-    // Users can read their own purchases
-    // Only server can update (approve/reject)
     match /purchases/{purchaseId} {
-      allow read: if isAuthenticated()
-                   && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated()
-                     && request.resource.data.userId == request.auth.uid
-                     && isSafeString(request.resource.data.receiptUrl);
-      allow update: if false; // Server-only via Admin SDK
-      allow delete: if false;
+      allow read, write: if false;
     }
 
-    // ── Reviews ──
-    // Any authenticated user can read reviews
-    // Users can create reviews for content they have access to
-    // Users can update their own reviews only
+    // Reviews — server-only (submitted via API, sanitized + access-checked)
     match /reviews/{reviewId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated()
-                     && request.resource.data.userId == request.auth.uid
-                     && request.resource.data.rating is number
-                     && request.resource.data.rating >= 1
-                     && request.resource.data.rating <= 5;
-      allow update: if isAuthenticated()
-                     && resource.data.userId == request.auth.uid
-                     && !(request.resource.data.diff(resource.data).affectedKeys()
-                       .hasAny(['userId']));
-      allow delete: if false; // Server-only
+      allow read, write: if false;
     }
 
-    // ── Notifications ──
-    // Users can read their own notifications
-    // Users can update (mark as read) their own notifications
+    // Notifications — server-only
     match /notifications/{notifId} {
-      allow read: if isAuthenticated()
-                   && resource.data.userId == request.auth.uid;
-      allow create: if false; // Server-only creates notifications
-      allow update: if isAuthenticated()
-                     && resource.data.userId == request.auth.uid
-                     && !(request.resource.data.diff(resource.data).affectedKeys()
-                       .hasAny(['userId', 'type']));
-      allow delete: if false;
+      allow read, write: if false;
     }
 
-    // ── Site Settings & Sliders ──
-    // Read-only for authenticated users
-    // Write only via Admin SDK (server-side)
+    // Site settings & sliders — server-only (protects admin_access_code)
     match /siteSettings/{settingId} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Server-only
+      allow read, write: if false;
     }
     match /sliders/{sliderId} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Server-only
+      allow read, write: if false;
+    }
+    match /homepageImages/{imageId} {
+      allow read, write: if false;
     }
 
-    // ── Deny all other collections ──
-    // This prevents accessing any collection not explicitly defined above
+    // ── Deny everything not explicitly whitelisted above ──
     match /{document=**} {
       allow read, write: if false;
     }

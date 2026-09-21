@@ -159,7 +159,7 @@ export default function Navbar() {
                   <Button variant="ghost" size="sm">{t('auth.login')}</Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm" className="bg-primary hover:bg-teal-700 text-white">
+                  <Button size="sm" className="bg-primary hover:bg-healing-brown text-white">
                     {t('auth.register')}
                   </Button>
                 </Link>

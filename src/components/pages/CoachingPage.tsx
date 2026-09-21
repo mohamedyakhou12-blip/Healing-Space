@@ -24,6 +24,7 @@ import {
   Stethoscope,
   PersonStanding,
   Sun,
+  CheckCircle2,
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
 
@@ -66,14 +67,14 @@ const COACHING_COLORS = [
   "from-rose-400 to-pink-500",
   "from-amber-400 to-orange-500",
   "from-violet-400 to-purple-500",
-  "from-emerald-400 to-teal-500",
-  "from-sky-400 to-cyan-500",
+  "from-healing-beige to-healing-brown",
+  "from-sky-400 to-healing-sand",
   "from-indigo-400 to-blue-500",
   "from-yellow-400 to-amber-500",
   "from-pink-400 to-rose-500",
-  "from-teal-400 to-emerald-500",
+  "from-healing-beige to-healing-brown",
   "from-orange-400 to-red-500",
-  "from-cyan-400 to-sky-500",
+  "from-healing-sand to-sky-500",
   "from-fuchsia-400 to-purple-500",
 ];
 
@@ -81,14 +82,14 @@ const COACHING_BG = [
   "bg-rose-50 dark:bg-rose-950/30",
   "bg-amber-50 dark:bg-amber-950/30",
   "bg-violet-50 dark:bg-violet-950/30",
-  "bg-emerald-50 dark:bg-emerald-950/30",
+  "bg-healing-cream dark:bg-healing-brown/30",
   "bg-sky-50 dark:bg-sky-950/30",
   "bg-indigo-50 dark:bg-indigo-950/30",
   "bg-yellow-50 dark:bg-yellow-950/30",
   "bg-pink-50 dark:bg-pink-950/30",
-  "bg-teal-50 dark:bg-teal-950/30",
+  "bg-healing-cream dark:bg-healing-brown/30",
   "bg-orange-50 dark:bg-orange-950/30",
-  "bg-cyan-50 dark:bg-cyan-950/30",
+  "bg-healing-cream dark:bg-healing-brown/30",
   "bg-fuchsia-50 dark:bg-fuchsia-950/30",
 ];
 
@@ -274,12 +275,12 @@ export default function CoachingPage() {
                         </div>
                         {/* Price badge */}
                         {!item.isFree && (
-                          <Badge className="shrink-0 bg-teal-600 text-white border-0 text-xs">
+                          <Badge className="shrink-0 bg-healing-brown text-white border-0 text-xs">
                             {item.price.toLocaleString()} {t("common.currency")}
                           </Badge>
                         )}
                         {item.isFree && (
-                          <Badge variant="outline" className="shrink-0 text-xs border-emerald-400 text-emerald-600">
+                          <Badge variant="outline" className="shrink-0 text-xs border-healing-beige text-healing-brown">
                             {t("common.free")}
                           </Badge>
                         )}
@@ -294,13 +295,10 @@ export default function CoachingPage() {
                         {/* Action button */}
                         <div className="flex items-center gap-2">
                           {accessible ? (
-                            <Button
-                              size="sm"
-                              className="gap-1.5 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border-0"
-                            >
-                              <Sparkles className="size-3.5" />
-                              {locale === "ar" ? "ابدأ الآن" : locale === "fr" ? "Commencer" : "Start Now"}
-                            </Button>
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-healing-beige-light bg-healing-cream px-3 py-1.5 text-xs font-medium text-healing-brown">
+                              <CheckCircle2 className="size-3.5" />
+                              {locale === "ar" ? "متاح لك" : locale === "fr" ? "Disponible" : "Available"}
+                            </span>
                           ) : (
                             <Button
                               size="sm"

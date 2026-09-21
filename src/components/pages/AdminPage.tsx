@@ -222,7 +222,7 @@ const CONTENT_API_CONFIG: Record<ContentSubTab, { endpoint: string; responseKey:
   podcasts: { endpoint: "/api/podcasts", responseKey: "podcasts", contentType: "podcast" },
   videos: { endpoint: "/api/videos", responseKey: "videos", contentType: "video" },
   pdfs: { endpoint: "/api/pdfs", responseKey: "pdfs", contentType: "pdf" },
-  live: { endpoint: "/api/live", responseKey: "liveSessions", contentType: "live" },
+  live: { endpoint: "/api/live", responseKey: "sessions", contentType: "live" },
   coaching: { endpoint: "/api/coachings", responseKey: "coachings", contentType: "coaching" },
 };
 
@@ -927,7 +927,14 @@ export default function AdminPage() {
   const { t } = useTranslation();
   const { pageParams, navigate, locale, isAdmin, user, isLoadingAuth } = useAppStore();
   const isRtl = locale === "ar";
-  const activeTab = (pageParams.tab as AdminTab) || "dashboard";
+
+  // Tab can come from the URL query (?tab=...), the store (SPA navigation), or default to dashboard
+  const [urlTab] = useState<AdminTab | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    return tab ? (tab as AdminTab) : null;
+  });
+  const activeTab = (pageParams.tab as AdminTab) || urlTab || "dashboard";
 
   // Show loading state while session is being restored
   if (isLoadingAuth) {
@@ -2098,7 +2105,6 @@ function ContentView() {
         status: formStatus,
         category: formCategory || undefined,
         tags: formTags || undefined,
-        scheduledAt: formScheduledAt || undefined,
         metaTitleAr: formMetaTitleAr || undefined,
         metaTitleFr: formMetaTitleFr || undefined,
         metaTitleEn: formMetaTitleEn || undefined,
@@ -2128,6 +2134,16 @@ function ContentView() {
         payload.contentAr = formContentAr || formTitleAr;
         payload.contentFr = formContentFr || formContentAr || formTitleAr;
         payload.contentEn = formContentEn || formContentAr || formTitleAr;
+      }
+      if (contentSubTab === "live") {
+        const liveStatus = formStatus === "published" ? "live" : formStatus === "draft" ? "upcoming" : (["live", "upcoming", "ended"].includes(formStatus) ? formStatus : "upcoming");
+        payload.status = liveStatus;
+        if (formVideoUrl.trim()) payload.streamUrl = formVideoUrl;
+        payload.description = formDescAr || formTitleAr;
+        payload.descriptionAr = formDescAr || formTitleAr;
+        payload.descriptionFr = formDescFr || formDescAr || formTitleAr;
+        payload.descriptionEn = formDescEn || formDescAr || formTitleAr;
+        if (formDuration) payload.duration = formDuration;
       }
 
       let res: Response;
@@ -2207,7 +2223,7 @@ function ContentView() {
         thumbnail: item.imageUrl,
         isFree: item.isFree,
         price: item.price,
-        status: "draft",
+        status: contentSubTab === "live" ? "upcoming" : "draft",
         category: item.category || undefined,
         tags: item.tags || undefined,
       };
@@ -2262,7 +2278,11 @@ function ContentView() {
           const res = await fetch(`${config.endpoint}/${id}`, {
             method: "PUT",
             headers: { ...adminHeaders(), "Content-Type": "application/json" },
-            body: JSON.stringify({ status: action === "publish" ? "published" : "draft" }),
+            body: JSON.stringify({
+              status: action === "publish"
+                ? (contentSubTab === "live" ? "live" : "published")
+                : (contentSubTab === "live" ? "upcoming" : "draft"),
+            }),
           });
           if (res.ok) successCount++;
         }
@@ -4732,7 +4752,7 @@ function SettingsView() {
           return;
         }
       } else if (sliderDialog.slider) {
-        const res = await fetch("/api/sliders", {
+        const res = await fetch(`/api/sliders/${encodeURIComponent(sliderDialog.slider.id)}`, {
           method: "PUT",
           headers: { ...adminHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ id: sliderDialog.slider.id, ...sliderForm }),
@@ -5526,7 +5546,7 @@ function HomepageCustomizer() {
         });
         if (!res.ok) { toast.error(t("common.error")); return; }
       } else if (sliderDialog.slider) {
-        const res = await fetch("/api/sliders", {
+        const res = await fetch(`/api/sliders/${encodeURIComponent(sliderDialog.slider.id)}`, {
           method: "PUT",
           headers: { ...adminHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ id: sliderDialog.slider.id, ...sliderForm }),

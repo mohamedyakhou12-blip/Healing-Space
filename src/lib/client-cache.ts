@@ -1,7 +1,15 @@
 /**
  * Client-side API cache with TTL.
  * Prevents redundant fetches when navigating between pages (SPA pattern).
- * Uses in-memory cache + localStorage for persistence across page refreshes.
+ *
+ * In-memory only — responses are NEVER persisted to localStorage because:
+ * 1. Content list responses are access-gated server-side per user; caching
+ *    them in localStorage would leak premium content across users/sessions
+ *    sharing the same browser.
+ * 2. Persistent caching makes prices/content stale after admin changes —
+ *    a page refresh must always show the latest published values.
+ *
+ * The memory cache is short-lived and cleared on every page reload.
  */
 
 interface CacheEntry<T> {
@@ -12,11 +20,11 @@ interface CacheEntry<T> {
 // In-memory cache for current session
 const memoryCache = new Map<string, CacheEntry<any>>();
 
-// Default TTL: 60 seconds for client-side (longer than server since user can manually refresh)
+// Default TTL: 60 seconds for in-memory caching
 const DEFAULT_TTL = 60_000;
 
 /**
- * Fetch with client-side caching.
+ * Fetch with client-side caching (memory only).
  * Returns cached data if fresh, otherwise fetches from API.
  * @param url API URL to fetch
  * @param ttlMs Cache TTL in ms (default 60s)
@@ -33,25 +41,6 @@ export async function cachedFetch<T>(
     return memEntry.data as T;
   }
 
-  // Check localStorage cache (survives page refresh)
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem(`cc_${url}`);
-      if (stored) {
-        const parsed = JSON.parse(stored) as CacheEntry<T>;
-        if (parsed.expiry > now) {
-          // Restore to memory cache
-          memoryCache.set(url, parsed);
-          return parsed.data;
-        }
-        // Expired, remove from localStorage
-        localStorage.removeItem(`cc_${url}`);
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-  }
-
   // Fetch from API
   const response = await fetch(url);
   if (!response.ok) {
@@ -63,45 +52,20 @@ export async function cachedFetch<T>(
   const entry: CacheEntry<T> = { data, expiry: now + ttlMs };
   memoryCache.set(url, entry);
 
-  // Store in localStorage (only for small responses)
-  if (typeof window !== "undefined") {
-    try {
-      const size = JSON.stringify(data).length;
-      if (size < 500_000) { // Only cache responses under 500KB
-        localStorage.setItem(`cc_${url}`, JSON.stringify(entry));
-      }
-    } catch {
-      // Ignore localStorage errors (quota exceeded, etc.)
-    }
-  }
-
   return data;
 }
 
 /**
- * Invalidate a specific cached URL.
+ * Invalidate a specific cached URL (or the whole cache).
+ * Call this after mutations so stale listings are re-fetched immediately.
  */
 export function invalidateClientCache(url?: string) {
   if (!url) {
     memoryCache.clear();
-    if (typeof window !== "undefined") {
-      // Remove all client cache entries from localStorage
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith("cc_")) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
-    }
     return;
   }
 
   memoryCache.delete(url);
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(`cc_${url}`);
-  }
 }
 
 /**

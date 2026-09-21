@@ -326,7 +326,7 @@ export default function HomepageCustomizerPage() {
         });
         if (!res.ok) { toast.error(locale === "ar" ? "فشل الإضافة" : "Failed to add"); return; }
       } else if (sliderDialog.slider) {
-        const res = await fetch("/api/sliders", {
+        const res = await fetch(`/api/sliders/${encodeURIComponent(sliderDialog.slider.id)}`, {
           method: "PUT",
           headers: { ...adminHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ id: sliderDialog.slider.id, ...sliderForm }),
@@ -423,7 +423,7 @@ export default function HomepageCustomizerPage() {
     placeholder?: Trilingual; isTextarea?: boolean;
   }) => (
     <div className="space-y-2">
-      <Label className="text-sm font-semibold text-teal-700 dark:text-teal-400">{label}</Label>
+      <Label className="text-sm font-semibold text-healing-brown dark:text-healing-beige">{label}</Label>
       {(["ar", "fr", "en"] as const).map((lang) => (
         <div key={lang} className="space-y-1">
           <Label className="text-xs text-muted-foreground">
@@ -452,11 +452,11 @@ export default function HomepageCustomizerPage() {
 
   /* ─── Tab config ─── */
   const tabs: { key: CustomizerTab; labelAr: string; labelEn: string; icon: React.ElementType; color: string }[] = [
-    { key: "hero", labelAr: "البانر الرئيسي", labelEn: "Hero Banner", icon: BookOpen, color: "text-teal-600" },
+    { key: "hero", labelAr: "البانر الرئيسي", labelEn: "Hero Banner", icon: BookOpen, color: "text-healing-brown" },
     { key: "video", labelAr: "الفيديو التعريفي", labelEn: "Intro Video", icon: Video, color: "text-rose-600" },
     { key: "sliders", labelAr: "الشرائح", labelEn: "Sliders", icon: ImageIcon, color: "text-violet-600" },
     { key: "images", labelAr: "معرض الصور", labelEn: "Image Gallery", icon: ImageIcon, color: "text-amber-600" },
-    { key: "sections", labelAr: "أقسام الصفحة", labelEn: "Page Sections", icon: LayoutDashboard, color: "text-cyan-600" },
+    { key: "sections", labelAr: "أقسام الصفحة", labelEn: "Page Sections", icon: LayoutDashboard, color: "text-healing-sand" },
   ];
 
   /* ─── Loading state ─── */
@@ -464,7 +464,7 @@ export default function HomepageCustomizerPage() {
     return (
       <div className="flex min-h-screen items-center justify-center" dir={dir}>
         <div className="text-center space-y-4">
-          <Loader2 className="size-10 animate-spin text-teal-600 mx-auto" />
+          <Loader2 className="size-10 animate-spin text-healing-brown mx-auto" />
           <p className="text-muted-foreground">{locale === "ar" ? "جارٍ تحميل الإعدادات..." : "Loading settings..."}</p>
         </div>
       </div>
@@ -472,7 +472,7 @@ export default function HomepageCustomizerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/30 dark:from-background dark:via-background dark:to-teal-950/10" dir={dir}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-healing-cream/30 dark:from-background dark:via-background dark:to-healing-brown/10" dir={dir}>
       {/* ─── Top Bar ─── */}
       <div className="sticky top-0 z-50 glass-card border-b border-border/50 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -486,7 +486,7 @@ export default function HomepageCustomizerPage() {
             </button>
             <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-2">
-              <Settings className="size-5 text-teal-600" />
+              <Settings className="size-5 text-healing-brown" />
               <h1 className="text-lg font-bold">
                 {locale === "ar" ? "تخصيص الصفحة الرئيسية" : locale === "fr" ? "Personnaliser la page d'accueil" : "Customize Homepage"}
               </h1>
@@ -495,7 +495,7 @@ export default function HomepageCustomizerPage() {
           <Button
             onClick={() => handleSave("all")}
             disabled={saving !== null}
-            className="bg-teal-600 hover:bg-teal-700 text-white gap-2"
+            className="bg-healing-brown hover:bg-healing-brown text-white gap-2"
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             {locale === "ar" ? "حفظ الكل" : "Save All"}
@@ -515,8 +515,8 @@ export default function HomepageCustomizerPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-teal-600 text-white shadow-lg shadow-teal-500/25"
-                    : "bg-white dark:bg-card border text-muted-foreground hover:border-teal-300 hover:text-foreground"
+                    ? "bg-healing-brown text-white shadow-lg shadow-healing-brown/25"
+                    : "bg-white dark:bg-card border text-muted-foreground hover:border-healing-beige-light hover:text-foreground"
                 }`}
               >
                 <Icon className={`size-4 ${isActive ? "text-white" : tab.color}`} />
@@ -541,7 +541,7 @@ export default function HomepageCustomizerPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <BookOpen className="size-5 text-teal-600" />
+                    <BookOpen className="size-5 text-healing-brown" />
                     {locale === "ar" ? "تعديل البانر الرئيسي" : "Edit Hero Banner"}
                   </CardTitle>
                 </CardHeader>
@@ -590,7 +590,7 @@ export default function HomepageCustomizerPage() {
                     />
                   </div>
                   <div className="pt-2">
-                    <Button onClick={() => handleSave("hero")} disabled={saving !== null} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    <Button onClick={() => handleSave("hero")} disabled={saving !== null} className="bg-healing-brown hover:bg-healing-brown text-white gap-2">
                       {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                       {locale === "ar" ? "حفظ التغييرات" : "Save Changes"}
                     </Button>
@@ -707,13 +707,13 @@ export default function HomepageCustomizerPage() {
                             ? (locale === "ar" ? "فيديو يوتيوب" : "YouTube video")
                             : (locale === "ar" ? "فيديو مباشر" : "Direct video")}
                         </span>
-                        <Check className="size-4 text-green-500 shrink-0" />
+                        <Check className="size-4 text-healing-brown shrink-0" />
                       </div>
                     </div>
                   )}
 
                   <div className="pt-2 flex gap-3">
-                    <Button onClick={() => handleSave("video")} disabled={saving !== null} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    <Button onClick={() => handleSave("video")} disabled={saving !== null} className="bg-healing-brown hover:bg-healing-brown text-white gap-2">
                       {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                       {locale === "ar" ? "حفظ الفيديو" : "Save Video"}
                     </Button>
@@ -1149,7 +1149,7 @@ export default function HomepageCustomizerPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <LayoutDashboard className="size-5 text-cyan-600" />
+                    <LayoutDashboard className="size-5 text-healing-sand" />
                     {locale === "ar" ? "إدارة أقسام الصفحة" : "Manage Page Sections"}
                   </CardTitle>
                 </CardHeader>
@@ -1164,7 +1164,7 @@ export default function HomepageCustomizerPage() {
                     {DEFAULT_SECTIONS.map((section) => (
                       <div
                         key={section.key}
-                        className="flex items-center justify-between rounded-xl border p-4 hover:border-cyan-300 transition-colors"
+                        className="flex items-center justify-between rounded-xl border p-4 hover:border-healing-beige-light transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <GripVertical className="size-4 text-muted-foreground/40 cursor-grab" />
@@ -1191,7 +1191,7 @@ export default function HomepageCustomizerPage() {
                   </div>
 
                   <div className="pt-2 flex gap-3">
-                    <Button onClick={() => handleSave("sections")} disabled={saving !== null} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    <Button onClick={() => handleSave("sections")} disabled={saving !== null} className="bg-healing-brown hover:bg-healing-brown text-white gap-2">
                       {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                       {locale === "ar" ? "حفظ إعدادات الأقسام" : "Save Section Settings"}
                     </Button>
@@ -1227,7 +1227,7 @@ export default function HomepageCustomizerPage() {
           <Button
             onClick={() => handleSave("all")}
             disabled={saving !== null}
-            className="bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white gap-2 shadow-lg shadow-teal-500/25"
+            className="bg-gradient-to-r from-healing-brown to-healing-brown hover:from-healing-brown hover:to-healing-brown text-white gap-2 shadow-lg shadow-healing-brown/25"
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             {locale === "ar" ? "حفظ جميع التغييرات" : "Save All Changes"}

@@ -32,138 +32,18 @@ interface BookItem {
   price: number;
   gradient: string;
   category: { ar: string; en: string; fr: string };
+  fileUrl?: string;
+  pdfUrl?: string;
 }
 
 const GRADIENTS = [
   "from-amber-400 to-orange-600",
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockBooks: BookItem[] = [
-  {
-    id: "book-1",
-    title: {
-      ar: "دليلك الشامل للصحة النفسية",
-      en: "Your Comprehensive Guide to Mental Health",
-      fr: "Votre Guide Complet de Santé Mentale",
-    },
-    description: {
-      ar: "دليل شامل يغطي أساسيات الصحة النفسية وكيفية الحفاظ عليها وتطوير المرونة النفسية.",
-      en: "A comprehensive guide covering the fundamentals of mental health and how to maintain and develop psychological resilience.",
-      fr: "Un guide complet couvrant les fondamentaux de la santé mentale et comment développer la résilience psychologique.",
-    },
-    author: { ar: "د. سارة بن علي", en: "Dr. Sara Ben Ali", fr: "Dr. Sara Ben Ali" },
-    fileSize: "5.2 MB",
-    pages: 245,
-    isFree: true,
-    price: 0,
-    gradient: "from-amber-400 to-orange-600",
-    category: { ar: "الصحة النفسية", en: "Mental Health", fr: "Santé Mentale" },
-  },
-  {
-    id: "book-2",
-    title: {
-      ar: "فن العلاج النفسي المعرفي",
-      en: "The Art of Cognitive Psychotherapy",
-      fr: "L'Art de la Psychothérapie Cognitive",
-    },
-    description: {
-      ar: "كتاب متقدم في العلاج المعرفي السلوكي يشرح التقنيات والتطبيقات العملية.",
-      en: "An advanced book on cognitive behavioral therapy explaining techniques and practical applications.",
-      fr: "Un livre avancé sur la thérapie cognitivo-comportementale expliquant les techniques et applications pratiques.",
-    },
-    author: { ar: "د. خالد مراد", en: "Dr. Khaled Mourad", fr: "Dr. Khaled Mourad" },
-    fileSize: "8.1 MB",
-    pages: 320,
-    isFree: false,
-    price: 1500,
-    gradient: "from-emerald-400 to-teal-600",
-    category: { ar: "العلاج المعرفي", en: "Cognitive Therapy", fr: "Thérapie Cognitive" },
-  },
-  {
-    id: "book-3",
-    title: {
-      ar: "التأمل والوعي الذاتي",
-      en: "Meditation and Self-Awareness",
-      fr: "Méditation et Conscience de Soi",
-    },
-    description: {
-      ar: "كتاب يأخذك في رحلة داخلية لاكتشاف الذات من خلال تقنيات التأمل والذهنية.",
-      en: "A book that takes you on an inner journey of self-discovery through meditation and mindfulness techniques.",
-      fr: "Un livre qui vous emmène dans un voyage intérieur de découverte de soi à travers la méditation et la pleine conscience.",
-    },
-    author: { ar: "أ. فاطمة الزهراء", en: "Ms. Fatima El Zahra", fr: "Mme Fatima El Zahra" },
-    fileSize: "3.7 MB",
-    pages: 180,
-    isFree: false,
-    price: 2000,
-    gradient: "from-violet-400 to-purple-600",
-    category: { ar: "التأمل", en: "Meditation", fr: "Méditation" },
-  },
-  {
-    id: "book-4",
-    title: {
-      ar: "بناء المرونة النفسية",
-      en: "Building Psychological Resilience",
-      fr: "Construire la Résilience Psychologique",
-    },
-    description: {
-      ar: "دليل عملي لبناء المرونة النفسية والتعامل مع الضغوط والتحديات الحياتية.",
-      en: "A practical guide to building psychological resilience and dealing with life's pressures and challenges.",
-      fr: "Un guide pratique pour développer la résilience psychologique et faire face aux pressions de la vie.",
-    },
-    author: { ar: "د. ليلى مراد", en: "Dr. Laila Mourad", fr: "Dr. Laila Mourad" },
-    fileSize: "6.3 MB",
-    pages: 275,
-    isFree: true,
-    price: 0,
-    gradient: "from-rose-400 to-pink-600",
-    category: { ar: "التطوير الشخصي", en: "Personal Development", fr: "Développement Personnel" },
-  },
-  {
-    id: "book-5",
-    title: {
-      ar: "التعامل مع الضغوط الحياتية",
-      en: "Managing Life Pressures",
-      fr: "Gérer les Pressions de la Vie",
-    },
-    description: {
-      ar: "كتاب شامل عن استراتيجيات التعامل مع الضغوط اليومية وتقنيات الاسترخاء.",
-      en: "A comprehensive book about strategies for dealing with daily pressures and relaxation techniques.",
-      fr: "Un livre complet sur les stratégies pour gérer les pressions quotidiennes et les techniques de relaxation.",
-    },
-    author: { ar: "د. محمد أمين", en: "Dr. Mohamed Amine", fr: "Dr. Mohamed Amine" },
-    fileSize: "4.8 MB",
-    pages: 210,
-    isFree: false,
-    price: 1800,
-    gradient: "from-sky-400 to-cyan-600",
-    category: { ar: "إدارة الضغوط", en: "Stress Management", fr: "Gestion du Stress" },
-  },
-  {
-    id: "book-6",
-    title: {
-      ar: "مقدمة في العلاج بالفن",
-      en: "Introduction to Art Therapy",
-      fr: "Introduction à l'Art-thérapie",
-    },
-    description: {
-      ar: "كتاب تعريفي بالعلاج بالفن وتطبيقاته في تحسين الصحة النفسية والتعبير عن المشاعر.",
-      en: "An introductory book on art therapy and its applications in improving mental health and emotional expression.",
-      fr: "Un livre d'introduction à l'art-thérapie et ses applications dans l'amélioration de la santé mentale.",
-    },
-    author: { ar: "د. سارة بن علي", en: "Dr. Sara Ben Ali", fr: "Dr. Sara Ben Ali" },
-    fileSize: "3.2 MB",
-    pages: 155,
-    isFree: true,
-    price: 0,
-    gradient: "from-amber-400 to-orange-600",
-    category: { ar: "العلاج بالفن", en: "Art Therapy", fr: "Art-thérapie" },
-  },
-];
 
 export default function BooksPage() {
   const { t, locale } = useTranslation();
@@ -213,14 +93,16 @@ export default function BooksPage() {
             price: p.price || 0,
             gradient: GRADIENTS[i % GRADIENTS.length],
             category: { ar: p.category || "", en: p.category || "", fr: p.category || "" },
+            fileUrl: p.fileUrl || p.pdfUrl || "",
+            pdfUrl: p.pdfUrl || p.fileUrl || "",
           }));
-        if (books.length > 0) setApiBooks(books);
+        setApiBooks(books);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const displayBooks = apiBooks || mockBooks;
+  const displayBooks = apiBooks || [];
 
   const filteredBooks = useMemo(() => {
     return displayBooks.filter((book) => {
@@ -363,11 +245,11 @@ export default function BooksPage() {
                       )}
                       <div className="absolute top-4 start-4">
                         {book.isFree ? (
-                          <Badge className="bg-white/90 text-emerald-700 border-0">
+                          <Badge className="bg-white/90 text-healing-brown border-0">
                             {t("common.free")}
                           </Badge>
                         ) : book.price > 0 ? (
-                          <Badge className="bg-teal-600 text-white border-0">
+                          <Badge className="bg-healing-brown text-white border-0">
                             {book.price.toLocaleString()} {t("common.currency")}
                           </Badge>
                         ) : (

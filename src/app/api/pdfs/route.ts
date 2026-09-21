@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
-import { requireAdmin } from "@/lib/session";
 import { sanitizeHtml, isUrlSafe } from "@/lib/html-sanitize";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 import { cached, invalidateContentCache } from "@/lib/cache";
@@ -24,6 +23,15 @@ const createPdfSchema = z.object({
   status: z.enum(["published", "draft"]).default("draft"),
   isFree: z.boolean().default(false),
   price: z.number().min(REQUEST_LIMITS.MIN_PRICE).max(REQUEST_LIMITS.MAX_PRICE).optional(),
+  category: z.string().max(200).optional(),
+  tags: z.string().max(1000).optional(),
+  metaTitleAr: z.string().max(200).optional(),
+  metaTitleFr: z.string().max(200).optional(),
+  metaTitleEn: z.string().max(200).optional(),
+  metaDescAr: z.string().max(1000).optional(),
+  metaDescFr: z.string().max(1000).optional(),
+  metaDescEn: z.string().max(1000).optional(),
+  ogImage: z.string().max(500).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -32,10 +40,11 @@ export async function GET(request: NextRequest) {
     const limit = url.searchParams.get("limit");
     let status = url.searchParams.get("status");
 
-    // Security: Only admins can view draft content
-    if (status && status !== "published") {
-      const adminId = await requireAdmin();
-      if (!adminId) status = "published";
+    // Security: Only admins may view draft content. Every request is
+    // restricted to published content unless it passes admin verification.
+    if (!status || status !== "published") {
+      const isAdmin = await verifyAdminAccess(request);
+      if (!isAdmin) status = "published";
     }
     // Cache ALL PDFs once, then filter in-memory for different query combos
     const allPdfs = await cached("api:pdfs:all", async () => {

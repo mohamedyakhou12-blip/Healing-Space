@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/form";
 import { useTranslation } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
-import { setStoredAdminCode } from "@/lib/api-helpers";
 import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
@@ -113,11 +112,6 @@ export default function LoginPage() {
         avatar: result.user.avatar,
         phone: result.user.phone,
       });
-
-      // If user is admin, save admin code to localStorage for API calls
-      if (result.user.role === "admin") {
-        setStoredAdminCode("admin-session");
-      }
 
       toast.success(t("common.success"));
       if (result.user.role === "admin") {

@@ -90,6 +90,10 @@ export async function validateAdminCode(providedCode: string | null): Promise<bo
   //    access the dashboard at least once to configure a proper code.
   //    IMPORTANT: After the admin sets a code via the settings page, this default
   //    will no longer be accepted because the DB check (step 1) will find the record.
+  //    SECURITY: Never accept the built-in default code in production — the live
+  //    site must have a real code configured (env var or DB) or admin auth is denied.
+  if (process.env.NODE_ENV === "production") return false;
+
   const envCode = getEnvCode();
   const hasDbCode = await checkDbHasAdminCode();
   if (!envCode && !hasDbCode) {

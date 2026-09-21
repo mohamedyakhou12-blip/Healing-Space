@@ -53,8 +53,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const gradientMap: Record<string, string> = {
-  info: "from-cyan-400 to-teal-500",
-  success: "from-emerald-400 to-green-500",
+  info: "from-healing-sand to-healing-brown",
+  success: "from-healing-beige to-healing-brown",
   warning: "from-amber-400 to-orange-500",
   payment: "from-violet-400 to-purple-500",
   content: "from-rose-400 to-pink-500",
@@ -133,6 +133,11 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) navigate("login");
+  }, [user, navigate]);
 
   const filteredNotifications = useMemo(() => {
     if (filter === "unread") {

@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { Suspense } from 'react';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -21,17 +23,17 @@ import {
 } from 'lucide-react';
 
 const adminLinks = [
-  { href: '/admin', label: 'لوحة المعلومات', icon: LayoutDashboard },
-  { href: '/admin/content', label: 'إدارة المحتوى', icon: BookOpen },
-  { href: '/admin/members', label: 'الأعضاء', icon: Users },
-  { href: '/admin/payments', label: 'المدفوعات', icon: CreditCard },
-  { href: '/admin/pricing', label: 'الأسعار', icon: DollarSign },
-  { href: '/admin/customize', label: 'تخصيص الرئيسية', icon: Paintbrush },
-  { href: '/admin/settings', label: 'الإعدادات', icon: Settings },
-  { href: '/admin/purchases', label: 'المشتريات', icon: ShoppingBag },
+  { href: '/admin?tab=dashboard', tab: 'dashboard', label: 'لوحة المعلومات', icon: LayoutDashboard },
+  { href: '/admin?tab=content', tab: 'content', label: 'إدارة المحتوى', icon: BookOpen },
+  { href: '/admin?tab=members', tab: 'members', label: 'الأعضاء', icon: Users },
+  { href: '/admin?tab=payments', tab: 'payments', label: 'المدفوعات', icon: CreditCard },
+  { href: '/admin?tab=prices', tab: 'prices', label: 'الأسعار', icon: DollarSign },
+  { href: '/admin?tab=homepage', tab: 'homepage', label: 'تخصيص الرئيسية', icon: Paintbrush },
+  { href: '/admin?tab=settings', tab: 'settings', label: 'الإعدادات', icon: Settings },
+  { href: '/admin?tab=purchases', tab: 'purchases', label: 'المشتريات', icon: ShoppingBag },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const user = useAppStore((s) => s.user);
@@ -39,6 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoadingAuth = useAppStore((s) => s.isLoadingAuth);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabQuery = searchParams.get("tab") || "";
 
   useEffect(() => {
     if (!isLoadingAuth && !user) {
@@ -91,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav links */}
         <nav className="flex-1 py-4 px-2 space-y-1">
           {adminLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = link.tab === 'dashboard' ? (tabQuery === '' || tabQuery === 'dashboard') : tabQuery === link.tab;
             return (
               <Link
                 key={link.href}
@@ -147,7 +151,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={link.href}
                   onClick={() => setIsMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                    pathname === link.href
+                    link.tab === 'dashboard' ? (tabQuery === '' || tabQuery === 'dashboard') : tabQuery === link.tab
                       ? 'bg-secondary text-primary'
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -168,5 +172,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </main>
     </div>
+  );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </Suspense>
   );
 }

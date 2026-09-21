@@ -249,7 +249,7 @@ export default function ResetPasswordPage() {
         dir={dir}
       >
         <div className="flex flex-col items-center gap-4">
-          <div className="size-12 animate-spin rounded-full border-4 border-teal-200 border-t-teal-600" />
+          <div className="size-12 animate-spin rounded-full border-4 border-healing-beige-light border-t-healing-brown" />
           <p className="text-muted-foreground">
             {locale === "ar"
               ? "جارٍ التحقق من الرابط..."
@@ -293,7 +293,7 @@ export default function ResetPasswordPage() {
             </CardContent>
             <CardFooter>
               <Button
-                className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-500 py-5 text-base font-semibold"
+                className="w-full rounded-xl bg-gradient-to-r from-healing-brown to-healing-brown py-5 text-base font-semibold"
                 onClick={() => navigate("forgot-password")}
               >
                 {locale === "ar"
@@ -312,10 +312,10 @@ export default function ResetPasswordPage() {
     return (
       <div className="flex min-h-screen" dir={dir}>
         {/* LEFT PANEL – Decorative (desktop only) */}
-        <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-teal-700 via-emerald-600 to-cyan-600 lg:flex lg:items-center lg:justify-center">
+        <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-healing-brown via-healing-brown to-healing-sand lg:flex lg:items-center lg:justify-center">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-1/4 -left-1/4 h-[50%] w-[50%] rounded-full bg-white/4 blur-3xl" />
-            <div className="absolute -bottom-1/4 -right-1/4 h-[45%] w-[45%] rounded-full bg-cyan-400/5 blur-3xl" />
+            <div className="absolute -bottom-1/4 -right-1/4 h-[45%] w-[45%] rounded-full bg-healing-sand/5 blur-3xl" />
           </div>
           <motion.div
             className="relative z-10 max-w-md px-8 text-center text-white"
@@ -356,8 +356,8 @@ export default function ResetPasswordPage() {
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
             <motion.div variants={fadeUp} custom={0} className="mb-8 text-center">
-              <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 shadow-lg">
-                <CheckCircle className="size-7 text-emerald-600 dark:text-emerald-400" />
+              <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-healing-cream dark:bg-healing-brown/30 shadow-lg">
+                <CheckCircle className="size-7 text-healing-brown dark:text-healing-beige" />
               </div>
               <h1 className="text-2xl font-bold">
                 {locale === "ar"
@@ -384,7 +384,7 @@ export default function ResetPasswordPage() {
                 </CardContent>
                 <CardFooter>
                   <Button
-                    className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-500 py-5 text-base font-semibold shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30"
+                    className="w-full rounded-xl bg-gradient-to-r from-healing-brown to-healing-brown py-5 text-base font-semibold shadow-lg shadow-healing-brown/25 hover:shadow-xl hover:shadow-healing-brown/30"
                     onClick={() => navigate("login")}
                   >
                     {locale === "ar"
@@ -404,10 +404,10 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen" dir={dir}>
       {/* LEFT PANEL – Decorative (desktop only) */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-teal-700 via-emerald-600 to-cyan-600 lg:flex lg:items-center lg:justify-center">
+      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-healing-brown via-healing-brown to-healing-sand lg:flex lg:items-center lg:justify-center">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-1/4 -left-1/4 h-[50%] w-[50%] rounded-full bg-white/4 blur-3xl" />
-          <div className="absolute -bottom-1/4 -right-1/4 h-[45%] w-[45%] rounded-full bg-cyan-400/5 blur-3xl" />
+          <div className="absolute -bottom-1/4 -right-1/4 h-[45%] w-[45%] rounded-full bg-healing-sand/5 blur-3xl" />
         </div>
         <motion.div
           className="relative z-10 max-w-md px-8 text-center text-white"
@@ -449,7 +449,7 @@ export default function ResetPasswordPage() {
         >
           {/* Logo */}
           <motion.div variants={fadeUp} custom={0} className="mb-8 text-center">
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-400 shadow-lg shadow-teal-500/25">
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-healing-brown to-healing-beige shadow-lg shadow-healing-brown/25">
               <Lock className="size-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold">
@@ -590,7 +590,7 @@ export default function ResetPasswordPage() {
 
                     <Button
                       type="submit"
-                      className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-500 py-5 text-base font-semibold shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30"
+                      className="w-full rounded-xl bg-gradient-to-r from-healing-brown to-healing-brown py-5 text-base font-semibold shadow-lg shadow-healing-brown/25 hover:shadow-xl hover:shadow-healing-brown/30"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -613,7 +613,7 @@ export default function ResetPasswordPage() {
               <CardFooter>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-center gap-2 text-sm font-medium text-teal-600 hover:text-teal-700 hover:underline"
+                  className="flex w-full items-center justify-center gap-2 text-sm font-medium text-healing-brown hover:text-healing-brown hover:underline"
                   onClick={() => navigate("login")}
                 >
                   <BackArrow className="size-4" />

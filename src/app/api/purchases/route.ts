@@ -7,6 +7,31 @@ import { REQUEST_LIMITS } from "@/lib/request-limits";
 
 const CONTENT_TYPES = ["courses", "articles", "podcasts", "videos", "pdfs", "live", "coaching"] as const;
 
+/**
+ * Load the actual content document so the purchase price and title are
+ * derived server-side instead of trusting client-supplied values.
+ */
+async function resolveContentItem(contentType: string, contentId: string): Promise<Record<string, unknown> | null> {
+  switch (contentType) {
+    case "courses":
+      return db.course.findUnique({ where: { id: contentId } });
+    case "articles":
+      return db.article.findUnique({ where: { id: contentId } });
+    case "podcasts":
+      return db.podcast.findUnique({ where: { id: contentId } });
+    case "videos":
+      return db.video.findUnique({ where: { id: contentId } });
+    case "pdfs":
+      return db.pdfResource.findUnique({ where: { id: contentId } });
+    case "live":
+      return db.liveSession.findUnique({ where: { id: contentId } });
+    case "coaching":
+      return db.coaching.findUnique({ where: { id: contentId } });
+    default:
+      return null;
+  }
+}
+
 const createPurchaseSchema = z.object({
   contentId: z.string().min(1, "Content ID is required"),
   contentType: z.enum(CONTENT_TYPES, { message: "Invalid content type" }),
@@ -212,16 +237,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Server-side integrity checks ──
+    // 1. The content item must exist.
+    const contentItem = await resolveContentItem(parsed.data.contentType, parsed.data.contentId);
+    if (!contentItem) {
+      return NextResponse.json(
+        { error: "Content item not found" },
+        { status: 404 }
+      );
+    }
+
+    // 2. Individual purchases must be enabled by the administrator.
+    const settings = await db.siteSetting.findMany({ orderBy: { key: "asc" } });
+    const settingsMap = new Map(settings.map((s: { key: string; value: string }) => [s.key, s.value]));
+    if (settingsMap.get("individualPurchasesEnabled") === "false") {
+      return NextResponse.json(
+        { error: "Individual purchases are currently disabled" },
+        { status: 403 }
+      );
+    }
+
+    // 3. Price must be derived from the content item (or the configured
+    //    individual-content fallback price) — the client amount is ignored.
+    const itemPrice = Number((contentItem as { price?: number | null }).price);
+    const fallbackPrice = Number(settingsMap.get("individualContentPrice"));
+    let serverAmount = Number.isFinite(itemPrice) && itemPrice > 0
+      ? itemPrice
+      : (Number.isFinite(fallbackPrice) && fallbackPrice > 0 ? fallbackPrice : 0);
+    if (!Number.isFinite(serverAmount) || serverAmount <= 0) {
+      return NextResponse.json(
+        { error: "This content cannot be purchased (no price configured)" },
+        { status: 400 }
+      );
+    }
+
+    // 4. Derive display titles from the database document.
+    const raw = contentItem as Record<string, unknown>;
+    const contentTitle = (raw.titleEn as string) || (raw.title as string) || "";
+    const contentTitleAr = (raw.titleAr as string) || (raw.title as string) || "";
+
     const purchase = await db.purchase.create({
       data: {
         userId,
         contentId: parsed.data.contentId,
         contentType: parsed.data.contentType,
-        amount: parsed.data.amount,
+        amount: serverAmount,
         receiptImage,
         ccpNumber: parsed.data.ccpNumber,
-        contentTitle: parsed.data.contentTitle,
-        contentTitleAr: parsed.data.contentTitleAr,
+        contentTitle,
+        contentTitleAr,
         status: "pending",
       },
     });

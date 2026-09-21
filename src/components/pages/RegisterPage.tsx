@@ -162,10 +162,10 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen" dir={dir}>
       {/* LEFT PANEL – Decorative (desktop only) */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-emerald-700 via-teal-600 to-cyan-600 lg:flex lg:items-center lg:justify-center">
+      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-healing-brown via-healing-brown to-healing-sand lg:flex lg:items-center lg:justify-center">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-1/4 -right-1/4 h-[50%] w-[50%] rounded-full bg-white/4 blur-3xl" />
-          <div className="absolute -bottom-1/4 -left-1/4 h-[45%] w-[45%] rounded-full bg-teal-400/5 blur-3xl" />
+          <div className="absolute -bottom-1/4 -left-1/4 h-[45%] w-[45%] rounded-full bg-healing-beige/5 blur-3xl" />
         </div>
 
         <motion.div
@@ -218,7 +218,7 @@ export default function RegisterPage() {
         >
           {/* Logo */}
           <motion.div variants={fadeUp} custom={0} className="mb-8 text-center">
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 shadow-lg shadow-emerald-500/25">
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-healing-brown to-healing-beige shadow-lg shadow-healing-brown/25">
               <Heart className="size-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold">{t("auth.register")}</h1>
@@ -390,7 +390,7 @@ export default function RegisterPage() {
 
                     <Button
                       type="submit"
-                      className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 py-5 text-base font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30"
+                      className="w-full rounded-xl bg-gradient-to-r from-healing-brown to-healing-brown py-5 text-base font-semibold shadow-lg shadow-healing-brown/25 hover:shadow-xl hover:shadow-healing-brown/30"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -411,7 +411,7 @@ export default function RegisterPage() {
                   {t("auth.hasAccount")}{" "}
                   <button
                     type="button"
-                    className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                    className="font-semibold text-healing-brown hover:text-healing-brown hover:underline"
                     onClick={() => navigate("login")}
                   >
                     {t("auth.login")}

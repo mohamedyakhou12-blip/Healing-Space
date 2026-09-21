@@ -20,7 +20,7 @@ import { canAccessContent, ALL_CONTENT_TYPES, type ContentType, type ExcludedIte
 
 const SENSITIVE_FIELDS: Record<string, string[]> = {
   articles: ["content", "contentAr", "contentFr", "contentEn"],
-  videos: ["videoUrl"],
+  videos: ["videoUrl", "youtubeId"],
   podcasts: ["audioUrl"],
   pdfs: ["pdfUrl", "fileUrl"],
   live: ["streamUrl", "zoomUrl"],
@@ -104,9 +104,11 @@ async function resolveAccessContext(): Promise<AccessContext> {
     )
     .map((sub: { type: string }) => sub.type);
 
-  // Fetch individual purchases
+  // Fetch individual purchases.
+  // Purchases are created as "pending" and become "approved" after admin approval —
+  // "approved" is the only status that grants permanent content access.
   const purchases = await db.purchase.findMany({
-    where: { userId, status: "active" },
+    where: { userId, status: "approved" },
   });
   const purchasedContentIds: Set<string> = new Set(
     purchases.map((p: Record<string, any>) => String(p.contentId || ""))

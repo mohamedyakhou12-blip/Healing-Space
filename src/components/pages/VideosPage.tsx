@@ -42,60 +42,21 @@ interface VideoItem {
 }
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockVideos: VideoItem[] = [
-  {
-    id: "vid-1",
-    title: { ar: "مقدمة في العلاج النفسي: ما تحتاج أن تعرفه", en: "Introduction to Psychotherapy: What You Need to Know", fr: "Introduction à la Psychothérapie: Ce Que Vous Devez Savoir" },
-    description: { ar: "في هذا الفيديو نقدم مقدمة شاملة عن العلاج النفسي وأنواعه المختلفة ومتى يجب التفكير في زيارة معالج نفسي.", en: "In this video we present a comprehensive introduction to psychotherapy, its different types, and when to consider visiting a therapist.", fr: "Dans cette vidéo, nous présentons une introduction complète à la psychothérapie." },
-    duration: "18:45", views: 12450, likes: 892, publishedDate: "2025-01-20",
-    gradient: "from-emerald-400 to-teal-600",
-    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
-  },
-  {
-    id: "vid-2",
-    title: { ar: "تمارين التنفس للاسترخاء الفوري", en: "Breathing Exercises for Instant Relaxation", fr: "Exercices de Respiration pour une Relaxation Instantanée" },
-    description: { ar: "تعلم 5 تمارين تنفس بسيطة وفعالة يمكنك ممارستها في أي وقت ومكان للاسترخاء الفوري والتخلص من التوتر.", en: "Learn 5 simple and effective breathing exercises you can practice anytime, anywhere for instant relaxation and stress relief.", fr: "Apprenez 5 exercices de respiration simples et efficaces pour une relaxation instantanée." },
-    duration: "12:30", views: 8900, likes: 654, publishedDate: "2025-02-15",
-    gradient: "from-amber-400 to-orange-600",
-    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
-  },
-  {
-    id: "vid-3",
-    title: { ar: "كيف تتعامل مع الأفكار السلبية؟", en: "How to Deal with Negative Thoughts?", fr: "Comment Gérer les Pensées Négatives ?" },
-    description: { ar: "استراتيجيات عملية وفعالة للتعامل مع الأفكار السلبية وتحويلها إلى أفكار إيجابية وبناءة.", en: "Practical and effective strategies for dealing with negative thoughts and transforming them into positive ones.", fr: "Stratégies pratiques et efficaces pour gérer les pensées négatives." },
-    duration: "22:15", views: 15200, likes: 1100, publishedDate: "2025-03-10",
-    gradient: "from-violet-400 to-purple-600",
-    image: "https://images.unsplash.com/photo-1515894203077-9cd36032142f?w=400&h=250&fit=crop",
-    isFree: false, price: 2000, youtubeId: undefined, videoUrl: "",
-  },
-  {
-    id: "vid-4",
-    title: { ar: "دليل الآباء: فهم مشاعر أبنائك", en: "Parents' Guide: Understanding Your Children's Feelings", fr: "Guide des Parents: Comprendre les Sentiments de Vos Enfants" },
-    description: { ar: "في هذا الفيديو نستضيف د. ليلى مراد لمناقشة كيفية فهم مشاعر الأطفال والتواصل معهم بطريقة صحية.", en: "In this video we host Dr. Laila Mourad to discuss how to understand children's feelings and communicate with them healthily.", fr: "Dans cette vidéo, nous recevons le Dr. Laila Mourad pour discuter de la compréhension des sentiments des enfants." },
-    duration: "28:00", views: 9800, likes: 780, publishedDate: "2025-03-25",
-    gradient: "from-rose-400 to-pink-600",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
-    isFree: false, price: 2500, youtubeId: undefined, videoUrl: "",
-  },
-  {
-    id: "vid-5",
-    title: { ar: "جلسة تأمل موجّهة لمدة 10 دقائق", en: "10-Minute Guided Meditation Session", fr: "Séance de Méditation Guidée de 10 Minutes" },
-    description: { ar: "جلسة تأمل موجّهة مع أ. فاطمة الزهراء للاسترخاء العميق وتصفية الذهن.", en: "A guided meditation session with Ms. Fatima El Zahra for deep relaxation and mind clearing.", fr: "Une séance de méditation guidée avec Mme Fatima El Zahra." },
-    duration: "10:30", views: 22000, likes: 1850, publishedDate: "2025-04-05",
-    gradient: "from-sky-400 to-cyan-600",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-    isFree: true, price: 0, youtubeId: undefined, videoUrl: "",
-  },
-];
+const extractYouTubeId = (url: string): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/
+  );
+  return match?.[1];
+};
+
 
 export default function VideosPage() {
   const { t, locale } = useTranslation();
@@ -147,7 +108,7 @@ export default function VideosPage() {
             image: v.image || v.thumbnail || "",
             isFree: v.isFree || false,
             price: v.price || 0,
-            youtubeId: v.youtubeId || undefined,
+            youtubeId: extractYouTubeId(v.videoUrl) || v.youtubeId || undefined,
             videoUrl: v.videoUrl || "",
           }));
         setApiVideos(videos);
@@ -193,6 +154,8 @@ export default function VideosPage() {
     if (!canAccessContentById(userWithSub, 'videos', video.id, video.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems)) {
       if (individualPurchasesEnabled) {
         openPurchaseDialog(video);
+      } else {
+        navigate("subscriptions");
       }
       return;
     }

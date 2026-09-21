@@ -5,6 +5,7 @@ import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { invalidateAccessContext } from "@/lib/api-content-gate";
 
 const updatePurchaseSchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -91,6 +92,9 @@ export async function PUT(
           link: "/profile",
         },
       });
+
+      // Invalidate the cached access context so the purchase unlocks immediately.
+      invalidateAccessContext(existing.userId);
     }
 
     // If rejected, notify user with reason

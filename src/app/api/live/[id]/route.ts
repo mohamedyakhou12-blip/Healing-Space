@@ -5,6 +5,7 @@ import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
+import { gateContentItem } from "@/lib/api-content-gate";
 
 const updateLiveSessionSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -23,6 +24,15 @@ const updateLiveSessionSchema = z.object({
   duration: z.string().max(50).optional(),
   isFree: z.boolean().optional(),
   price: z.number().min(0).max(1000000).optional(),
+  category: z.string().max(200).optional(),
+  tags: z.string().max(1000).optional(),
+  metaTitleAr: z.string().max(200).optional(),
+  metaTitleFr: z.string().max(200).optional(),
+  metaTitleEn: z.string().max(200).optional(),
+  metaDescAr: z.string().max(1000).optional(),
+  metaDescFr: z.string().max(1000).optional(),
+  metaDescEn: z.string().max(1000).optional(),
+  ogImage: z.string().max(500).optional(),
 });
 
 export async function GET(
@@ -44,8 +54,10 @@ export async function GET(
       return NextResponse.json({ error: "Live session not found" }, { status: 404 });
     }
 
+    const gated = await gateContentItem(liveSession, "live");
+
     return NextResponse.json(
-      { liveSession },
+      { liveSession: gated },
       { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (error) {

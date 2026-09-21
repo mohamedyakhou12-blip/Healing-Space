@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { PurchaseDialog } from "@/components/PurchaseDialog";
 import { getOptimizedImageUrl } from "@/lib/cloudinary-utils";
+import Link from "next/link";
 
 interface Lesson {
   id: string;
@@ -68,206 +69,13 @@ interface Course {
   price: number;
 }
 
-const mockCourses: Course[] = [
-  {
-    id: "course-1",
-    title: {
-      ar: "أساسيات العلاج النفسي المعرفي السلوكي",
-      en: "Fundamentals of CBT",
-      fr: "Fondements de la TCC",
-    },
-    description: {
-      ar: "تعرف على أساسيات العلاج المعرفي السلوكي وكيفية تطبيقه في حياتك اليومية لإدارة المشاعر السلبية وتغيير أنماط التفكير غير الصحية.",
-      en: "Learn the fundamentals of Cognitive Behavioral Therapy and how to apply it in your daily life to manage negative emotions and change unhealthy thinking patterns.",
-      fr: "Découvrez les fondamentaux de la thérapie cognitivo-comportementale et comment l'appliquer dans votre vie quotidienne.",
-    },
-    instructor: {
-      ar: "د. سارة بن علي",
-      en: "Dr. Sara Ben Ali",
-      fr: "Dr. Sara Ben Ali",
-    },
-    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop",
-    gradient: "from-emerald-400 to-teal-600",
-    totalLessons: 24,
-    totalDuration: "12 ساعة",
-    students: 1245,
-    rating: 4.8,
-    isFree: true,
-    enrolled: true,
-    progress: 65,
-    price: 0,
-    chapters: [
-      {
-        id: "ch-1-1",
-        title: { ar: "مقدمة في العلاج المعرفي", en: "Introduction to Cognitive Therapy", fr: "Introduction à la thérapie cognitive" },
-        lessons: [
-          { id: "l-1-1-1", title: { ar: "ما هو العلاج المعرفي السلوكي؟", en: "What is CBT?", fr: "Qu'est-ce que la TCC ?" }, duration: "15:30", isFree: true, isCompleted: true },
-          { id: "l-1-1-2", title: { ar: "تاريخ العلاج المعرفي السلوكي", en: "History of CBT", fr: "Histoire de la TCC" }, duration: "20:00", isFree: true, isCompleted: true },
-          { id: "l-1-1-3", title: { ar: "الفرق بين العلاج المعرفي والسلوكي", en: "Cognitive vs Behavioral Therapy", fr: "Thérapie cognitive vs comportementale" }, duration: "18:45", isFree: false, isCompleted: false },
-        ],
-      },
-      {
-        id: "ch-1-2",
-        title: { ar: "تحديد الأفكار التلقائية", en: "Identifying Automatic Thoughts", fr: "Identification des pensées automatiques" },
-        lessons: [
-          { id: "l-1-2-1", title: { ar: "أنماط التفكير المشوهة", en: "Distorted Thinking Patterns", fr: "Patterns de pensée déformés" }, duration: "22:10", isFree: false, isCompleted: true },
-          { id: "l-1-2-2", title: { ar: "دفتر الأفكار اليومية", en: "Daily Thought Journal", fr: "Journal de pensées quotidien" }, duration: "25:00", isFree: false, isCompleted: false },
-        ],
-      },
-      {
-        id: "ch-1-3",
-        title: { ar: "تقنيات تغيير السلوك", en: "Behavior Change Techniques", fr: "Techniques de changement comportemental" },
-        lessons: [
-          { id: "l-1-3-1", title: { ar: "التعريض التدريجي", en: "Gradual Exposure", fr: "Exposition graduelle" }, duration: "30:00", isFree: false, isCompleted: false },
-          { id: "l-1-3-2", title: { ar: "تقنية التوقف الفكري", en: "Thought Stopping", fr: "Arrêt de la pensée" }, duration: "15:20", isFree: false, isCompleted: false },
-        ],
-      },
-    ],
-  },
-  {
-    id: "course-2",
-    title: {
-      ar: "فن الذكاء العاطفي",
-      en: "The Art of Emotional Intelligence",
-      fr: "L'Art de l'Intelligence Émotionnelle",
-    },
-    description: {
-      ar: "طور مهاراتك في الذكاء العاطفي وتعلم كيفية فهم مشاعرك ومشاعر الآخرين، وبناء علاقات أقوى وأكثر صحة.",
-      en: "Develop your emotional intelligence skills and learn to understand your feelings and those of others, building stronger and healthier relationships.",
-      fr: "Développez vos compétences en intelligence émotionnelle et apprenez à comprendre vos sentiments et ceux des autres.",
-    },
-    instructor: {
-      ar: "د. محمد أمين",
-      en: "Dr. Mohamed Amine",
-      fr: "Dr. Mohamed Amine",
-    },
-    image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&h=250&fit=crop",
-    gradient: "from-amber-400 to-orange-600",
-    totalLessons: 18,
-    totalDuration: "9 ساعات",
-    students: 890,
-    rating: 4.6,
-    isFree: false,
-    enrolled: false,
-    progress: 0,
-    price: 2500,
-    chapters: [
-      {
-        id: "ch-2-1",
-        title: { ar: "ما هو الذكاء العاطفي؟", en: "What is Emotional Intelligence?", fr: "Qu'est-ce que l'intelligence émotionnelle ?" },
-        lessons: [
-          { id: "l-2-1-1", title: { ar: "المكونات الخمسة للذكاء العاطفي", en: "The Five Components of EQ", fr: "Les cinq composantes de l'IE" }, duration: "20:00", isFree: true, isCompleted: false },
-          { id: "l-2-1-2", title: { ar: "قياس الذكاء العاطفي", en: "Measuring Emotional Intelligence", fr: "Mesurer l'intelligence émotionnelle" }, duration: "15:30", isFree: true, isCompleted: false },
-        ],
-      },
-      {
-        id: "ch-2-2",
-        title: { ar: "إدارة المشاعر", en: "Managing Emotions", fr: "Gestion des émotions" },
-        lessons: [
-          { id: "l-2-2-1", title: { ar: "التنظيم العاطفي", en: "Emotional Regulation", fr: "Régulation émotionnelle" }, duration: "25:00", isFree: false, isCompleted: false },
-          { id: "l-2-2-2", title: { ar: "استراتيجيات التعامل مع الغضب", en: "Anger Management Strategies", fr: "Stratégies de gestion de la colère" }, duration: "22:45", isFree: false, isCompleted: false },
-        ],
-      },
-    ],
-  },
-  {
-    id: "course-3",
-    title: {
-      ar: "اليقظة الذهنية والتأمل الموجه",
-      en: "Mindfulness & Guided Meditation",
-      fr: "Pleine Conscience et Méditation Guidée",
-    },
-    description: {
-      ar: "دورة شاملة لتعلم تقنيات اليقظة الذهنية والتأمل الموجه للحد من التوتر والقلق وتحسين جودة الحياة.",
-      en: "A comprehensive course on mindfulness and guided meditation techniques to reduce stress and anxiety and improve quality of life.",
-      fr: "Un cours complet sur les techniques de pleine conscience et de méditation guidée pour réduire le stress et l'anxiété.",
-    },
-    instructor: {
-      ar: "أ. فاطمة الزهراء",
-      en: "Ms. Fatima El Zahra",
-      fr: "Mme Fatima El Zahra",
-    },
-    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-    gradient: "from-violet-400 to-purple-600",
-    totalLessons: 30,
-    totalDuration: "15 ساعة",
-    students: 2100,
-    rating: 4.9,
-    isFree: false,
-    enrolled: true,
-    progress: 100,
-    price: 3000,
-    chapters: [
-      {
-        id: "ch-3-1",
-        title: { ar: "مدخل إلى اليقظة الذهنية", en: "Introduction to Mindfulness", fr: "Introduction à la pleine conscience" },
-        lessons: [
-          { id: "l-3-1-1", title: { ar: "ما هي اليقظة الذهنية؟", en: "What is Mindfulness?", fr: "Qu'est-ce que la pleine conscience ?" }, duration: "12:00", isFree: true, isCompleted: true },
-          { id: "l-3-1-2", title: { ar: "فوائد التأمل العلمية", en: "Scientific Benefits of Meditation", fr: "Bienfaits scientifiques de la méditation" }, duration: "18:00", isFree: true, isCompleted: true },
-        ],
-      },
-      {
-        id: "ch-3-2",
-        title: { ar: "تمارين التأمل الأساسية", en: "Basic Meditation Exercises", fr: "Exercices de méditation de base" },
-        lessons: [
-          { id: "l-3-2-1", title: { ar: "تأمل التنفس الواعي", en: "Mindful Breathing Meditation", fr: "Méditation de respiration consciente" }, duration: "15:00", isFree: false, isCompleted: true },
-          { id: "l-3-2-2", title: { ar: "مسح الجسم", en: "Body Scan Meditation", fr: "Scan corporel" }, duration: "20:00", isFree: false, isCompleted: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: "course-4",
-    title: {
-      ar: "التغلب على القلق والوسواس",
-      en: "Overcoming Anxiety & OCD",
-      fr: "Surmonter l'Anxiété et le TOC",
-    },
-    description: {
-      ar: "دورة متقدمة في فهم وإدارة اضطرابات القلق والوسواس القهري باستخدام أحدث التقنيات العلاجية.",
-      en: "An advanced course in understanding and managing anxiety disorders and OCD using the latest therapeutic techniques.",
-      fr: "Un cours avancé sur la compréhension et la gestion des troubles anxieux et du TOC.",
-    },
-    instructor: {
-      ar: "د. خالد مراد",
-      en: "Dr. Khaled Mourad",
-      fr: "Dr. Khaled Mourad",
-    },
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
-    gradient: "from-rose-400 to-pink-600",
-    totalLessons: 20,
-    totalDuration: "10 ساعات",
-    students: 670,
-    rating: 4.7,
-    isFree: false,
-    enrolled: false,
-    progress: 0,
-    price: 3500,
-    chapters: [
-      {
-        id: "ch-4-1",
-        title: { ar: "فهم اضطرابات القلق", en: "Understanding Anxiety Disorders", fr: "Comprendre les troubles anxieux" },
-        lessons: [
-          { id: "l-4-1-1", title: { ar: "أنواع اضطرابات القلق", en: "Types of Anxiety Disorders", fr: "Types de troubles anxieux" }, duration: "20:00", isFree: true, isCompleted: false },
-          { id: "l-4-1-2", title: { ar: "أسباب القلق وعوامل الخطر", en: "Causes and Risk Factors", fr: "Causes et facteurs de risque" }, duration: "25:00", isFree: false, isCompleted: false },
-        ],
-      },
-    ],
-  },
-];
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
-];
-
-const mockReviews = [
-  { id: "r1", name: { ar: "أحمد بوزيد", en: "Ahmed Bouzid", fr: "Ahmed Bouzid" }, rating: 5, comment: { ar: "دورة رائعة ومفيدة جداً، غيرت نظرتي للحياة!", en: "Amazing and very useful course, changed my perspective on life!", fr: "Cours incroyable et très utile, a changé ma perspective de vie !" } },
-  { id: "r2", name: { ar: "نورة علي", en: "Noura Ali", fr: "Noura Ali" }, rating: 4, comment: { ar: "محتوى علمي ممتاز، أنصح به بشدة", en: "Excellent scientific content, highly recommended", fr: "Contenu scientifique excellent, fortement recommandé" } },
-  { id: "r3", name: { ar: "ياسين حمداني", en: "Yassine Hamdani", fr: "Yassine Hamdani" }, rating: 5, comment: { ar: "شرح واضح وبسيط، سهل الفهم والتطبيق", en: "Clear and simple explanation, easy to understand and apply", fr: "Explication claire et simple, facile à comprendre et à appliquer" } },
+  "from-sky-400 to-healing-sand",
 ];
 
 export default function CoursesPage() {
@@ -282,6 +90,7 @@ export default function CoursesPage() {
   const [purchasedContentIds, setPurchasedContentIds] = useState<string[]>([]);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [selectedCourseForPurchase, setSelectedCourseForPurchase] = useState<Course | null>(null);
+  const [courseReviews, setCourseReviews] = useState<Array<{ id: string; name: string; rating: number; comment: string }>>([]);
 
   // Fetch user purchases
   useEffect(() => {
@@ -328,7 +137,7 @@ export default function CoursesPage() {
             progress: 0,
             price: c.price || 0,
           }));
-        if (courses.length > 0) setApiCourses(courses);
+        setApiCourses(courses);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -336,7 +145,7 @@ export default function CoursesPage() {
 
   // Compute enrolled dynamically based on current user - NOT baked into state
   const displayCourses = useMemo(() => {
-    const base = apiCourses || mockCourses;
+    const base = apiCourses || [];
     return base.map(c => ({
       ...c,
       enrolled: canAccessContentById(userWithSub, 'courses' as any, c.id, c.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems),
@@ -347,6 +156,25 @@ export default function CoursesPage() {
   const selectedCourse = courseId
     ? displayCourses.find((c) => c.id === courseId)
     : null;
+
+  // Fetch real reviews for the selected course detail
+  useEffect(() => {
+    if (!courseId) return;
+    let cancelled = false;
+    fetch(`/api/reviews?contentType=course&contentId=${encodeURIComponent(courseId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setCourseReviews((data.reviews || []).map((r: any) => ({
+          id: r.id,
+          name: r.user?.name || "",
+          rating: r.rating || 0,
+          comment: r.comment || "",
+        })));
+      })
+      .catch(() => { if (!cancelled) setCourseReviews([]); });
+    return () => { cancelled = true; };
+  }, [courseId]);
 
   const filteredCourses = useMemo(() => {
     return displayCourses.filter((course) => {
@@ -426,12 +254,12 @@ export default function CoursesPage() {
               <div className="absolute inset-0 bg-black/20 flex items-end p-6">
                 <div className="text-white">
                   {course.isFree && (
-                    <Badge className="bg-emerald-500 mb-2">
+                    <Badge className="bg-healing-brown mb-2">
                       {t("common.free")}
                     </Badge>
                   )}
                   {!course.isFree && course.price > 0 && (
-                    <Badge className="bg-teal-500 text-white border-0 mb-2">
+                    <Badge className="bg-healing-brown text-white border-0 mb-2">
                       {course.price.toLocaleString()} {t("common.currency")}
                     </Badge>
                   )}
@@ -520,7 +348,7 @@ export default function CoursesPage() {
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             {lesson.isCompleted ? (
-                              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                              <CheckCircle2 className="h-5 w-5 text-healing-brown shrink-0" />
                             ) : (
                               <Play className="h-5 w-5 text-muted-foreground shrink-0" />
                             )}
@@ -558,20 +386,23 @@ export default function CoursesPage() {
             <div className="space-y-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Star className="h-5 w-5 text-amber-500" />
-                {t("reviews.title")} ({mockReviews.length})
+                {t("reviews.title")} ({courseReviews.length})
               </h2>
+              {courseReviews.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("reviews.noReviews")}</p>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockReviews.map((review) => (
+                {courseReviews.map((review) => (
                   <Card key={review.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-primary font-semibold text-sm">
-                            {localizedText(review.name).charAt(0)}
+                            {(review.name || "؟").charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{localizedText(review.name)}</p>
+                          <p className="text-sm font-medium">{review.name || (locale === "ar" ? "مستخدم" : locale === "fr" ? "Utilisateur" : "User")}</p>
                           <div className="flex gap-0.5">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star
@@ -586,11 +417,12 @@ export default function CoursesPage() {
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{localizedText(review.comment)}</p>
+                      <p className="text-sm text-muted-foreground">{review.comment}</p>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+              )}
             </div>
           </div>
 
@@ -626,7 +458,7 @@ export default function CoursesPage() {
                   {!course.isFree && course.price > 0 && (
                     <div className="text-center py-3">
                       <p className="text-sm text-muted-foreground">{t("common.priceLabel")}</p>
-                      <p className="text-3xl font-bold text-teal-600 dark:text-teal-400">{course.price.toLocaleString()} <span className="text-base font-normal">{t("common.currency")}</span></p>
+                      <p className="text-3xl font-bold text-healing-brown dark:text-healing-beige">{course.price.toLocaleString()} <span className="text-base font-normal">{t("common.currency")}</span></p>
                     </div>
                   )}
 
@@ -786,11 +618,11 @@ export default function CoursesPage() {
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                     <BookOpen className="absolute bottom-3 start-3 h-8 w-8 text-white/30" />
                     {course.isFree ? (
-                      <Badge className="absolute top-3 start-3 bg-emerald-500 border-0">
+                      <Badge className="absolute top-3 start-3 bg-healing-brown border-0">
                         {t("common.free")}
                       </Badge>
                     ) : course.price > 0 ? (
-                      <Badge className="absolute top-3 start-3 bg-teal-600 text-white border-0">
+                      <Badge className="absolute top-3 start-3 bg-healing-brown text-white border-0">
                         {course.price.toLocaleString()} {t("common.currency")}
                       </Badge>
                     ) : (
@@ -831,7 +663,7 @@ export default function CoursesPage() {
                         {course.students}
                       </span>
                       {course.price > 0 && (
-                        <span className="flex items-center gap-1 font-semibold text-teal-600 dark:text-teal-400">
+                        <span className="flex items-center gap-1 font-semibold text-healing-brown dark:text-healing-beige">
                           {course.price.toLocaleString()} {t("common.currency")}
                         </span>
                       )}
@@ -853,7 +685,7 @@ export default function CoursesPage() {
                       {!course.isFree && course.price > 0 && !course.enrolled && (
                         <div className="flex items-center justify-between">
                           {individualPurchasesEnabled && (
-                            <span className="font-bold text-teal-600 dark:text-teal-400">{course.price.toLocaleString()} {t("common.currency")}</span>
+                            <span className="font-bold text-healing-brown dark:text-healing-beige">{course.price.toLocaleString()} {t("common.currency")}</span>
                           )}
                           {individualPurchasesEnabled && (
                             <Button className="flex-1 ms-3" size="sm" onClick={() => {
@@ -872,24 +704,32 @@ export default function CoursesPage() {
                         </div>
                       )}
                       {!course.enrolled && course.isFree && (
-                        <Button className="w-full" size="sm">
-                          {t("courses.enroll")}
+                        <Button asChild className="w-full" size="sm">
+                          <Link href={`/courses/${course.id}`}>
+                            {t("courses.enroll")}
+                          </Link>
                         </Button>
                       )}
                       {!course.enrolled && !course.isFree && course.price === 0 && (
-                        <Button className="w-full" size="sm">
-                          {t("courses.enroll")}
+                        <Button asChild className="w-full" size="sm">
+                          <Link href={`/courses/${course.id}`}>
+                            {t("courses.enroll")}
+                          </Link>
                         </Button>
                       )}
                       {course.enrolled && course.progress < 100 && (
-                        <Button className="w-full" size="sm" variant="secondary">
-                          {t("courses.continue")}
+                        <Button asChild className="w-full" size="sm" variant="secondary">
+                          <Link href={`/courses/${course.id}`}>
+                            {t("courses.continue")}
+                          </Link>
                         </Button>
                       )}
                       {course.enrolled && course.progress === 100 && (
-                        <Button className="w-full" size="sm" variant="outline">
-                          <CheckCircle2 className="h-4 w-4 me-1.5 text-emerald-500" />
-                          {t("courses.completed")}
+                        <Button asChild className="w-full" size="sm" variant="outline">
+                          <Link href={`/courses/${course.id}`}>
+                            <CheckCircle2 className="h-4 w-4 me-1.5 text-healing-brown" />
+                            {t("courses.completed")}
+                          </Link>
                         </Button>
                       )}
                     </div>

@@ -26,6 +26,8 @@ const ALLOWED_SETTINGS_KEYS = [
   "subscription_price_live", "subscription_price_coaching",
   // Full plan content type includes & per-item exclusions
   "full_plan_includes", "full_plan_excluded_items",
+  // Social links (trilingual JSON object consumed by the public footer)
+  "socialLinks",
 ];
 
 // Keys that must NEVER be written through this endpoint
@@ -66,6 +68,12 @@ export async function GET(request: NextRequest) {
     const settingsMap: Record<string, string> = {};
     for (const setting of settings) {
       settingsMap[setting.key] = setting.value;
+    }
+
+    // Never expose sensitive keys to the client (even admins get them via
+    // the dedicated endpoints, not through a bulk settings dump).
+    for (const key of BLOCKED_SETTINGS_KEYS) {
+      delete settingsMap[key];
     }
 
     return NextResponse.json({ settings: settingsMap });

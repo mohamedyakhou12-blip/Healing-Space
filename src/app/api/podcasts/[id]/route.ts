@@ -5,6 +5,7 @@ import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
+import { gateContentItem } from "@/lib/api-content-gate";
 
 const updatePodcastSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -22,6 +23,15 @@ const updatePodcastSchema = z.object({
   isFree: z.boolean().optional(),
   price: z.number().min(0).max(1000000).optional(),
   status: z.enum(["published", "draft"]).optional(),
+  category: z.string().max(200).optional(),
+  tags: z.string().max(1000).optional(),
+  metaTitleAr: z.string().max(200).optional(),
+  metaTitleFr: z.string().max(200).optional(),
+  metaTitleEn: z.string().max(200).optional(),
+  metaDescAr: z.string().max(1000).optional(),
+  metaDescFr: z.string().max(1000).optional(),
+  metaDescEn: z.string().max(1000).optional(),
+  ogImage: z.string().max(500).optional(),
 });
 
 export async function GET(
@@ -46,8 +56,18 @@ export async function GET(
       return NextResponse.json({ error: "Podcast not found" }, { status: 404 });
     }
 
+    // Drafts are only visible to admins
+    if (podcast.status && podcast.status !== "published") {
+      const isAdmin = await verifyAdminAccess(request);
+      if (!isAdmin) {
+        return NextResponse.json({ error: "Podcast not found" }, { status: 404 });
+      }
+    }
+
+    const gated = await gateContentItem(podcast, "podcasts");
+
     return NextResponse.json(
-      { podcast },
+      { podcast: gated },
       { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (error) {

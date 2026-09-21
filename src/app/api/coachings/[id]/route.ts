@@ -5,6 +5,7 @@ import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
+import { gateContentItem } from "@/lib/api-content-gate";
 
 const updateCoachingSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -23,6 +24,13 @@ const updateCoachingSchema = z.object({
   status: z.enum(["published", "draft"]).optional(),
   category: z.string().max(200).optional(),
   tags: z.string().max(1000).optional(),
+  metaTitleAr: z.string().max(200).optional(),
+  metaTitleFr: z.string().max(200).optional(),
+  metaTitleEn: z.string().max(200).optional(),
+  metaDescAr: z.string().max(1000).optional(),
+  metaDescFr: z.string().max(1000).optional(),
+  metaDescEn: z.string().max(1000).optional(),
+  ogImage: z.string().max(500).optional(),
   viewCount: z.number().int().min(0).optional(),
 });
 
@@ -47,9 +55,19 @@ export async function GET(
       return NextResponse.json({ error: "Coaching not found" }, { status: 404 });
     }
 
+    // Drafts are only visible to admins
+    if (coaching.status && coaching.status !== "published") {
+      const isAdmin = await verifyAdminAccess(request);
+      if (!isAdmin) {
+        return NextResponse.json({ error: "Coaching not found" }, { status: 404 });
+      }
+    }
+
+    const gated = await gateContentItem(coaching, "coaching");
+
     return NextResponse.json(
-      { coaching },
-      { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+      { coaching: gated },
+      { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

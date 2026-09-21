@@ -39,99 +39,13 @@ interface PdfItem {
 }
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockPdfs: PdfItem[] = [
-  {
-    id: "pdf-1",
-    title: {
-      ar: "دليل التأمل واليقظة الذهنية",
-      en: "Guide to Meditation and Mindfulness",
-      fr: "Guide de Méditation et Pleine Conscience",
-    },
-    description: {
-      ar: "دليل عملي شامل يتضمن تمارين التأمل الموجه ونصائح لتطوير ممارسة اليقظة الذهنية في حياتك اليومية.",
-      en: "A comprehensive practical guide including guided meditation exercises and tips for developing mindfulness practice in your daily life.",
-      fr: "Un guide pratique complet incluant des exercices de méditation guidée et des conseils pour développer la pleine conscience.",
-    },
-    author: { ar: "أ. فاطمة الزهراء", en: "Ms. Fatima El Zahra", fr: "Mme Fatima El Zahra" },
-    fileSize: "4.2 MB",
-    pages: 45,
-    isFree: true,
-    price: 0,
-    gradient: "from-emerald-400 to-teal-600",
-    category: { ar: "التأمل", en: "Meditation", fr: "Méditation" },
-    fileUrl: "",
-  },
-  {
-    id: "pdf-2",
-    title: {
-      ar: "فهم اضطرابات القلق: دليل شامل",
-      en: "Understanding Anxiety Disorders: A Comprehensive Guide",
-      fr: "Comprendre les Troubles Anxieux: Un Guide Complet",
-    },
-    description: {
-      ar: "كتاب إلكتروني متخصص يشرح أنواع اضطرابات القلق وأعراضها وطرق التشخيص والعلاج المتاحة.",
-      en: "A specialized e-book explaining types of anxiety disorders, their symptoms, diagnosis methods, and available treatments.",
-      fr: "Un e-book spécialisé expliquant les types de troubles anxieux, leurs symptômes et traitements.",
-    },
-    author: { ar: "د. خالد مراد", en: "Dr. Khaled Mourad", fr: "Dr. Khaled Mourad" },
-    fileSize: "8.7 MB",
-    pages: 120,
-    isFree: false,
-    price: 1500,
-    gradient: "from-amber-400 to-orange-600",
-    category: { ar: "اضطرابات القلق", en: "Anxiety Disorders", fr: "Troubles Anxieux" },
-    fileUrl: "",
-  },
-  {
-    id: "pdf-3",
-    title: {
-      ar: "مفكرة العافية النفسية اليومية",
-      en: "Daily Mental Wellness Journal",
-      fr: "Journal Quotidien de Bien-Être Mental",
-    },
-    description: {
-      ar: "مفكرة تفاعلية تساعدك على تتبع مزاجك اليومي وممارسة الامتنان وتحديد أهدافك النفسية.",
-      en: "An interactive journal to help you track your daily mood, practice gratitude, and set mental health goals.",
-      fr: "Un journal interactif pour suivre votre humeur quotidienne et pratiquer la gratitude.",
-    },
-    author: { ar: "د. ليلى مراد", en: "Dr. Laila Mourad", fr: "Dr. Laila Mourad" },
-    fileSize: "2.1 MB",
-    pages: 30,
-    isFree: true,
-    price: 0,
-    gradient: "from-violet-400 to-purple-600",
-    category: { ar: "التطوير الشخصي", en: "Personal Development", fr: "Développement Personnel" },
-    fileUrl: "",
-  },
-  {
-    id: "pdf-4",
-    title: {
-      ar: "الذكاء العاطفي في مكان العمل",
-      en: "Emotional Intelligence in the Workplace",
-      fr: "L'Intelligence Émotionnelle au Travail",
-    },
-    description: {
-      ar: "كتاب متقدم عن تطبيق مهارات الذكاء العاطفي في بيئة العمل لتحسين الأداء وبناء علاقات مهنية أفضل.",
-      en: "An advanced book on applying emotional intelligence skills in the workplace to improve performance and professional relationships.",
-      fr: "Un livre avancé sur l'application de l'intelligence émotionnelle au travail.",
-    },
-    author: { ar: "د. محمد أمين", en: "Dr. Mohamed Amine", fr: "Dr. Mohamed Amine" },
-    fileSize: "5.5 MB",
-    pages: 85,
-    isFree: false,
-    price: 2500,
-    gradient: "from-rose-400 to-pink-600",
-    category: { ar: "الذكاء العاطفي", en: "Emotional Intelligence", fr: "Intelligence Émotionnelle" },
-    fileUrl: "",
-  },
-];
 
 export default function PdfsPage() {
   const { t, locale } = useTranslation();
@@ -352,11 +266,11 @@ export default function PdfsPage() {
                       )}
                       <div className="absolute top-4 start-4">
                         {pdf.isFree ? (
-                          <Badge className="bg-white/90 text-emerald-700 border-0">
+                          <Badge className="bg-white/90 text-healing-brown border-0">
                             {t("common.free")}
                           </Badge>
                         ) : pdf.price > 0 ? (
-                          <Badge className="bg-teal-600 text-white border-0">
+                          <Badge className="bg-healing-brown text-white border-0">
                             {pdf.price.toLocaleString()} {t("common.currency")}
                           </Badge>
                         ) : (

@@ -43,125 +43,13 @@ interface PodcastEpisode {
 }
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockEpisodes: PodcastEpisode[] = [
-  {
-    id: "pod-1",
-    episodeNumber: 1,
-    title: {
-      ar: "فن التواصل الفعال في العلاقات",
-      en: "The Art of Effective Communication in Relationships",
-      fr: "L'Art de la Communication Efficace dans les Relations",
-    },
-    description: {
-      ar: "في هذه الحلقة، نستضيف د. سارة بن علي لمناقشة أساسيات التواصل الفعال وكيفية تحسين جودة علاقاتنا من خلال الاستماع النشط والتعبير الواضح عن المشاعر.",
-      en: "In this episode, we host Dr. Sara Ben Ali to discuss the basics of effective communication and how to improve our relationships through active listening and clear expression of feelings.",
-      fr: "Dans cet épisode, nous recevons le Dr. Sara Ben Ali pour discuter des bases de la communication efficace.",
-    },
-    duration: "45:30",
-    durationSeconds: 2730,
-    guest: { ar: "د. سارة بن علي", en: "Dr. Sara Ben Ali", fr: "Dr. Sara Ben Ali" },
-    date: "2025-01-10",
-    isFree: true,
-    price: 0,
-    gradient: "from-emerald-400 to-teal-600",
-    audioUrl: "",
-  },
-  {
-    id: "pod-2",
-    episodeNumber: 2,
-    title: {
-      ar: "التعافي من الصدمات النفسية",
-      en: "Recovering from Psychological Trauma",
-      fr: "Se Remettre des Traumatismes Psychologiques",
-    },
-    description: {
-      ar: "حلقة خاصة حول التعافي من الصدمات النفسية مع د. خالد مراد، نتحدث عن مراحل التعافي والدعم المتاح.",
-      en: "A special episode on recovering from psychological trauma with Dr. Khaled Mourad, discussing recovery stages and available support.",
-      fr: "Un épisode spécial sur la récupération des traumatismes psychologiques avec le Dr. Khaled Mourad.",
-    },
-    duration: "52:15",
-    durationSeconds: 3135,
-    guest: { ar: "د. خالد مراد", en: "Dr. Khaled Mourad", fr: "Dr. Khaled Mourad" },
-    date: "2025-02-05",
-    isFree: true,
-    price: 0,
-    gradient: "from-amber-400 to-orange-600",
-    audioUrl: "",
-  },
-  {
-    id: "pod-3",
-    episodeNumber: 3,
-    title: {
-      ar: "اليقظة الذهنية للمبتدئين",
-      en: "Mindfulness for Beginners",
-      fr: "Pleine Conscience pour Débutants",
-    },
-    description: {
-      ar: "دليل عملي للمبتدئين في اليقظة الذهنية مع أ. فاطمة الزهراء، تعلم التأمل خطوة بخطوة.",
-      en: "A practical beginner's guide to mindfulness with Ms. Fatima El Zahra, learn meditation step by step.",
-      fr: "Un guide pratique pour débutants en pleine conscience avec Mme Fatima El Zahra.",
-    },
-    duration: "38:00",
-    durationSeconds: 2280,
-    guest: { ar: "أ. فاطمة الزهراء", en: "Ms. Fatima El Zahra", fr: "Mme Fatima El Zahra" },
-    date: "2025-03-12",
-    isFree: false,
-    price: 1500,
-    gradient: "from-violet-400 to-purple-600",
-    audioUrl: "",
-  },
-  {
-    id: "pod-4",
-    episodeNumber: 4,
-    title: {
-      ar: "بناء الثقة بالنفس",
-      en: "Building Self-Confidence",
-      fr: "Construire la Confiance en Soi",
-    },
-    description: {
-      ar: "حلقة ملهمة حول بناء الثقة بالنفس مع د. محمد أمين، استراتيجيات عملية لتطوير ثقتك بنفسك.",
-      en: "An inspiring episode on building self-confidence with Dr. Mohamed Amine, practical strategies to develop your confidence.",
-      fr: "Un épisode inspirant sur la construction de la confiance en soi avec le Dr. Mohamed Amine.",
-    },
-    duration: "41:45",
-    durationSeconds: 2505,
-    guest: { ar: "د. محمد أمين", en: "Dr. Mohamed Amine", fr: "Dr. Mohamed Amine" },
-    date: "2025-04-01",
-    isFree: false,
-    price: 1000,
-    gradient: "from-rose-400 to-pink-600",
-    audioUrl: "",
-  },
-  {
-    id: "pod-5",
-    episodeNumber: 5,
-    title: {
-      ar: "التعامل مع القلق في أوقات الأزمات",
-      en: "Managing Anxiety During Crisis Times",
-      fr: "Gérer l'Anxiété en Période de Crise",
-    },
-    description: {
-      ar: "نصائح متخصصة للتعامل مع القلق في الأوقات الصعبة، مع د. ليلى مراد.",
-      en: "Specialized tips for managing anxiety during difficult times, with Dr. Laila Mourad.",
-      fr: "Conseils spécialisés pour gérer l'anxiété dans les moments difficiles, avec le Dr. Laila Mourad.",
-    },
-    duration: "35:20",
-    durationSeconds: 2120,
-    guest: { ar: "د. ليلى مراد", en: "Dr. Laila Mourad", fr: "Dr. Laila Mourad" },
-    date: "2025-04-20",
-    isFree: true,
-    price: 0,
-    gradient: "from-sky-400 to-cyan-600",
-    audioUrl: "",
-  },
-];
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -354,6 +242,8 @@ export default function PodcastsPage() {
     if (!canAccessContentById(userWithSub, 'podcasts', episode.id, episode.isFree, purchasedContentIds, activePlans, fullPlanIncludes, fullPlanExcludedItems)) {
       if (individualPurchasesEnabled) {
         openPurchaseDialog(episode);
+      } else {
+        navigate("subscriptions");
       }
       return;
     }
@@ -465,6 +355,15 @@ export default function PodcastsPage() {
         </div>
       ) : (
       <div className="space-y-4">
+        {displayEpisodes.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-8 text-center">
+            <Headphones className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+            <p className="text-muted-foreground">
+              {locale === "ar" ? "لا توجد نوبات بودكاست بعد" : locale === "fr" ? "Aucun épisode de podcast pour le moment" : "No podcast episodes yet"}
+            </p>
+          </div>
+        ) : (
+        <>
         {displayEpisodes.map((episode, index) => (
           <motion.div
             key={episode.id}
@@ -565,6 +464,8 @@ export default function PodcastsPage() {
             </Card>
           </motion.div>
         ))}
+        </>
+      )}
       </div>
       )}
 

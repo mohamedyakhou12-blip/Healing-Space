@@ -72,11 +72,11 @@ const config: Config = {
 
         /* ── Healing Palette (static) ── */
         healing: {
-          teal: "#0D9488",
-          "teal-light": "#5EEAD4",
+          beige: "#b89b7a",
+          "beige-light": "#eadfce",
+          sand: "#d8c4aa",
           gold: "#D4A853",
           "gold-light": "#F0D48A",
-          sage: "#A8C5A0",
           lavender: "#B4A7D6",
           rose: "#D4A0A0",
           sky: "#7FB5C9",

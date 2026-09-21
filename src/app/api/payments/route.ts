@@ -6,6 +6,7 @@ import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { REQUEST_LIMITS } from "@/lib/request-limits";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
+import { invalidateAccessContext } from "@/lib/api-content-gate";
 
 const createPaymentSchema = z.object({
   subscriptionType: z.enum([
@@ -214,11 +215,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Price is computed server-side from the current published prices —
+    // the client-provided amount is never trusted for billing decisions.
+    const settings = await db.siteSetting.findMany({ orderBy: { key: "asc" } });
+    const settingsMap = new Map(settings.map((s: { key: string; value: string }) => [s.key, s.value]));
+    const priceSetting = settingsMap.get(`subscription_price_${parsed.data.subscriptionType}`);
+    const serverAmount = Number(priceSetting);
+    if (!Number.isFinite(serverAmount) || serverAmount <= 0) {
+      return NextResponse.json(
+        { error: "Subscription price is not configured. Please contact the administrator." },
+        { status: 400 }
+      );
+    }
+
     const payment = await db.payment.create({
       data: {
         userId,
         subscriptionType: parsed.data.subscriptionType,
-        amount: parsed.data.amount,
+        amount: serverAmount,
         receiptImage,
         ccpNumber: parsed.data.ccpNumber,
         status: "pending",
@@ -270,6 +284,14 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Prevent re-opening an approved payment (would allow double extensions)
+    if (existing.status === "approved" && status !== "approved") {
+      return NextResponse.json(
+        { error: "Approved payments cannot be re-opened" },
+        { status: 400 }
+      );
+    }
+
     const payment = await db.payment.update({
       where: { id },
       data: { status, adminNote: sanitizedAdminNote },
@@ -288,12 +310,12 @@ export async function PUT(request: NextRequest) {
       );
 
       if (existingSubForType) {
-        // Extend existing subscription: new endDate = max(now, current endDate) + 30 days
+        // Extend existing subscription: new endDate = max(now, current endDate) + 1 month
         const currentEndDate = new Date(existingSubForType.endDate);
         const now = new Date();
         const baseDate = currentEndDate > now ? currentEndDate : now;
         const newEndDate = new Date(baseDate);
-        newEndDate.setDate(newEndDate.getDate() + 30);
+        newEndDate.setMonth(newEndDate.getMonth() + 1);
 
         await db.subscription.update({
           where: { id: existingSubForType.id },
@@ -303,7 +325,7 @@ export async function PUT(request: NextRequest) {
         // No active subscription for this type — create new one
         const now = new Date();
         const endDate = new Date(now);
-        endDate.setDate(endDate.getDate() + 30); // Exactly 30 days
+        endDate.setMonth(endDate.getMonth() + 1); // Full calendar month
 
         await db.subscription.create({
           data: {
@@ -345,6 +367,10 @@ export async function PUT(request: NextRequest) {
           link: "/profile",
         },
       });
+
+      // Invalidate the cached access context so the user's new plan is
+      // honored immediately (no 30-second delay).
+      invalidateAccessContext(existing.userId);
     }
 
     // If rejected, create notification

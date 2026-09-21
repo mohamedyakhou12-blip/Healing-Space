@@ -47,78 +47,10 @@ const GRADIENTS = [
   "from-red-500 to-rose-600",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
-  "from-emerald-400 to-teal-600",
-  "from-sky-400 to-cyan-600",
+  "from-healing-beige to-healing-brown",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockSessions: LiveSession[] = [
-  {
-    id: "live-1",
-    title: {
-      ar: "ورشة تفاعلية: التعامل مع ضغوط الامتحانات",
-      en: "Interactive Workshop: Dealing with Exam Stress",
-      fr: "Atelier Interactif: Gérer le Stress des Examens",
-    },
-    description: {
-      ar: "ورشة تفاعلية مباشرة مع د. سارة بن علي حول استراتيجيات التعامل مع ضغوط الامتحانات وتحقيق التركيز الأمثل.",
-      en: "A live interactive workshop with Dr. Sara Ben Ali on strategies for dealing with exam stress and achieving optimal focus.",
-      fr: "Un atelier interactif en direct avec le Dr. Sara Ben Ali sur les stratégies de gestion du stress des examens.",
-    },
-    instructor: { ar: "د. سارة بن علي", en: "Dr. Sara Ben Ali", fr: "Dr. Sara Ben Ali" },
-    scheduledAt: new Date(Date.now() - 30 * 60 * 1000), // Started 30 min ago
-    duration: "90 دقيقة",
-    status: "live",
-    viewers: 234,
-    gradient: "from-red-500 to-rose-600",
-    category: { ar: "ورشات تفاعلية", en: "Interactive Workshops", fr: "Ateliers Interactifs" },
-    price: 0,
-    isFree: true,
-  },
-  {
-    id: "live-2",
-    title: {
-      ar: "جلسة أسئلة وأجوبة: التحديات النفسية في العلاقات",
-      en: "Q&A Session: Psychological Challenges in Relationships",
-      fr: "Session Q&R: Défis Psychologiques dans les Relations",
-    },
-    description: {
-      ar: "جلسة بث مباشر مفتوحة للأسئلة والأجوبة مع د. محمد أمين حول التحديات النفسية في العلاقات العاطفية.",
-      en: "An open live Q&A session with Dr. Mohamed Amine about psychological challenges in romantic relationships.",
-      fr: "Une session de questions-réponses en direct avec le Dr. Mohamed Amine sur les défis psychologiques dans les relations.",
-    },
-    instructor: { ar: "د. محمد أمين", en: "Dr. Mohamed Amine", fr: "Dr. Mohamed Amine" },
-    scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // In 2 hours
-    duration: "60 دقيقة",
-    status: "upcoming",
-    viewers: 0,
-    gradient: "from-amber-400 to-orange-600",
-    category: { ar: "جلسات حوارية", en: "Discussion Sessions", fr: "Sessions de Discussion" },
-    price: 1500,
-    isFree: false,
-  },
-  {
-    id: "live-3",
-    title: {
-      ar: "جلسة تأمل جماعية مباشرة",
-      en: "Live Group Meditation Session",
-      fr: "Séance de Méditation de Groupe en Direct",
-    },
-    description: {
-      ar: "جلسة تأمل جماعية مباشرة مدتها 30 دقيقة مع أ. فاطمة الزهراء للاسترخاء والصفاء الذهني.",
-      en: "A 30-minute live group meditation session with Ms. Fatima El Zahra for relaxation and mental clarity.",
-      fr: "Une séance de méditation de groupe en direct de 30 minutes avec Mme Fatima El Zahra.",
-    },
-    instructor: { ar: "أ. فاطمة الزهراء", en: "Ms. Fatima El Zahra", fr: "Mme Fatima El Zahra" },
-    scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-    duration: "30 دقيقة",
-    status: "upcoming",
-    viewers: 0,
-    gradient: "from-violet-400 to-purple-600",
-    category: { ar: "تأمل ويقظة", en: "Meditation & Mindfulness", fr: "Méditation & Pleine Conscience" },
-    price: 0,
-    isFree: true,
-  },
-];
 
 function CountdownTimer({ targetDate }: { targetDate: Date }) {
   const { t } = useTranslation();
@@ -211,7 +143,7 @@ export default function LivePage() {
             category: { ar: s.category || "", en: s.category || "", fr: s.category || "" },
             price: s.price || 0,
             isFree: s.isFree || false,
-            meetingUrl: s.meetingUrl || s.videoUrl || "",
+            meetingUrl: s.streamUrl || s.zoomUrl || s.videoUrl || "",
           }))
         setApiSessions(sessions);
       })

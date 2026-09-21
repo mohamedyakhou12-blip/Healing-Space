@@ -44,160 +44,13 @@ interface Article {
 }
 
 const GRADIENTS = [
-  "from-emerald-400 to-teal-600",
+  "from-healing-beige to-healing-brown",
   "from-amber-400 to-orange-600",
   "from-violet-400 to-purple-600",
   "from-rose-400 to-pink-600",
-  "from-sky-400 to-cyan-600",
+  "from-sky-400 to-healing-sand",
 ];
 
-const mockArticles: Article[] = [
-  {
-    id: "art-1",
-    title: {
-      ar: "10 تقنيات فعالة للتعامل مع التوتر اليومي",
-      en: "10 Effective Techniques for Dealing with Daily Stress",
-      fr: "10 Techniques Efficaces pour Gérer le Stress Quotidien",
-    },
-    excerpt: {
-      ar: "اكتشف مجموعة من التقنيات المثبتة علمياً التي تساعدك على التعامل مع ضغوطات الحياة اليومية بطريقة صحية.",
-      en: "Discover a set of scientifically proven techniques to help you deal with daily life pressures in a healthy way.",
-      fr: "Découvrez un ensemble de techniques scientifiquement prouvées pour gérer les pressions de la vie quotidienne.",
-    },
-    content: {
-      ar: `التوتر جزء طبيعي من الحياة، لكن التعامل المفرط معه يمكن أن يؤثر سلباً على صحتك النفسية والجسدية. إليك 10 تقنيات فعالة:\n\n**1. التنفس العميق**\nخذ نفساً عميقاً عبر الأنف لمدة 4 ثوانٍ، احبسه لمدة 7 ثوانٍ، ثم أخرجه عبر الفم لمدة 8 ثوانٍ.\n\n**2. التمارين الرياضية**\nالنشاط البدني المنتظم يقلل من مستويات الكورتيزول ويعزز إفراز الإندورفين.\n\n**3. الكتابة التعبيرية**\nخصص 15 دقيقة يومياً لكتابة مشاعرك وأفكارك.\n\n**4. التأمل الواعي**\nخصص 10 دقائق يومياً للتأمل والتركيز على اللحظة الحالية.\n\n**5. إدارة الوقت**\nنظم أولوياتك واستخدم تقنية بومودورو لتحسين الإنتاجية.\n\n**6. التواصل الاجتماعي**\nحافظ على علاقات اجتماعية صحية وداعمة.\n\n**7. النوم الكافي**\nحاول النوم 7-8 ساعات يومياً في بيئة مريحة.\n\n**8. التغذية المتوازنة**\nاهتم بوجباتك الغذائية وتجنب الأطعمة المصنعة.\n\n**9. الضحك والعفوية**\nخصص وقتاً للأنشطة الممتعة والضحك.\n\n**10. المساعدة المهنية**\nلا تتردد في استشارة أخصائي نفسي عند الحاجة.`,
-      en: `Stress is a natural part of life, but excessive handling can negatively affect your mental and physical health. Here are 10 effective techniques:\n\n**1. Deep Breathing**\nTake a deep breath through your nose for 4 seconds, hold for 7 seconds, then exhale through your mouth for 8 seconds.\n\n**2. Physical Exercise**\nRegular physical activity reduces cortisol levels and boosts endorphin release.\n\n**3. Expressive Writing**\nDedicate 15 minutes daily to writing your feelings and thoughts.\n\n**4. Mindful Meditation**\nDedicate 10 minutes daily to meditation and focusing on the present moment.\n\n**5. Time Management**\nOrganize your priorities and use the Pomodoro technique to improve productivity.\n\n**6. Social Connection**\nMaintain healthy and supportive social relationships.\n\n**7. Adequate Sleep**\nTry to sleep 7-8 hours daily in a comfortable environment.\n\n**8. Balanced Nutrition**\nPay attention to your meals and avoid processed foods.\n\n**9. Laughter and Spontaneity**\nDedicate time to enjoyable activities and laughter.\n\n**10. Professional Help**\nDon't hesitate to consult a mental health professional when needed.`,
-      fr: `Le stress est une partie naturelle de la vie, mais une gestion excessive peut affecter négativement votre santé mentale et physique. Voici 10 techniques efficaces:\n\n**1. Respiration profonde**\nPrenez une respiration profonde par le nez pendant 4 secondes, retenez pendant 7 secondes, puis expirez par la bouche pendant 8 secondes.\n\n**2. Exercice physique**\nL'activité physique régulière réduit les niveaux de cortisol et stimule la libération d'endorphines.\n\n**3. Écriture expressive**\nConsacrez 15 minutes par jour à l'écriture de vos sentiments et pensées.\n\n**4. Méditation pleine conscience**\nConsacrez 10 minutes par jour à la méditation.\n\n**5. Gestion du temps**\nOrganisez vos priorités et utilisez la technique Pomodoro.\n\n**6. Connexion sociale**\nMaintenez des relations sociales saines et soutenantes.\n\n**7. Sommeil adéquat**\nEssayez de dormir 7-8 heures par jour.\n\n**8. Nutrition équilibrée**\nFaites attention à vos repas et évitez les aliments transformés.\n\n**9. Rire et spontanéité**\nConsacrez du temps aux activités agréables et au rire.\n\n**10. Aide professionnelle**\nN'hésitez pas à consulter un professionnel de la santé mentale.`,
-    },
-    author: {
-      name: { ar: "د. ليلى مراد", en: "Dr. Laila Mourad", fr: "Dr. Laila Mourad" },
-      bio: { ar: "طبيبة نفسية متخصصة في العلاج المعرفي السلوكي مع 12 سنة خبرة", en: "Psychiatrist specializing in CBT with 12 years of experience", fr: "Psychiatre spécialisée en TCC avec 12 ans d'expérience" },
-    },
-    category: { ar: "الصحة النفسية", en: "Mental Health", fr: "Santé Mentale" },
-    gradient: "from-emerald-400 to-teal-600",
-    readTime: 8,
-    publishedDate: "2025-01-15",
-    rating: 4.8,
-    isFree: true,
-    price: 0,
-  },
-  {
-    id: "art-2",
-    title: {
-      ar: "فهم اضطراب القلق العام: الأعراض والعلاج",
-      en: "Understanding Generalized Anxiety Disorder: Symptoms & Treatment",
-      fr: "Comprendre le Trouble Anxiété Généralisée: Symptômes et Traitement",
-    },
-    excerpt: {
-      ar: "دليل شامل لفهم اضطراب القلق العام وأعراضه وأحدث طرق العلاج المتاحة.",
-      en: "A comprehensive guide to understanding GAD, its symptoms, and the latest available treatments.",
-      fr: "Un guide complet pour comprendre le TAG, ses symptômes et les derniers traitements disponibles.",
-    },
-    content: {
-      ar: `اضطراب القلق العام هو حالة نفسية يتميز بالقلق المفرط والمستمر بشأن أحداث الحياة اليومية. يصيب حوالي 3-5% من السكان.\n\n**الأعراض الرئيسية:**\n- قلق مستمر ومفرط\n- صعوبة في التركيز\n- اضطرابات النوم\n- توتر عضلي\n- سرعة الغضب\n\n**طرق العلاج:**\n1. العلاج النفسي (CBT)\n2. الأدوية المضادة للقلق\n3. تقنيات الاسترخاء\n4. تغيير نمط الحياة`,
-      en: `GAD is a mental health condition characterized by excessive and persistent worry about everyday life events. It affects about 3-5% of the population.\n\n**Main Symptoms:**\n- Constant and excessive worry\n- Difficulty concentrating\n- Sleep disturbances\n- Muscle tension\n- Irritability\n\n**Treatment Methods:**\n1. Psychotherapy (CBT)\n2. Anti-anxiety medications\n3. Relaxation techniques\n4. Lifestyle changes`,
-      fr: `Le TAG est un trouble de santé mentale caractérisé par une inquiétude excessive et persistante concernant les événements quotidiens. Il touche environ 3-5% de la population.\n\n**Principaux symptômes:**\n- Inquiétude constante et excessive\n- Difficulté de concentration\n- Troubles du sommeil\n- Tension musculaire\n- Irritabilité\n\n**Méthodes de traitement:**\n1. Psychothérapie (TCC)\n2. Médicaments anti-anxiété\n3. Techniques de relaxation\n4. Changements de mode de vie`,
-    },
-    author: {
-      name: { ar: "د. خالد مراد", en: "Dr. Khaled Mourad", fr: "Dr. Khaled Mourad" },
-      bio: { ar: "أخصائي في اضطرابات القلق والوسواس القهري", en: "Specialist in anxiety and OCD disorders", fr: "Spécialiste des troubles anxieux et du TOC" },
-    },
-    category: { ar: "اضطرابات القلق", en: "Anxiety Disorders", fr: "Troubles Anxieux" },
-    gradient: "from-amber-400 to-orange-600",
-    readTime: 12,
-    publishedDate: "2025-02-10",
-    rating: 4.7,
-    isFree: false,
-    price: 1500,
-  },
-  {
-    id: "art-3",
-    title: {
-      ar: "أهمية النوم لصحتنا النفسية",
-      en: "The Importance of Sleep for Our Mental Health",
-      fr: "L'Importance du Sommeil pour Notre Santé Mentale",
-    },
-    excerpt: {
-      ar: "كيف يؤثر النوم على صحتنا النفسية وما هي العادات التي يمكن أن تساعدنا على نوم أفضل.",
-      en: "How sleep affects our mental health and what habits can help us sleep better.",
-      fr: "Comment le sommeil affecte notre santé mentale et quelles habitudes peuvent nous aider à mieux dormir.",
-    },
-    content: {
-      ar: `النوم الجيد هو حجر الأساس للصحة النفسية. الأبحاث تثبت أن نقص النوم يرتبط بزيادة مخاطر الاكتئاب والقلق.\n\n**نصائح لنوم أفضل:**\n1. التزم بجدول نوم منتظم\n2. تجنب الشاشات قبل النوم\n3. اجعل غرفتك مظلمة وهادئة\n4. تجنب الكافيين بعد الظهر\n5. مارس الرياضة بانتظام`,
-      en: `Good sleep is the foundation of mental health. Research proves that sleep deprivation is linked to increased risks of depression and anxiety.\n\n**Tips for Better Sleep:**\n1. Maintain a regular sleep schedule\n2. Avoid screens before bed\n3. Keep your room dark and quiet\n4. Avoid caffeine after noon\n5. Exercise regularly`,
-      fr: `Un bon sommeil est le fondement de la santé mentale. La recherche prouve que le manque de sommeil est lié à un risque accru de dépression et d'anxiété.\n\n**Conseils pour un meilleur sommeil:**\n1. Maintenez un horaire de sommeil régulier\n2. Évitez les écrans avant le coucher\n3. Gardez votre chambre sombre et calme\n4. Évitez la caféine après midi\n5. Faites de l'exercice régulièrement`,
-    },
-    author: {
-      name: { ar: "أ. فاطمة الزهراء", en: "Ms. Fatima El Zahra", fr: "Mme Fatima El Zahra" },
-      bio: { ar: "مستشارة نفسية متخصصة في اضطرابات النوم", en: "Mental health counselor specializing in sleep disorders", fr: "Conseillère en santé mentale spécialisée dans les troubles du sommeil" },
-    },
-    category: { ar: "نمط الحياة", en: "Lifestyle", fr: "Mode de Vie" },
-    gradient: "from-violet-400 to-purple-600",
-    readTime: 6,
-    publishedDate: "2025-03-05",
-    rating: 4.5,
-    isFree: true,
-    price: 0,
-  },
-  {
-    id: "art-4",
-    title: {
-      ar: "الذكاء العاطفي: كيف تطور مهاراتك العاطفية؟",
-      en: "Emotional Intelligence: How to Develop Your Emotional Skills?",
-      fr: "Intelligence Émotionnelle: Comment Développer Vos Compétences Émotionnelles?",
-    },
-    excerpt: {
-      ar: "دليل عملي لفهم الذكاء العاطفي وتطوير مهاراتك في إدارة المشاعر وبناء علاقات أفضل.",
-      en: "A practical guide to understanding emotional intelligence and developing your emotion management skills.",
-      fr: "Un guide pratique pour comprendre l'intelligence émotionnelle et développer vos compétences.",
-    },
-    content: {
-      ar: `الذكاء العاطفي هو القدرة على التعرف على مشاعرك ومشاعر الآخرين وإدارتها بفعالية.\n\n**المكونات الخمسة:**\n1. الوعي الذاتي\n2. التنظيم الذاتي\n3. التحفيز الذاتي\n4. التعاطف\n5. المهارات الاجتماعية`,
-      en: `Emotional intelligence is the ability to recognize and manage your own and others' emotions effectively.\n\n**The Five Components:**\n1. Self-awareness\n2. Self-regulation\n3. Self-motivation\n4. Empathy\n5. Social skills`,
-      fr: `L'intelligence émotionnelle est la capacité à reconnaître et gérer efficacement vos émotions et celles des autres.\n\n**Les Cinq Composantes:**\n1. Conscience de soi\n2. Autorégulation\n3. Automotivation\n4. Empathie\n5. Compétences sociales`,
-    },
-    author: {
-      name: { ar: "د. محمد أمين", en: "Dr. Mohamed Amine", fr: "Dr. Mohamed Amine" },
-      bio: { ar: "خبير في الذكاء العاطفي والتطوير الشخصي", en: "Expert in emotional intelligence and personal development", fr: "Expert en intelligence émotionnelle et développement personnel" },
-    },
-    category: { ar: "التطوير الشخصي", en: "Personal Development", fr: "Développement Personnel" },
-    gradient: "from-rose-400 to-pink-600",
-    readTime: 10,
-    publishedDate: "2025-03-20",
-    rating: 4.9,
-    isFree: false,
-    price: 2000,
-  },
-  {
-    id: "art-5",
-    title: {
-      ar: "الاحتراق الوظيفي: علاماته وطرق التعافي منه",
-      en: "Burnout: Signs and Recovery Methods",
-      fr: "L'Épuisement Professionnel: Signes et Méthodes de Récupération",
-    },
-    excerpt: {
-      ar: "تعرف على علامات الاحتراق الوظيفي واستراتيجيات فعالة للتعافي والوقاية منه.",
-      en: "Learn about burnout signs and effective strategies for recovery and prevention.",
-      fr: "Découvrez les signes de l'épuisement professionnel et les stratégies de récupération.",
-    },
-    content: {
-      ar: `الاحتراق الوظيفي هو حالة من الإرهاق العاطفي والذهني الناتج عن ضغوط العمل المزمنة.\n\n**العلامات التحذيرية:**\n- الإرهاق المزمن\n- السخرية من العمل\n- انخفاض الإنجاز\n\n**طرق التعافي:**\n1. تحديد الحدود\n2. طلب المساعدة\n3. الأنشطة الترفيهية\n4. إعادة تقييم الأولويات`,
-      en: `Burnout is a state of emotional and mental exhaustion caused by chronic work stress.\n\n**Warning Signs:**\n- Chronic exhaustion\n- Cynicism about work\n- Reduced accomplishment\n\n**Recovery Methods:**\n1. Set boundaries\n2. Seek help\n3. Recreational activities\n4. Reevaluate priorities`,
-      fr: `L'épuisement professionnel est un état d'épuisement émotionnel et mental causé par le stress chronique au travail.\n\n**Signes d'avertissement:**\n- Épuisement chronique\n- Cynisme au travail\n- Accomplissement réduit\n\n**Méthodes de récupération:**\n1. Fixer des limites\n2. Demander de l'aide\n3. Activités récréatives\n4. Réévaluer les priorités`,
-    },
-    author: {
-      name: { ar: "د. ليلى مراد", en: "Dr. Laila Mourad", fr: "Dr. Laila Mourad" },
-      bio: { ar: "طبيبة نفسية متخصصة في العلاج المعرفي السلوكي", en: "Psychiatrist specializing in CBT", fr: "Psychiatre spécialisée en TCC" },
-    },
-    category: { ar: "الصحة المهنية", en: "Occupational Health", fr: "Santé Professionnelle" },
-    gradient: "from-sky-400 to-cyan-600",
-    readTime: 7,
-    publishedDate: "2025-04-01",
-    rating: 4.6,
-    isFree: true,
-    price: 0,
-  },
-];
 
 export default function ArticlesPage() {
   const { t, locale } = useTranslation();
@@ -253,13 +106,13 @@ export default function ArticlesPage() {
             isFree: a.isFree || false,
             price: a.price || 0,
           }));
-        if (articles.length > 0) setApiArticles(articles);
+        setApiArticles(articles);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const displayArticles = apiArticles || mockArticles;
+  const displayArticles = apiArticles || [];
 
   const articleId = pageParams?.articleId as string | undefined;
   const selectedArticle = articleId
@@ -365,11 +218,11 @@ export default function ArticlesPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{localizedText(article.category)}</Badge>
                 {article.isFree ? (
-                  <Badge variant="outline" className="text-emerald-600 border-emerald-300 bg-emerald-50">
+                  <Badge variant="outline" className="text-healing-brown border-healing-beige-light bg-healing-cream">
                     {t("common.free")}
                   </Badge>
                 ) : article.price > 0 ? (
-                  <Badge variant="outline" className="text-teal-600 border-teal-300 bg-teal-50">
+                  <Badge variant="outline" className="text-healing-brown border-healing-beige-light bg-healing-cream">
                     {article.price.toLocaleString()} {t("common.currency")}
                   </Badge>
                 ) : (
@@ -481,7 +334,7 @@ export default function ArticlesPage() {
                   {!article.isFree && article.price > 0 && individualPurchasesEnabled && (
                     <div className="text-center py-3">
                       <p className="text-sm text-muted-foreground">{t("common.priceLabel")}</p>
-                      <p className="text-3xl font-bold text-teal-600 dark:text-teal-400">{article.price.toLocaleString()} <span className="text-base font-normal">{t("common.currency")}</span></p>
+                      <p className="text-3xl font-bold text-healing-brown dark:text-healing-beige">{article.price.toLocaleString()} <span className="text-base font-normal">{t("common.currency")}</span></p>
                       <Button className="w-full mt-3" size="sm" onClick={() => openPurchaseDialog(article)}>
                         {t("common.buyNow")}
                       </Button>
@@ -602,7 +455,7 @@ export default function ArticlesPage() {
                     <Newspaper className="absolute bottom-3 start-3 h-8 w-8 text-white/30" />
                     <Badge className="absolute top-3 start-3">{localizedText(article.category)}</Badge>
                     {!article.isFree && article.price > 0 && (
-                      <Badge className="absolute top-3 end-3 bg-teal-600 text-white border-0">
+                      <Badge className="absolute top-3 end-3 bg-healing-brown text-white border-0">
                         {article.price.toLocaleString()} {t("common.currency")}
                       </Badge>
                     )}
@@ -636,7 +489,7 @@ export default function ArticlesPage() {
                           {article.rating}
                         </span>
                         {article.price > 0 && (
-                          <span className="flex items-center gap-1 font-semibold text-teal-600 dark:text-teal-400">
+                          <span className="flex items-center gap-1 font-semibold text-healing-brown dark:text-healing-beige">
                             {article.price.toLocaleString()} {t("common.currency")}
                           </span>
                         )}

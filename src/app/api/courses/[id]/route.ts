@@ -22,6 +22,15 @@ const updateCourseSchema = z.object({
   price: z.number().min(0).max(1000000).optional(),
   duration: z.string().max(50).optional(),
   instructor: z.string().max(100).optional(),
+  category: z.string().max(200).optional(),
+  tags: z.string().max(1000).optional(),
+  metaTitleAr: z.string().max(200).optional(),
+  metaTitleFr: z.string().max(200).optional(),
+  metaTitleEn: z.string().max(200).optional(),
+  metaDescAr: z.string().max(1000).optional(),
+  metaDescFr: z.string().max(1000).optional(),
+  metaDescEn: z.string().max(1000).optional(),
+  ogImage: z.string().max(500).optional(),
 });
 
 export async function GET(
@@ -42,7 +51,11 @@ export async function GET(
     const cachedData = await cached(`api:course:${id}`, async () => {
       const course = await db.course.findUnique({
         where: { id },
-        include: { chapters: true, reviews: true, _count: true },
+        include: {
+          chapters: { include: { lessons: true } },
+          reviews: true,
+          _count: true,
+        },
       });
 
       if (!course) return null;
@@ -66,6 +79,17 @@ export async function GET(
         { error: "Course not found" },
         { status: 404 }
       );
+    }
+
+    // Drafts are only visible to admins
+    if (cachedData.status && cachedData.status !== "published") {
+      const isAdmin = await verifyAdminAccess(request);
+      if (!isAdmin) {
+        return NextResponse.json(
+          { error: "Course not found" },
+          { status: 404 }
+        );
+      }
     }
 
     // Strip premium lesson content for unauthenticated/unsubscribed users

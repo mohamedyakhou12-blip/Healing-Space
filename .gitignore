@@ -5,3 +5,12 @@ node_modules/
 .env*.local
 *.tsbuildinfo
 .vercel
+.zscripts/
+agent-ctx/
+db/
+upload/
+download/
+examples/
+mini-services/
+Healing-Space/
+dev.log

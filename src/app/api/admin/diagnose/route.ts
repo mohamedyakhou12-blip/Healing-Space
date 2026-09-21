@@ -19,10 +19,12 @@ export async function GET(request: NextRequest) {
   // 2. Firestore READ test from siteSettings
   try {
     const settings = await adminDb.collection("siteSettings").limit(1).get();
+    // Never echo stored values back — only report the setting keys present.
+    const sampleDoc = settings.docs[0]?.data() ?? null;
     results.firestoreRead = {
       success: true,
       docCount: settings.size,
-      sample: settings.docs[0]?.data() ?? null,
+      sampleKeys: sampleDoc ? Object.keys(sampleDoc) : [],
     };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);

@@ -95,6 +95,7 @@ export default function SubscriptionsPage() {
   // Using {uid, plan} pattern so currentPlanId auto-resets when userId changes
   const userId = user?.id;
   const [fetchedPlans, setFetchedPlans] = useState<{ uid: string; plans: string[] } | null>(null);
+  const [activeEndDate, setActiveEndDate] = useState<string | null>(null);
   // Active plan types for the current user
   const activePlanTypes = (fetchedPlans !== null && fetchedPlans.uid === userId && userId !== "admin-1")
     ? fetchedPlans.plans
@@ -118,8 +119,10 @@ export default function SubscriptionsPage() {
         if (!cancelled) {
           if (activeSubs.length > 0) {
             setFetchedPlans({ uid: userId, plans: activeSubs.map((s: { type: string }) => s.type) });
+            setActiveEndDate(activeSubs.map((s: { endDate: string }) => s.endDate).sort().slice(-1)[0] || null);
           } else {
             setFetchedPlans({ uid: userId, plans: [] });
+            setActiveEndDate(null);
           }
         }
       } catch { /* ignore */ }
@@ -160,7 +163,7 @@ export default function SubscriptionsPage() {
       icon: BookOpen,
       nameKey: "subscriptions.coursesOnly",
       price: planPrice("courses"),
-      gradient: "from-emerald-400 to-teal-600",
+      gradient: "from-healing-beige to-healing-brown",
       features: [
         { ar: "الوصول لجميع الدورات", en: "Access to all courses", fr: "Accès à tous les cours" },
         { ar: "شهادات إتمام الدورات", en: "Course completion certificates", fr: "Certificats de complétion" },
@@ -172,7 +175,7 @@ export default function SubscriptionsPage() {
       icon: FileText,
       nameKey: "subscriptions.articlesOnly",
       price: planPrice("articles"),
-      gradient: "from-cyan-400 to-sky-600",
+      gradient: "from-healing-sand to-sky-600",
       features: [
         { ar: "الوصول لجميع المقالات", en: "Access to all articles", fr: "Accès à tous les articles" },
         { ar: "مقالات حصرية متخصصة", en: "Exclusive specialized articles", fr: "Articles spécialisés exclusifs" },
@@ -220,7 +223,7 @@ export default function SubscriptionsPage() {
       icon: Radio,
       nameKey: "subscriptions.liveOnly",
       price: planPrice("live"),
-      gradient: "from-teal-400 to-emerald-600",
+      gradient: "from-healing-beige to-healing-brown",
       features: [
         { ar: "الوصول لجميع البث المباشر", en: "Access to all live streams", fr: "Accès à tous les directs" },
         { ar: "تسجيلات البث السابق", en: "Past stream recordings", fr: "Enregistrements des directs précédents" },
@@ -267,6 +270,14 @@ export default function SubscriptionsPage() {
           {t("subscriptions.description")}
         </p>
       </div>
+
+      {/* Active subscription banner */}
+      {activeEndDate && (
+        <div className="mx-auto max-w-2xl rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center text-sm">
+          {locale === "ar" ? "اشتراكك نشط حتى" : locale === "fr" ? "Votre abonnement est actif jusqu'au" : "Your subscription is active until"}{" "}
+          <span className="font-bold">{new Date(activeEndDate).toLocaleDateString(locale === "ar" ? "ar-DZ" : locale === "fr" ? "fr-FR" : "en-US")}</span>
+        </div>
+      )}
 
       {/* Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
