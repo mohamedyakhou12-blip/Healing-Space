@@ -32,3 +32,68 @@
  GET /api/public-settings?_t=1790015014707 200 in 76ms (next.js: 41ms, proxy.ts: 32ms, application-code: 3ms)
  GET /api/public-settings 200 in 64ms (next.js: 20ms, proxy.ts: 41ms, application-code: 3ms)
  GET /api/auth/profile 401 in 78ms (next.js: 39ms, proxy.ts: 29ms, application-code: 9ms)
+ GET /api/csrf-token 200 in 12ms (next.js: 4ms, proxy.ts: 5ms, application-code: 3ms)
+ GET /api/auth/session 200 in 11ms (next.js: 1627µs, proxy.ts: 7ms, application-code: 3ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="ar" dir="rtl" suppressHydrationWarning={true}>
+                          <head>
+                            <script
++                             type="application/ld+json"
+-                             type={null}
+                              dangerouslySetInnerHTML={{
++                               __html: "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebSite\",\"@id..."
+-                               __html: "window.__V0_SANDBOX_ID__=\"sb-60t18x4xnq6q\";window.__V0_CHAT_ID__=\"HisowKWt..."
+                              }}
+                            >
+                            ...
+                          ...
+                            <LoadableComponent>
+                              <HomePage>
+                                <div className="min-h-screen" dir="rtl">
+-                                 <section className="bg-background px-4 py-20 sm:px-6 lg:px-8">
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at div (<anonymous>)
+ GET /api/auth/profile 401 in 14ms (next.js: 8ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/public-settings?_t=1790015016618 200 in 8ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/public-settings 200 in 8ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/public-settings?_t=1790015016636 200 in 7ms (next.js: 1778µs, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/auth/session 200 in 10ms (next.js: 3ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/auth/profile 401 in 15ms (next.js: 4ms, proxy.ts: 3ms, application-code: 9ms)
+ GET /api/public-settings 200 in 8ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
+ GET / 200 in 137ms (next.js: 7ms, application-code: 131ms)
