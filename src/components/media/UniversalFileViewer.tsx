@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download, FileText, Image as ImageIcon, Music, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -10,13 +10,60 @@ interface UniversalFileViewerProps {
   className?: string;
 }
 
-function getFileKind(src: string): "image" | "video" | "audio" | "pdf" | "document" {
+type FileKind = "image" | "video" | "audio" | "pdf" | "office" | "text" | "document";
+
+function getFileKind(src: string): FileKind {
   const cleanSrc = src.split("?")[0].toLowerCase();
   if (/\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)$/.test(cleanSrc)) return "image";
   if (/\.(mp4|webm|ogg|mov|m4v|avi|mkv)$/.test(cleanSrc)) return "video";
   if (/\.(mp3|wav|m4a|aac|flac|oga|opus)$/.test(cleanSrc)) return "audio";
   if (/\.pdf$/.test(cleanSrc)) return "pdf";
+  if (/\.(docx?|xlsx?|pptx?|odt|ods|odp|rtf)$/.test(cleanSrc)) return "office";
+  if (/\.(txt|md|csv|tsv|json|xml|log|yaml|yml|ini|conf)$/.test(cleanSrc)) return "text";
   return "document";
+}
+
+function TextViewer({ src, title }: { src: string; title: string }) {
+  const [content, setContent] = useState<string>("");
+  const [error, setError] = useState<boolean>(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(src)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((text) => {
+        if (!cancelled) setContent(text);
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-4 p-8 text-center">
+        <FileText className="h-14 w-14 text-primary" aria-hidden="true" />
+        <p className="max-w-md text-muted-foreground">تعذّر تحميل النص للعرض المباشر.</p>
+        <Button asChild>
+          <a href={src} download>
+            <Download className="me-2 h-4 w-4" /> تنزيل الملف
+          </a>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <pre className="max-h-[75vh] w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border bg-background p-6 text-start text-sm leading-relaxed" dir="auto" aria-label={title}>
+      {content || "جارٍ تحميل النص…"}
+    </pre>
+  );
 }
 
 export function UniversalFileViewer({ src, title, className = "" }: UniversalFileViewerProps) {
@@ -41,10 +88,14 @@ export function UniversalFileViewer({ src, title, className = "" }: UniversalFil
         {kind === "pdf" && (
           <iframe src={`${src}#view=FitH`} title={title} className="h-[75vh] w-full rounded-xl bg-background" />
         )}
+        {kind === "office" && (
+          <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(src)}&embedded=true`} title={title} className="h-[75vh] w-full rounded-xl bg-background" />
+        )}
+        {kind === "text" && <TextViewer src={src} title={title} />}
         {kind === "document" && (
           <div className="flex flex-col items-center gap-4 p-8 text-center">
             <FileText className="h-14 w-14 text-primary" aria-hidden="true" />
-            <p className="max-w-md text-muted-foreground">هذا النوع من الملفات لا يدعم العرض المباشر في المتصفح، ويمكنك تنزيله وفتحه بالتطبيق المناسب.</p>
+            <p className="max-w-md text-muted-foreground">هذا النوع من الملفات لا يدعم العرض المباشر في المتصفح (مثل الأرشيفات أو البرامج)، ويمكنك تنزيله وفتحه بالتطبيق المناسب.</p>
             <Button asChild>
               <a href={src} download>
                 <Download className="me-2 h-4 w-4" /> تنزيل الملف
