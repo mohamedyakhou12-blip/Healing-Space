@@ -59,6 +59,7 @@ import {
   AlignCenter,
   AlignRight,
   Sparkles,
+  Youtube,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -199,6 +200,12 @@ interface ContentItem {
   metaDescEn?: string;
   ogImage?: string;
   attachments?: Attachment[];
+  // Type-specific
+  videoUrl?: string;
+  streamUrl?: string;
+  zoomUrl?: string;
+  duration?: string;
+  order?: number;
 }
 
 interface Slider {
@@ -286,6 +293,11 @@ function normalizeContentItem(raw: Record<string, unknown>): ContentItem {
     metaDescEn: raw.metaDescEn as string | undefined,
     ogImage: raw.ogImage as string | undefined,
     attachments: (raw.attachments as Attachment[] | undefined) || [],
+    videoUrl: (raw.videoUrl as string) || (raw.streamUrl as string) || (raw.zoomUrl as string) || (raw.youtubeUrl as string) || "",
+    streamUrl: (raw.streamUrl as string) || "",
+    zoomUrl: (raw.zoomUrl as string) || "",
+    duration: (raw.duration as string) || "",
+    order: (raw.order as number) || 0,
   };
 }
 
@@ -1931,6 +1943,8 @@ function ContentView() {
   const [formContentFr, setFormContentFr] = useState("");
   const [formContentEn, setFormContentEn] = useState("");
   const [formDuration, setFormDuration] = useState("");
+  const [formStreamUrl, setFormStreamUrl] = useState("");
+  const [formZoomUrl, setFormZoomUrl] = useState("");
   // Store raw API data for editing descriptions
   const rawItemsRef = useRef<Record<string, Record<string, unknown>>>({});
 
@@ -2063,6 +2077,8 @@ function ContentView() {
     setFormContentEn((raw.contentEn as string) || (item as any)?.contentEn || "");
     setFormDuration((raw.duration as string) || (item as any)?.duration || "");
     setFormOrder((raw.order as number) || (item as any)?.order || 0);
+    setFormStreamUrl((raw.streamUrl as string) || (item as any)?.streamUrl || "");
+    setFormZoomUrl((raw.zoomUrl as string) || (item as any)?.zoomUrl || "");
     setFormCategory(item?.category || "");
     setFormTags(item?.tags || "");
     setFormScheduledAt(item?.scheduledAt ? new Date(item.scheduledAt).toISOString().slice(0, 16) : "");
@@ -2149,12 +2165,19 @@ function ContentView() {
       if (contentSubTab === "live") {
         const liveStatus = formStatus === "published" ? "live" : formStatus === "draft" ? "upcoming" : (["live", "upcoming", "ended"].includes(formStatus) ? formStatus : "upcoming");
         payload.status = liveStatus;
-        if (formVideoUrl.trim()) payload.streamUrl = formVideoUrl;
+        if (formStreamUrl.trim()) payload.streamUrl = formStreamUrl;
+        if (formZoomUrl.trim()) payload.zoomUrl = formZoomUrl;
+        if (formVideoUrl.trim()) payload.youtubeUrl = formVideoUrl;
         payload.description = formDescAr || formTitleAr;
         payload.descriptionAr = formDescAr || formTitleAr;
         payload.descriptionFr = formDescFr || formDescAr || formTitleAr;
         payload.descriptionEn = formDescEn || formDescAr || formTitleAr;
         if (formDuration) payload.duration = formDuration;
+      }
+      if (contentSubTab === "coaching") {
+        payload.duration = formDuration;
+        payload.order = formOrder;
+        if (formVideoUrl.trim()) payload.videoUrl = formVideoUrl;
       }
 
       let res: Response;
@@ -2865,6 +2888,58 @@ function ContentView() {
                 uploadType="content"
                 contentType="pdfs"
                 maxSizeMB={100}
+              />
+            )}
+
+            {/* Live session URLs — Stream/Zoom/YouTube */}
+            {contentSubTab === "live" && (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    <Radio className="size-3.5" /> {t("admin.streamUrl") || "رابط البث المباشر (Stream URL)"}
+                  </Label>
+                  <Input
+                    placeholder="https://... (m3u8, rtmp, إلخ)"
+                    value={formStreamUrl}
+                    onChange={(e) => setFormStreamUrl(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    <Video className="size-3.5" /> {t("admin.zoomUrl") || "رابط Zoom / اجتماع"}
+                  </Label>
+                  <Input
+                    placeholder="https://zoom.us/j/... أو رابط اجتماع"
+                    value={formZoomUrl}
+                    onChange={(e) => setFormZoomUrl(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    <Youtube className="size-3.5" /> {t("admin.youtubeUrl") || "رابط YouTube للبث"}
+                  </Label>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=... أو رابط بث YouTube"
+                    value={formVideoUrl}
+                    onChange={(e) => setFormVideoUrl(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Coaching video URL — Upload or paste */}
+            {contentSubTab === "coaching" && (
+              <FileUploadComponent
+                value={formVideoUrl}
+                onChange={setFormVideoUrl}
+                label={t("admin.videoUrl") || "رابط الفيديو / رفع ملف فيديو"}
+                placeholder="https://www.youtube.com/watch?v=... أو رفع ملف فيديو"
+                uploadType="content"
+                contentType="coaching"
+                maxSizeMB={500}
               />
             )}
 

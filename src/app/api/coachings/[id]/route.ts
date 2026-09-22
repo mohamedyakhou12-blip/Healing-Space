@@ -31,6 +31,7 @@ const updateCoachingSchema = z.object({
   metaDescFr: z.string().max(1000).optional(),
   metaDescEn: z.string().max(1000).optional(),
   ogImage: z.string().max(500).optional(),
+  videoUrl: z.string().max(1000).optional(),
   viewCount: z.number().int().min(0).optional(),
 });
 

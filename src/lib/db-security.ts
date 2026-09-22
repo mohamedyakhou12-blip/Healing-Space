@@ -147,7 +147,7 @@ const COLLECTION_FIELDS: Record<string, Set<string>> = {
     "description", "descriptionAr", "descriptionFr", "descriptionEn",
     "image", "thumbnail", "isFree", "price", "status",
     "category", "subcategory", "tags", "viewCount", "order", "duration",
-    "metaTitleAr", "metaTitleFr", "metaTitleEn",
+    "videoUrl", "metaTitleAr", "metaTitleFr", "metaTitleEn",
     "metaDescAr", "metaDescFr", "metaDescEn",
     "ogImage",
     "createdAt", "updatedAt",
