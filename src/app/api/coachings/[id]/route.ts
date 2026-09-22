@@ -6,6 +6,7 @@ import { cached, invalidateContentCache } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { gateContentItem } from "@/lib/api-content-gate";
+import { deleteCloudinaryAssetsFromDoc } from "@/lib/cloudinary";
 
 const updateCoachingSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -158,6 +159,9 @@ export async function DELETE(
     if (!existing) {
       return NextResponse.json({ error: "Coaching not found" }, { status: 404 });
     }
+
+    // Delete associated Cloudinary assets
+    await deleteCloudinaryAssetsFromDoc(existing);
 
     await db.coaching.delete({ where: { id } });
     invalidateContentCache();
