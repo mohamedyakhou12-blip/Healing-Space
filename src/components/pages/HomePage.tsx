@@ -634,8 +634,16 @@ export default function HomePage() {
               </motion.div>
             )}
 
-            {/* Badge */}
-            <motion.div variants={fadeUp} custom={0}>
+  <motion.div variants={fadeUp} custom={0} className="mb-6 flex justify-center">
+    <img
+      src="/logo-healing-space.jpeg"
+      alt="Healing Space"
+      className="size-32 rounded-2xl object-cover shadow-lg ring-1 ring-border/60 sm:size-40"
+    />
+  </motion.div>
+
+  {/* Badge */}
+  <motion.div variants={fadeUp} custom={0.5}>
               <Badge variant="secondary" className="mb-6 gap-1.5 rounded-full px-4 py-1.5 text-sm">
                 <Sparkles className="size-3.5" />
                 {heroSubtitle}

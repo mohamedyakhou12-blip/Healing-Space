@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useSyncExternalStore } from "react";
 import {
-  Leaf,
   Moon,
   Sun,
   Bell,
@@ -102,9 +101,11 @@ export function Header() {
             onClick={() => navigate("home")}
             className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:size-9">
-              <Leaf className="size-4 sm:size-5" />
-            </div>
+            <img
+              src="/logo-healing-space.jpeg"
+              alt="Healing Space"
+              className="size-10 rounded-md object-cover sm:size-11"
+            />
             <span className="hidden text-base font-bold text-foreground sm:block lg:text-lg">
               {t("home.heroTitle")}
             </span>
