@@ -893,18 +893,17 @@ export default function HomePage() {
           >
             {services.map((svc) => {
               const Icon = svc.icon;
-              const isCoaching = svc.key === "coaching";
               return (
                 <motion.div key={svc.key} variants={fadeUp}>
                   <Card
                     className={`group cursor-pointer border ${svc.border} bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden`}
                     onClick={() => navigate(svc.key)}
                   >
-                    <div className="relative h-40 overflow-hidden bg-muted">
+                    <div className="relative aspect-square overflow-hidden bg-muted">
                       <img
                         src={svc.image}
                         alt={t(navKey(svc.key))}
-                        className={`h-full w-full transition-transform duration-500 group-hover:scale-110 ${isCoaching ? "object-contain" : "object-cover"}`}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       <div className={`absolute bottom-3 start-3 flex size-10 items-center justify-center rounded-xl ${svc.bg} shadow-lg`}>

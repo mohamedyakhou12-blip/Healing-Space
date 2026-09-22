@@ -155,14 +155,75 @@ export function getVideoThumbnailUrl(videoUrl: string): string {
 }
 
 /**
- * Determine the Cloudinary resource type based on MIME type.
+ * Determine the Cloudinary resource type based on MIME type or URL.
  */
-export function getCloudinaryResourceType(mimeType: string): "image" | "video" | "raw" {
-  if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/")) return "video";
-  if (mimeType.startsWith("audio/")) return "video"; // Cloudinary treats audio as video
+export function getCloudinaryResourceType(input: string): "image" | "video" | "raw" {
+  // If it's a Cloudinary URL, determine from the path
+  if (input.includes("res.cloudinary.com")) {
+    if (input.includes("/image/upload/")) return "image";
+    if (input.includes("/video/upload/")) return "video";
+    if (input.includes("/raw/upload/")) return "raw";
+    // Default to image for unknown Cloudinary URLs
+    return "image";
+  }
+  // Otherwise treat as MIME type
+  if (input.startsWith("image/")) return "image";
+  if (input.startsWith("video/")) return "video";
+  if (input.startsWith("audio/")) return "video"; // Cloudinary treats audio as video
   // PDFs, documents, archives → "raw"
   return "raw";
+}
+
+/**
+ * Extract public_id from a Cloudinary URL.
+ */
+export function extractPublicIdFromUrl(url: string): string | null {
+  if (!url || !url.includes("res.cloudinary.com")) return null;
+  const parts = url.split("/upload/");
+  if (parts.length !== 2) return null;
+  // Remove version prefix (v1234567/) and file extension
+  const path = parts[1].replace(/^v\d+\//, "");
+  return path.replace(/\.\w+$/, "");
+}
+
+/**
+ * Delete file(s) from Cloudinary based on URL(s) found in a document.
+ */
+export async function deleteCloudinaryAssetsFromDoc(doc: Record<string, any>): Promise<void> {
+  const urlFields = [
+    "image", "thumbnail", "videoUrl", "audioUrl", "fileUrl", "streamUrl", "zoomUrl", "youtubeUrl", "ogImage", "pdfUrl"
+  ];
+  const attachments = doc.attachments as Array<{ url: string }> | undefined;
+
+  const urlsToDelete = new Set<string>();
+
+  // Collect URLs from known fields
+  for (const field of urlFields) {
+    if (doc[field] && typeof doc[field] === "string" && doc[field].includes("res.cloudinary.com")) {
+      urlsToDelete.add(doc[field]);
+    }
+  }
+
+  // Collect URLs from attachments
+  if (attachments) {
+    for (const att of attachments) {
+      if (att.url && att.url.includes("res.cloudinary.com")) {
+        urlsToDelete.add(att.url);
+      }
+    }
+  }
+
+  // Delete each unique URL
+  for (const url of urlsToDelete) {
+    const publicId = extractPublicIdFromUrl(url);
+    if (!publicId) continue;
+    const resourceType = getCloudinaryResourceType(url);
+    try {
+      await deleteFromCloudinary(publicId, resourceType);
+    } catch (e) {
+      console.error(`Failed to delete Cloudinary asset ${publicId}:`, e);
+    }
+  }
 }
 
 /**

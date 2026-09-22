@@ -214,11 +214,11 @@ export default function CoachingPage() {
         </div>
 
         {/* Hero image */}
-        <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden shadow-lg bg-muted">
+        <div className="relative rounded-2xl overflow-hidden shadow-lg bg-muted inline-block max-w-full">
           <img
             src="https://res.cloudinary.com/dooxcfe94/image/upload/v1790031559/healing-space/coaching/file_ditzw6.jpg"
             alt={t("coaching.title")}
-            className="h-full w-full object-contain"
+            className="block object-contain"
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -264,11 +264,11 @@ export default function CoachingPage() {
                     <CardContent className="p-0">
                       {/* Image banner when available, otherwise colored icon section */}
                       {item.image ? (
-                        <div className="relative h-48 overflow-hidden bg-muted">
+                        <div className="relative aspect-square overflow-hidden bg-muted">
                           <img
                             src={item.image}
                             alt={localizedTitle(item)}
-                            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

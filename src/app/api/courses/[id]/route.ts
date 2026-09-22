@@ -6,6 +6,7 @@ import { invalidateContentCache, cached } from "@/lib/cache";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeHtml } from "@/lib/html-sanitize";
 import { gateCourseLessons } from "@/lib/api-content-gate";
+import { deleteCloudinaryAssetsFromDoc } from "@/lib/cloudinary";
 
 const updateCourseSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -206,6 +207,9 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    // Delete associated Cloudinary assets
+    await deleteCloudinaryAssetsFromDoc(existing);
 
     await db.course.delete({ where: { id } });
     invalidateContentCache();
