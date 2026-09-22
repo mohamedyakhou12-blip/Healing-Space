@@ -106,7 +106,7 @@ const mockFeaturedCourses = [
     id: 1,
     title: "أساسيات العلاج النفسي",
     description: "تعرف على مبادئ العلاج النفسي وأساسياته",
-    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D8%AF%D9%88%D8%B1%D8%A7%D8%AA.jfif-r7FETGbLRz9jSrPhtd9zird88ZMYJf.jpeg",
     progress: 75,
     lessons: 24,
     duration: "12 ساعة",
@@ -145,7 +145,7 @@ const mockArticles = [
     id: 1,
     title: "كيف تتغلب على القلق والخوف",
     excerpt: "تعرف على أفضل التقنيات العلمية للتعامل مع القلق والخوف في حياتك اليومية...",
-    image: "https://images.unsplash.com/photo-1474418397713-7ede21d49118?w=400&h=250&fit=crop",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA.jfif-Kz59EZf74spBcI15HjDwmnrOaDJM14.jpeg",
     readTime: "5 دقائق",
     author: "د. سارة أحمد",
   },
@@ -222,13 +222,13 @@ type ServiceConfig = {
 };
 
 const services: ServiceConfig[] = [
-  { key: "courses", icon: BookOpen, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "courses.description", image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop" },
-  { key: "articles", icon: FileText, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "articles.description", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=250&fit=crop" },
-  { key: "podcasts", icon: Headphones, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "podcasts.description", image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=250&fit=crop" },
-  { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400&h=250&fit=crop" },
-  { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=250&fit=crop" },
-  { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
-  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
+  { key: "courses", icon: BookOpen, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "courses.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D8%AF%D9%88%D8%B1%D8%A7%D8%AA.jfif-r7FETGbLRz9jSrPhtd9zird88ZMYJf.jpeg" },
+  { key: "articles", icon: FileText, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "articles.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA.jfif-Kz59EZf74spBcI15HjDwmnrOaDJM14.jpeg" },
+  { key: "podcasts", icon: Headphones, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "podcasts.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D8%A8%D9%88%D8%AF%D9%83%D8%A7%D8%B3%D8%AA.jfif-2IBCXffc4ns0x38JiiAGo4womaV46m.jpeg" },
+  { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D9%81%D9%8A%D8%AF%D9%8A%D9%88%D9%87%D8%A7%D8%AA.jfif-rj1CIrlarS9HyZCCL7qHSehqyplQWw.jpeg" },
+  { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A8.jfif-p5hBl7w7s52QR8qcxL596HJfVZODxH.jpeg" },
+  { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D8%A8%D8%AB%20%D9%85%D8%A8%D8%A7%D8%B4%D8%B1.jfif-cCQYbBRTMfdbhe1heZ5We96MpRLJpI.jpeg" },
+  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D9%83%D9%88%D8%AA%D8%B4%D9%86%D9%8A%D8%BA.jfif-JqfsL33UDj5SoWR7V9uMAmY5CbE4xJ.jpeg" },
 ];
 
 /* ------------------------------------------------------------------ */

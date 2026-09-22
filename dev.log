@@ -97,3 +97,22 @@ https://react.dev/link/hydration-mismatch
  GET /api/public-settings 200 in 306ms (next.js: 36ms, proxy.ts: 20ms, application-code: 250ms)
  GET /api/articles?status=published&limit=4 200 in 318ms (next.js: 23ms, proxy.ts: 9ms, application-code: 286ms)
  GET /api/public-settings 200 in 248ms (next.js: 14ms, proxy.ts: 36ms, application-code: 198ms)
+✓ Compiled in 460ms
+ GET /api/articles 200 in 385ms (next.js: 5ms, proxy.ts: 6ms, application-code: 373ms)
+ GET /api/subscription-prices?_t=1790104577423 200 in 354ms (next.js: 136ms, proxy.ts: 5ms, application-code: 213ms)
+ GET /api/subscription-prices?_t=1790104577422 200 in 434ms (next.js: 196ms, proxy.ts: 12ms, application-code: 226ms)
+ GET /api/articles 200 in 19ms (next.js: 3ms, proxy.ts: 3ms, application-code: 12ms)
+✓ Compiled in 171ms
+✓ Compiled in 126ms
+ GET /api/articles?status=published&limit=4 200 in 21ms (next.js: 7ms, proxy.ts: 9ms, application-code: 5ms)
+ GET /api/podcasts?status=published&limit=4 200 in 183ms (next.js: 3ms, proxy.ts: 5ms, application-code: 175ms)
+ GET /api/podcasts?status=published&limit=4 200 in 33ms (next.js: 10ms, proxy.ts: 14ms, application-code: 10ms)
+ GET /api/homepage-images 200 in 729ms (next.js: 7ms, proxy.ts: 9ms, application-code: 713ms)
+ GET /api/articles?status=published&limit=4 200 in 40ms (next.js: 17ms, proxy.ts: 16ms, application-code: 7ms)
+ GET /api/sliders 200 in 114ms (next.js: 3ms, proxy.ts: 4ms, application-code: 107ms)
+ GET /api/courses?status=published&limit=4 200 in 186ms (next.js: 10ms, proxy.ts: 7ms, application-code: 169ms)
+ GET /api/public-settings 200 in 225ms (next.js: 13ms, proxy.ts: 14ms, application-code: 198ms)
+ GET /api/homepage-images 200 in 28ms (next.js: 11ms, proxy.ts: 9ms, application-code: 8ms)
+ GET /api/sliders 200 in 20ms (next.js: 3ms, proxy.ts: 6ms, application-code: 11ms)
+ GET /api/courses?status=published&limit=4 200 in 17ms (next.js: 3ms, proxy.ts: 9ms, application-code: 5ms)
+ GET /api/public-settings 200 in 20ms (next.js: 8ms, proxy.ts: 7ms, application-code: 5ms)

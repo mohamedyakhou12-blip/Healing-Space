@@ -86,7 +86,7 @@ const mockCourses: Course[] = [
       en: "Dr. Sara Ben Ali",
       fr: "Dr. Sara Ben Ali",
     },
-    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400&h=250&fit=crop",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D8%AF%D9%88%D8%B1%D8%A7%D8%AA.jfif-r7FETGbLRz9jSrPhtd9zird88ZMYJf.jpeg",
     gradient: "from-emerald-400 to-teal-600",
     totalLessons: 24,
     totalDuration: "12 ساعة",
