@@ -992,7 +992,7 @@ export default function HomePage() {
                     className={`group cursor-pointer border ${svc.border} bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden`}
                     onClick={() => navigate(svc.key)}
                   >
-                    <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-muted">
                       <img
                         src={svc.image}
                         alt={t(navKey(svc.key))}

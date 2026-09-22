@@ -144,3 +144,7 @@ https://react.dev/link/hydration-mismatch
  GET /api/csrf-token 200 in 396ms (next.js: 185ms, proxy.ts: 203ms, application-code: 8ms)
  GET /api/podcasts?status=published&limit=4 200 in 636ms (next.js: 206ms, proxy.ts: 220ms, application-code: 210ms)
  GET /api/sliders 200 in 622ms (next.js: 250ms, proxy.ts: 149ms, application-code: 223ms)
+  Reload env: .env.development.local
+ GET / 200 in 152ms (next.js: 93ms, application-code: 58ms)
+ GET / 200 in 28ms (next.js: 3ms, application-code: 25ms)
+✓ Compiled in 354ms
