@@ -93,9 +93,11 @@ export function Footer() {
           {/* Brand column */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Leaf className="size-4" />
-              </div>
+              <img
+                src="/logo.jfif"
+                alt={t("home.heroTitle")}
+                className="size-8 object-contain"
+              />
               <span className="text-lg font-bold gradient-text">
                 {t("home.heroTitle")}
               </span>
@@ -168,7 +170,6 @@ export function Footer() {
             &copy; {new Date().getFullYear()} {t("home.heroTitle")} — {t("siteOwner.name")}. All rights reserved.
           </p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground/70">
-            <Leaf className="size-3 text-primary/40" />
             Made with care for your wellbeing
           </p>
         </div>

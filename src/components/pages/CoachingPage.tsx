@@ -213,10 +213,10 @@ export default function CoachingPage() {
           </div>
         </div>
 
-        {/* Hero image */}
+{/* Hero image */}
         <div className="relative rounded-2xl overflow-hidden shadow-lg bg-muted inline-block max-w-full">
           <img
-            src="https://res.cloudinary.com/dooxcfe94/image/upload/v1790031559/healing-space/coaching/file_ditzw6.jpg"
+            src="/images/coaching.jfif"
             alt={t("coaching.title")}
             className="block object-contain"
             loading="lazy"
@@ -263,7 +263,7 @@ export default function CoachingPage() {
                   >
                     <CardContent className="p-0">
                       {/* Image banner when available, otherwise colored icon section */}
-                      {item.image ? (
+{item.image ? (
                         <div className="relative aspect-square overflow-hidden bg-muted">
                           <img
                             src={item.image}

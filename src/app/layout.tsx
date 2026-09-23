@@ -78,7 +78,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.png", sizes: "1024x1024", type: "image/png" },
-      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/logo.jfif", type: "image/jfif" },
     ],
     apple: "/favicon.png",
   },
@@ -142,7 +142,7 @@ const jsonLd = {
       name: "فضاء الشفاء",
       alternateName: ["Espace de Guérison", "Healing Space"],
       url: SITE_URL,
-      logo: `${SITE_URL}/logo.svg`,
+      logo: `${SITE_URL}/logo.jfif`,
       sameAs: [],
       founder: {
         "@type": "Person",
