@@ -4,6 +4,7 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeEmail } from "@/lib/sanitize";
+import { isReservedAdminEmail } from "@/lib/admin-email";
 
 /**
  * POST /api/auth/reset-password-direct
@@ -53,6 +54,17 @@ export async function POST(request: NextRequest) {
     const { email: rawEmail, birthday, newPassword } = parsed.data;
     const email = sanitizeEmail(rawEmail);
 
+    // ── Admin account protection ──
+    // The reserved admin account must NEVER be resettable through the public
+    // birthday flow. The admin credential is controlled solely by the owner
+    // via ADMIN_PASSWORD (env var) / the admin dashboard.
+    if (isReservedAdminEmail(email)) {
+      return NextResponse.json(
+        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
+        { status: 400 }
+      );
+    }
+
     // Look up user by email
     const user = await db.user.findUnique({ where: { email } });
 
@@ -64,22 +76,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify birthday
-    // Stored format is YYYY-MM-DD, user input is also YYYY-MM-DD from date picker
+    // Verify birthday — a stored birthday is REQUIRED. Never accept any date
+    // just because the user has none on file, otherwise anyone could reset
+    // any account (including an admin-role user) by typing an arbitrary date.
     const storedBirthday = user.birthday;
     if (!storedBirthday) {
-      // User has NO birthday stored — they registered before the birthday field was added.
-      // For security: require them to have a birthday set first via an authenticated flow.
-      // We allow the reset but only if they're currently logged in (session-based).
-      // Since this is a "forgot password" flow, they can't be logged in.
-      // Alternative: accept the birthday and save it, but log a warning for the admin.
-      // For now: accept and save, but with stricter rate limiting already in place.
-      console.warn(
-        `[ResetPasswordDirect] User ${email} has no birthday stored. ` +
-        `Accepting provided birthday and saving for future verification.`
+      return NextResponse.json(
+        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
+        { status: 400 }
       );
-    } else if (storedBirthday !== birthday) {
-      // User has a birthday stored but it doesn't match — reject
+    }
+    if (storedBirthday !== birthday) {
+      // Do not leak whether the birthday matches or not
       return NextResponse.json(
         { error: "Invalid email or birthday. Please check your information and try again.", success: false },
         { status: 400 }
@@ -89,10 +97,6 @@ export async function POST(request: NextRequest) {
     // Update password in Firestore (bcrypt hash)
     const hashedPassword = await hash(newPassword, 12);
     const updateData: Record<string, unknown> = { password: hashedPassword };
-    // If user didn't have a birthday, save the one they just provided
-    if (!storedBirthday) {
-      updateData.birthday = birthday;
-    }
     await db.user.update({
       where: { id: user.id },
       data: updateData,

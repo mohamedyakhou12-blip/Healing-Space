@@ -4,6 +4,7 @@ import { z } from "zod";
 import { hash, compare } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/session";
+import { isReservedAdminEmail } from "@/lib/admin-email";
 
 /**
  * POST /api/auth/change-password
@@ -68,6 +69,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "User not found", success: false },
         { status: 404 }
+      );
+    }
+
+    // ── Admin account protection ──
+    // Never allow changing the reserved admin account's password through this
+    // endpoint. The admin credential is managed exclusively via ADMIN_PASSWORD
+    // (env var) / the admin dashboard.
+    if (
+      user.role === "admin" ||
+      (user.email && isReservedAdminEmail(user.email))
+    ) {
+      return NextResponse.json(
+        { error: "This account does not support password changes.", success: false },
+        { status: 403 }
       );
     }
 

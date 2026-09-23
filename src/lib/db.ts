@@ -1037,8 +1037,25 @@ export const db = {
     async findMany(opts?: { orderBy?: { key?: string } }) {
       return findAll("siteSettings", "key", "asc");
     },
+    // Fetch ALL docs with this key and return the most recently updated one.
+    // Prevents stale/duplicate records (created across app versions) from
+    // shadowing the latest value — a source of "old code still works".
     async findUnique({ where }: { where: { key: string } }) {
-      return findUnique("siteSettings", "key", where.key);
+      validateCollection("siteSettings");
+      const snap = await adminDb
+        .collection("siteSettings")
+        .where("key", "==", where.key)
+        .get();
+      if (snap.empty) return null;
+      const docs = snap.docs.map((d) =>
+        normalizeDoc({ id: d.id, ...d.data() })
+      );
+      docs.sort((a, b) => {
+        const ta = a.updatedAt || a.createdAt ? new Date(a.updatedAt || a.createdAt).getTime() : 0;
+        const tb = b.updatedAt || b.createdAt ? new Date(b.updatedAt || b.createdAt).getTime() : 0;
+        return tb - ta;
+      });
+      return docs[0];
     },
     async upsert({
       where,
@@ -1049,11 +1066,29 @@ export const db = {
       update: { value: string };
       create: { key: string; value: string };
     }) {
-      const existing = await findUnique("siteSettings", "key", where.key);
-      if (existing) {
-        return updateById("siteSettings", existing.id, update);
+      validateCollection("siteSettings");
+      // Find EVERY doc with this key (not just one) so we can de-duplicate.
+      const snap = await adminDb
+        .collection("siteSettings")
+        .where("key", "==", where.key)
+        .get();
+      const docs = snap.docs;
+      if (docs.length === 0) {
+        return create("siteSettings", createData);
       }
-      return create("siteSettings", createData);
+      // Sort by updatedAt desc; keep only the newest, remove the rest.
+      docs.sort((a, b) => {
+        const ta = a.data()?.updatedAt?.toDate?.() || a.data()?.updatedAt || 0;
+        const tb = b.data()?.updatedAt?.toDate?.() || b.data()?.updatedAt || 0;
+        return (typeof tb === "number" ? tb : new Date(tb).getTime()) -
+               (typeof ta === "number" ? ta : new Date(ta).getTime());
+      });
+      const [newest, ...stale] = docs;
+      const deletePromises = stale.map((d) => d.ref.delete());
+      if (deletePromises.length > 0) {
+        await Promise.all(deletePromises);
+      }
+      return updateById("siteSettings", newest.id, update);
     },
   },
 

@@ -541,6 +541,19 @@ export default function HomePage() {
               </motion.div>
             )}
 
+            {/* Logo — prominent in hero */}
+            <motion.div
+              variants={fadeUp}
+              custom={0}
+              className="mb-6 flex justify-center"
+            >
+              <img
+                src="/logo.jfif"
+                alt="Healing Space"
+                className="size-32 rounded-full object-cover shadow-2xl shadow-amber-500/25 ring-4 ring-white/60 dark:ring-white/10 sm:size-40"
+              />
+            </motion.div>
+
             {/* Badge */}
             <motion.div variants={fadeUp} custom={0}>
               <Badge variant="secondary" className="mb-6 gap-1.5 rounded-full px-4 py-1.5 text-sm">
@@ -640,19 +653,28 @@ export default function HomePage() {
             >
               {(() => {
                 // ── Parse YouTube video ID from various URL formats ──
-                const isYouTube = introVideoUrl!.includes('youtube.com') || introVideoUrl!.includes('youtu.be');
+                const url = introVideoUrl!;
+                const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
                 let youtubeVideoId: string | null = null;
 
                 if (isYouTube) {
-                  const shortMatch = introVideoUrl!.match(/youtu\.be\/([\w-]{11})/);
-                  const watchMatch = introVideoUrl!.match(/[?&]v=([\w-]{11})/);
-                  const embedMatch = introVideoUrl!.match(/youtube\.com\/embed\/([\w-]{11})/);
-                  youtubeVideoId = embedMatch?.[1] || watchMatch?.[1] || shortMatch?.[1] || null;
+                  const shortMatch = url.match(/youtu\.be\/([\w-]{11})/);
+                  const watchMatch = url.match(/[?&]v=([\w-]{11})/);
+                  const embedMatch = url.match(/youtube\.com\/embed\/([\w-]{11})/);
+                  const shortsMatch = url.match(/youtube\.com\/shorts\/([\w-]{11})/);
+                  const liveMatch = url.match(/youtube\.com\/live\/([\w-]{11})/);
+                  youtubeVideoId =
+                    embedMatch?.[1] ||
+                    watchMatch?.[1] ||
+                    shortsMatch?.[1] ||
+                    liveMatch?.[1] ||
+                    shortMatch?.[1] ||
+                    null;
                 }
 
                 const embedUrl = youtubeVideoId
                   ? `https://www.youtube-nocookie.com/embed/${youtubeVideoId}`
-                  : introVideoUrl!;
+                  : url;
 
                 // YouTube watch URL for fallback link
                 const youtubeWatchUrl = youtubeVideoId
