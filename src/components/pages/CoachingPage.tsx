@@ -216,7 +216,7 @@ export default function CoachingPage() {
 {/* Hero image */}
         <div className="relative rounded-2xl overflow-hidden shadow-lg bg-muted inline-block max-w-full">
           <img
-            src="/images/coaching.jfif"
+            src="/images/coaching.jpg"
             alt={t("coaching.title")}
             className="block object-contain"
             loading="lazy"

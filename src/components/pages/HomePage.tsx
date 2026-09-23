@@ -151,13 +151,13 @@ type ServiceConfig = {
 };
 
 const services: ServiceConfig[] = [
-  { key: "courses", icon: BookOpen, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "courses.description", image: "/images/courses.jfif" },
-  { key: "articles", icon: FileText, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "articles.description", image: "/images/articles.jfif" },
-  { key: "podcasts", icon: Headphones, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "podcasts.description", image: "/images/podcasts.jfif" },
-  { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "/images/videos.jfif" },
-  { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "/images/pdfs.jfif" },
-  { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "/images/live.jfif" },
-  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "/images/coaching.jfif" },
+  { key: "courses", icon: BookOpen, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "courses.description", image: "/images/courses.jpg" },
+  { key: "articles", icon: FileText, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "articles.description", image: "/images/articles.jpg" },
+  { key: "podcasts", icon: Headphones, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "podcasts.description", image: "/images/podcasts.jpg" },
+  { key: "videos", icon: PlayCircle, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "videos.description", image: "/images/videos.jpg" },
+  { key: "pdfs", icon: FileDown, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "pdfs.description", image: "/images/pdfs.jpg" },
+  { key: "live", icon: Radio, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "live.description", image: "/images/live.jpg" },
+  { key: "coaching", icon: Sparkles, color: "text-primary", bg: "bg-secondary", border: "border-border", descKey: "coaching.description", image: "/images/coaching.jpg" },
 ];
 
 /* ------------------------------------------------------------------ */
