@@ -77,10 +77,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.png", sizes: "1024x1024", type: "image/png" },
       { url: "/logo.jfif", type: "image/jfif" },
+      { url: "/favicon.png", sizes: "1024x1024", type: "image/png" },
     ],
-    apple: "/favicon.png",
+    apple: "/logo.jfif",
   },
   alternates: {
     canonical: SITE_URL,

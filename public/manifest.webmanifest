@@ -13,16 +13,10 @@
   "categories": ["education", "health", "lifestyle"],
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
+      "src": "/logo.jfif",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/jfif",
+      "purpose": "any maskable"
     },
     {
       "src": "/logo.svg",
@@ -37,21 +31,21 @@
       "short_name": "الدورات",
       "description": "تصفح الدورات التعليمية",
       "url": "/courses",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/logo.jfif", "sizes": "96x96" }]
     },
     {
       "name": "المقالات",
       "short_name": "المقالات",
       "description": "اقرأ المقالات المتخصصة",
       "url": "/articles",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/logo.jfif", "sizes": "96x96" }]
     },
     {
       "name": "البودكاست",
       "short_name": "البودكاست",
       "description": "استمع للبودكاست",
       "url": "/podcasts",
-      "icons": [{ "src": "/favicon.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/logo.jfif", "sizes": "96x96" }]
     }
   ]
 }
