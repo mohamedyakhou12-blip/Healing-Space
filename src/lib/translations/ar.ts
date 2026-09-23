@@ -389,7 +389,7 @@ const ar = {
     newCodePlaceholder: "أدخل الكود الجديد",
     codeChanged: "تم تغيير كود الوصول بنجاح",
     wrongCurrentCode: "الكود الحالي غير صحيح",
-    codeMinLength: "يجب أن يتكون الكود من 4 أحرف على الأقل",
+    codeMinLength: "يجب أن يتكون الكود من 8 أحرف على الأقل",
     security: "الأمان",
     subscriptionPrices: "أسعار الاشتراكات",
     subscriptionPricesDesc: "قم بتعديل أسعار خطط الاشتراك الشهرية",

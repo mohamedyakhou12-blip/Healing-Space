@@ -22,7 +22,7 @@
  * Returns true if both strings are equal, false otherwise.
  * The comparison time does not depend on the position of the first difference.
  */
-function timingSafeEqual(a: string, b: string): boolean {
+export function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) {
     // Still do a full comparison to avoid leaking length info via timing
     // but the result will always be false

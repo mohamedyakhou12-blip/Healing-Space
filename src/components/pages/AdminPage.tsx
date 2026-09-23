@@ -4813,7 +4813,7 @@ function SettingsView() {
       toast.error(t("common.error"));
       return;
     }
-    if (newCode.length < 4) {
+    if (newCode.length < 8) {
       toast.error(t("admin.codeMinLength"));
       return;
     }

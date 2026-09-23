@@ -37,10 +37,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const requestedCode = body.code;
 
-    // Validate the requested code
-    if (requestedCode && (typeof requestedCode !== "string" || requestedCode.trim().length < 4)) {
+    // VIS-06: NO default code fallback — the caller must always supply one.
+    // (Previously fell back to the public "HEAL2024SPACE" default.)
+    if (!requestedCode || typeof requestedCode !== "string" || requestedCode.trim().length < 4) {
       return NextResponse.json(
-        { error: "Admin code must be at least 4 characters long", success: false },
+        { error: "An admin code of at least 4 characters is required", success: false },
         { status: 400 }
       );
     }
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
       // Continue — we'll try to create it anyway
     }
 
-    // Create the admin_access_code in the database
-    const newCode = requestedCode?.trim() || "HEAL2024SPACE";
+    // Create the admin_access_code in the database (explicit code only)
+    const newCode = requestedCode.trim();
 
     try {
       await db.siteSetting.upsert({
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     let dbHasCode = false;
-    let dbError: string | null = null;
+    let dbHadError = false;
 
     try {
       const settings: any[] = await db.siteSetting.findMany();
@@ -125,13 +126,18 @@ export async function GET(request: NextRequest) {
         (s: any) => s && s.key === "admin_access_code"
       );
     } catch (err) {
-      dbError = err instanceof Error ? err.message : String(err);
+      // VIS-06: never leak internal DB error details to the client.
+      dbHadError = true;
+      console.error(
+        "[Setup] DB check failed:",
+        err instanceof Error ? err.message : String(err)
+      );
     }
 
     return NextResponse.json({
       setupComplete: dbHasCode,
       envCodeSet: !!process.env.ADMIN_ACCESS_CODE,
-      dbError,
+      dbError: dbHadError ? "database unavailable" : null,
     });
   } catch (error) {
     return NextResponse.json(

@@ -4,6 +4,37 @@ import { requireAdmin, requireAuth } from "@/lib/session";
 import { validateAdminCode } from "@/lib/admin-code";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
+// ── VIS-07: magic-byte signatures we can verify with certainty ──
+const KNOWN_SIGNED_MIME = new Set([
+  "image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf",
+]);
+
+function matchesExpectedMagicBytes(buffer: Buffer, mime: string): boolean {
+  if (buffer.length < 12) return false;
+  const ascii = (start: number, end: number) => buffer.subarray(start, end).toString("latin1");
+
+  const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isPng =
+    buffer[0] === 0x89 && ascii(1, 4) === "PNG" &&
+    buffer[4] === 0x0d && buffer[5] === 0x0a && buffer[6] === 0x1a && buffer[7] === 0x0a;
+  const isGif = ascii(0, 6) === "GIF87a" || ascii(0, 6) === "GIF89a";
+  const isWebp = ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP";
+  const isPdf = ascii(0, 5) === "%PDF-";
+  // ISO-BMP container (HEIC/HEIF/AVIF all start with an ftyp brand)
+  const isIsoBmp = ascii(4, 8) === "ftyp";
+
+  switch (mime) {
+    case "image/jpeg": return isJpeg;
+    case "image/png": return isPng;
+    case "image/gif": return isGif;
+    case "image/webp": return isWebp;
+    case "application/pdf": return isPdf;
+    case "image/heic":
+    case "image/heif": return isIsoBmp;
+    default: return true;
+  }
+}
+
 /**
  * Server-mediated file upload endpoint.
  *
@@ -87,13 +118,47 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Validate file type (block dangerous extensions) ──
-  const dangerousExtensions = [".exe", ".bat", ".sh", ".cmd", ".com", ".vbs", ".js", ".wsf", ".msi", ".scr", ".pif"];
+  const dangerousExtensions = [
+    ".exe", ".bat", ".sh", ".cmd", ".com", ".vbs", ".js", ".wsf", ".msi", ".scr", ".pif",
+    // VIS-07: script/markup documents that execute in a browser
+    ".html", ".htm", ".shtml", ".xhtml", ".svg", ".xml",
+    ".php", ".php3", ".php4", ".php5", ".phtml", ".pht", ".cgi", ".pl",
+  ];
   const fileName = file.name.toLowerCase();
   if (dangerousExtensions.some(ext => fileName.endsWith(ext))) {
     return NextResponse.json(
       { error: "This file type is not allowed for security reasons." },
       { status: 400 }
     );
+  }
+
+  // ── VIS-07: block dangerous MIME types (executable/markup documents) ──
+  const mime = (file.type || "").toLowerCase();
+  const dangerousMimeTypes = [
+    "text/html", "application/xhtml+xml", "image/svg+xml",
+    "application/xml", "text/xml", "application/x-sh", "application/x-executable",
+  ];
+  if (dangerousMimeTypes.includes(mime)) {
+    return NextResponse.json(
+      { error: "This file type is not allowed for security reasons." },
+      { status: 400 }
+    );
+  }
+
+  // ── VIS-07: receipts use a STRICT allowlist (images + PDF only) ──
+  const RECEIPT_ALLOWED_MIME = new Set([
+    "image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif",
+    "application/pdf",
+  ]);
+  const RECEIPT_ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".pdf"];
+  if (isReceipt) {
+    const extOk = RECEIPT_ALLOWED_EXT.some((ext) => fileName.endsWith(ext));
+    if (!extOk || !RECEIPT_ALLOWED_MIME.has(mime)) {
+      return NextResponse.json(
+        { error: "Receipts must be an image (JPG, PNG, WebP, GIF, HEIC) or PDF." },
+        { status: 400 }
+      );
+    }
   }
 
   try {
@@ -112,6 +177,23 @@ export async function POST(request: NextRequest) {
     // Read file as buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // ── VIS-07: magic-byte verification ──
+    // A renamed file (e.g. evil.html → receipt.png) keeps its HTML content;
+    // the real file signature must match the declared type.
+    if (isReceipt && !matchesExpectedMagicBytes(buffer, mime)) {
+      return NextResponse.json(
+        { error: "File content does not match its file type." },
+        { status: 400 }
+      );
+    }
+    // Admin content: verify only when we know the signature for sure.
+    if (!isReceipt && KNOWN_SIGNED_MIME.has(mime) && !matchesExpectedMagicBytes(buffer, mime)) {
+      return NextResponse.json(
+        { error: "File content does not match its file type." },
+        { status: 400 }
+      );
+    }
 
     // Upload to Cloudinary
     const result = await uploadToCloudinary(buffer, {

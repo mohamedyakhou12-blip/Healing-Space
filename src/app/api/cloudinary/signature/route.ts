@@ -94,6 +94,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── VIS-07: receipt uploads (untrusted users) may only be images or PDFs.
+    // Reject "auto"/"video" so arbitrary documents can't be stored as raw/
+    // video assets. The legit client always sends "image" or "raw" explicitly.
+    if (isReceiptFolder && resourceType !== "image" && resourceType !== "raw") {
+      return NextResponse.json(
+        { error: "Receipt uploads must be an image or PDF.", success: false },
+        { status: 400 }
+      );
+    }
+
     const timestamp = Math.round(Date.now() / 1000);
 
     // Build upload params for the signature

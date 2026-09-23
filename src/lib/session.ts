@@ -100,8 +100,7 @@ export async function setUserSession(
 
 export async function clearSession(): Promise<void> {
   const session = await getSession();
-  session.userId = null;
-  session.userRole = null;
-  session.isAdmin = false;
-  await session.save();
+  // VIS-13: destroy() removes the encrypted cookie entirely (instead of only
+  // overwriting its payload), so no stale session material remains client-side.
+  await session.destroy();
 }

@@ -5,9 +5,11 @@ import { compare, hash } from "bcryptjs";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { setUserSession } from "@/lib/session";
+import { timingSafeEqual } from "@/lib/admin-code";
 import {
   ADMIN_NAME,
   ADMIN_PASSWORD,
+  ADMIN_PASSWORD_IS_DEFAULT,
   isReservedAdminEmail,
 } from "@/lib/admin-email";
 
@@ -19,6 +21,72 @@ const loginSchema = z.object({
 const MAX_FAILED_ATTEMPTS = 10;
 const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
 const ATTEMPT_COOKIE = "hs_login_attempts";
+
+// ── Server-side per-account lockout ──
+// The cookie-based lockout above can be trivially bypassed by clearing cookies.
+// This in-memory map (same per-instance trade-off as lib/rate-limit.ts) locks
+// the ACCOUNT itself on repeated failures, independent of the client cookie.
+const ACCOUNT_MAX_FAILED_ATTEMPTS = 10;
+type AccountAttemptEntry = {
+  count: number;
+  lockedUntil: number;
+  lastFailedAt: number;
+};
+const accountAttempts = new Map<string, AccountAttemptEntry>();
+let lastAccountPrune = 0;
+
+function pruneAccountAttempts(): void {
+  const now = Date.now();
+  if (now - lastAccountPrune < 60_000) return;
+  lastAccountPrune = now;
+  for (const [key, entry] of accountAttempts) {
+    if (now - entry.lastFailedAt > LOCKOUT_DURATION) accountAttempts.delete(key);
+  }
+}
+
+function accountLockRemainingMs(email: string): number {
+  pruneAccountAttempts();
+  const entry = accountAttempts.get(email);
+  if (!entry || entry.count < ACCOUNT_MAX_FAILED_ATTEMPTS) return 0;
+  const remaining = entry.lockedUntil - Date.now();
+  if (remaining <= 0) {
+    accountAttempts.delete(email);
+    return 0;
+  }
+  return remaining;
+}
+
+function recordAccountFailure(email: string): void {
+  const now = Date.now();
+  const entry = accountAttempts.get(email) || { count: 0, lockedUntil: 0, lastFailedAt: now };
+  entry.count += 1;
+  entry.lastFailedAt = now;
+  if (entry.count >= ACCOUNT_MAX_FAILED_ATTEMPTS) entry.lockedUntil = now + LOCKOUT_DURATION;
+  accountAttempts.set(email, entry);
+}
+
+function clearAccountFailures(email: string): void {
+  accountAttempts.delete(email);
+}
+
+function accountLockResponse(remainingMs: number): NextResponse {
+  const remainingMinutes = Math.ceil(remainingMs / 60_000);
+  return NextResponse.json(
+    {
+      error: `Account temporarily locked due to too many failed attempts. Please try again in ${remainingMinutes} minutes.`,
+      success: false,
+    },
+    { status: 429 }
+  );
+}
+
+// Dummy bcrypt hash so a login for a non-existent email costs the same as a
+// real password check (prevents user-enumeration via response timing).
+let dummyHashPromise: Promise<string> | null = null;
+function getDummyHash(): Promise<string> {
+  if (!dummyHashPromise) dummyHashPromise = hash("dummy-password-not-real", 12);
+  return dummyHashPromise;
+}
 
 function readAttemptsCookie(request: NextRequest): { count: number; lockedUntil: number } {
   const cookie = request.cookies.get(ATTEMPT_COOKIE);
@@ -58,6 +126,12 @@ export async function POST(request: NextRequest) {
     let { email, password } = parsed.data;
     email = sanitizeEmail(email);
 
+    // ── Server-side per-account lockout (not bypassable by clearing cookies) ──
+    const accountLockedMs = accountLockRemainingMs(email);
+    if (accountLockedMs > 0) {
+      return accountLockResponse(accountLockedMs);
+    }
+
     // Check cookie-based lockout (persists across cold starts)
     const attemptState = readAttemptsCookie(request);
     if (attemptState.count >= MAX_FAILED_ATTEMPTS && Date.now() < attemptState.lockedUntil) {
@@ -77,13 +151,29 @@ export async function POST(request: NextRequest) {
     // here) so the owner can never lock themselves out. The user doc is
     // auto-provisioned on first successful login and always elevated to admin.
     if (isReservedAdminEmail(email)) {
+      // FAIL-CLOSED (VIS-01): never accept the hardcoded fallback password in
+      // production. Logged in source control / publicly known — refuse login
+      // with a clear, non-default-credential message until ADMIN_PASSWORD env
+      // is configured. (Checked at login-time, not module load, so the rest
+      // of the site keeps running if the env var is missing.)
+      if (ADMIN_PASSWORD_IS_DEFAULT && process.env.NODE_ENV === "production") {
+        console.error(
+          "[Login] Admin login blocked: ADMIN_PASSWORD environment variable is not set (insecure default in effect)."
+        );
+        return NextResponse.json(
+          {
+            error: "Admin login is not configured. Set the ADMIN_PASSWORD environment variable.",
+            success: false,
+          },
+          { status: 503 }
+        );
+      }
+
       // Trim whitespace — password managers / autofill often append a space.
       const normalizedPassword = password.trim();
-      if (normalizedPassword !== ADMIN_PASSWORD) {
-        return NextResponse.json(
-          { error: "كلمة مرور الأدمن غير صحيحة", success: false },
-          { status: 401 }
-        );
+      const isValidAdminPassword = timingSafeEqual(normalizedPassword, ADMIN_PASSWORD);
+      if (!isValidAdminPassword) {
+        return respondWithFailedAttempt(request, "Invalid credentials", email);
       }
 
       let user = await db.user.findUnique({ where: { email } });
@@ -130,19 +220,20 @@ export async function POST(request: NextRequest) {
     const user = await db.user.findUnique({ where: { email } });
 
     if (!user || !user.password) {
-      return respondWithFailedAttempt(request, "Invalid credentials");
-    }
-
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: "Account is deactivated. Please contact support.", success: false },
-        { status: 403 }
-      );
+      // Burn the same bcrypt time as a real check (timing-safe enumeration).
+      await compare(password, await getDummyHash());
+      return respondWithFailedAttempt(request, "Invalid credentials", email);
     }
 
     const isValid = await compare(password, user.password);
     if (!isValid) {
-      return respondWithFailedAttempt(request, "Invalid credentials");
+      return respondWithFailedAttempt(request, "Invalid credentials", email);
+    }
+
+    // Deactivated accounts return the SAME generic message (VIS-10: prevents
+    // account enumeration) — checked after the password so timing is uniform.
+    if (!user.isActive) {
+      return respondWithFailedAttempt(request, "Invalid credentials", email);
     }
 
     return buildLoginResponse(request, user, user.role === "admin" ? "admin" : "user");
@@ -160,7 +251,8 @@ async function buildLoginResponse(
   user: any,
   role: "user" | "admin"
 ) {
-  // Successful login — clear failed attempt cookie
+  // Successful login — clear failed attempt state (cookie + server-side map)
+  if (user?.email) clearAccountFailures(user.email.toLowerCase());
   const response = NextResponse.json({
     user: {
       id: user.id,
@@ -204,7 +296,7 @@ async function buildLoginResponse(
   return response;
 }
 
-function respondWithFailedAttempt(request: NextRequest, message: string) {
+function respondWithFailedAttempt(request: NextRequest, message: string, email?: string) {
   const state = readAttemptsCookie(request);
   const now = Date.now();
   let count = state.count + 1;
@@ -213,6 +305,9 @@ function respondWithFailedAttempt(request: NextRequest, message: string) {
   if (count >= MAX_FAILED_ATTEMPTS) {
     lockedUntil = now + LOCKOUT_DURATION;
   }
+
+  // Also count against the ACCOUNT (server-side, cookie-independent).
+  if (email) recordAccountFailure(email);
 
   const response = NextResponse.json(
     { error: message, success: false },

@@ -184,7 +184,13 @@ function itemIsAccessible(
   if (ctx.isAdmin) return true;
 
   // Free content → always accessible
-  const isFree = item.isFree === true || (item.price === undefined && item.price !== 0);
+  // VIS-09: only EXPLICIT free markers count: isFree === true, or price
+  // exactly 0 (the UI renders price 0 as "free"). The old expression
+  // `price === undefined && price !== 0` was always true for undefined price,
+  // accidentally exposing any item with a missing price field.
+  const isFree =
+    item.isFree === true ||
+    (item.price !== undefined && item.price !== null && Number(item.price) === 0);
   if (isFree) return true;
 
   // Individually purchased → accessible

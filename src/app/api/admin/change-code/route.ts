@@ -36,10 +36,6 @@ export async function PUT(request: NextRequest) {
   if (!currentCode || !newCode) {
     return NextResponse.json({ error: "Both currentCode and newCode are required" }, { status: 400 });
   }
-  if (newCode.length < 4) {
-    return NextResponse.json({ error: "New code must be at least 4 characters" }, { status: 400 });
-  }
-
   // Validate current code
   const isValid = await validateAdminCode(currentCode);
   if (!isValid) {
@@ -54,6 +50,13 @@ export async function PUT(request: NextRequest) {
  * and verify the write by reading it back.
  */
 async function changeCode(newCode: string) {
+  // VIS-02: enforce minimum length centrally (covers the session-admin path
+  // above, which previously skipped validation entirely). 8 chars — a 4-char
+  // code is trivially brute-forced.
+  if (typeof newCode !== "string" || newCode.length < 8) {
+    return NextResponse.json({ error: "New code must be at least 8 characters" }, { status: 400 });
+  }
+
   try {
     const { db } = await import("@/lib/db");
     await db.siteSetting.upsert({

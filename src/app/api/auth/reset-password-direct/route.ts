@@ -30,6 +30,54 @@ const resetSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
 });
 
+// ── Per-account brute-force lockout (VIS-05) ──
+// The birthday-only reset flow is guessable (small date space), and the
+// per-IP limiter above can be rotated. Track failed attempts per ACCOUNT so
+// birthday brute-force against one user is locked out server-side.
+// Same in-memory/per-instance trade-off as lib/rate-limit.ts.
+const ACCOUNT_MAX_FAILED_ATTEMPTS = 5;
+const ACCOUNT_LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+type ResetAttemptEntry = { count: number; lockedUntil: number; lastFailedAt: number };
+const resetAttempts = new Map<string, ResetAttemptEntry>();
+let lastResetPrune = 0;
+
+function pruneResetAttempts(): void {
+  const now = Date.now();
+  if (now - lastResetPrune < 60_000) return;
+  lastResetPrune = now;
+  for (const [key, entry] of resetAttempts) {
+    if (now - entry.lastFailedAt > ACCOUNT_LOCKOUT_MS) resetAttempts.delete(key);
+  }
+}
+
+function resetLockRemainingMs(email: string): number {
+  pruneResetAttempts();
+  const entry = resetAttempts.get(email);
+  if (!entry || entry.count < ACCOUNT_MAX_FAILED_ATTEMPTS) return 0;
+  const remaining = entry.lockedUntil - Date.now();
+  if (remaining <= 0) {
+    resetAttempts.delete(email);
+    return 0;
+  }
+  return remaining;
+}
+
+function recordResetFailure(email: string): void {
+  const now = Date.now();
+  const entry = resetAttempts.get(email) || { count: 0, lockedUntil: 0, lastFailedAt: now };
+  entry.count += 1;
+  entry.lastFailedAt = now;
+  if (entry.count >= ACCOUNT_MAX_FAILED_ATTEMPTS) entry.lockedUntil = now + ACCOUNT_LOCKOUT_MS;
+  resetAttempts.set(email, entry);
+}
+
+function genericResetError(): NextResponse {
+  return NextResponse.json(
+    { error: "Invalid email or birthday. Please check your information and try again.", success: false },
+    { status: 400 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: max 5 reset requests per minute per IP
@@ -54,15 +102,22 @@ export async function POST(request: NextRequest) {
     const { email: rawEmail, birthday, newPassword } = parsed.data;
     const email = sanitizeEmail(rawEmail);
 
+    // ── Per-account lockout (VIS-05) — blocks birthday brute-force ──
+    const lockRemaining = resetLockRemainingMs(email);
+    if (lockRemaining > 0) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later.", success: false },
+        { status: 429 }
+      );
+    }
+
     // ── Admin account protection ──
     // The reserved admin account must NEVER be resettable through the public
     // birthday flow. The admin credential is controlled solely by the owner
     // via ADMIN_PASSWORD (env var) / the admin dashboard.
     if (isReservedAdminEmail(email)) {
-      return NextResponse.json(
-        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
-        { status: 400 }
-      );
+      recordResetFailure(email);
+      return genericResetError();
     }
 
     // Look up user by email
@@ -70,10 +125,8 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       // Don't reveal whether email exists — use generic message
-      return NextResponse.json(
-        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
-        { status: 400 }
-      );
+      recordResetFailure(email);
+      return genericResetError();
     }
 
     // Verify birthday — a stored birthday is REQUIRED. Never accept any date
@@ -81,18 +134,17 @@ export async function POST(request: NextRequest) {
     // any account (including an admin-role user) by typing an arbitrary date.
     const storedBirthday = user.birthday;
     if (!storedBirthday) {
-      return NextResponse.json(
-        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
-        { status: 400 }
-      );
+      recordResetFailure(email);
+      return genericResetError();
     }
     if (storedBirthday !== birthday) {
       // Do not leak whether the birthday matches or not
-      return NextResponse.json(
-        { error: "Invalid email or birthday. Please check your information and try again.", success: false },
-        { status: 400 }
-      );
+      recordResetFailure(email);
+      return genericResetError();
     }
+
+    // Success — clear this account's failed-attempt state
+    resetAttempts.delete(email);
 
     // Update password in Firestore (bcrypt hash)
     const hashedPassword = await hash(newPassword, 12);

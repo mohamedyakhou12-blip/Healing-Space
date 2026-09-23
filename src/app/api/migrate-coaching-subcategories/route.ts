@@ -4,10 +4,7 @@ import { requireAdmin } from "@/lib/session";
 
 /**
  * POST /api/migrate-coaching-subcategories
- * Admin-only migration (requires session + CSRF).
- *
- * GET /api/migrate-coaching-subcategories?key=heal2026migrate
- * One-time key-based access for server-side migration calls.
+ * Admin-only migration (requires admin session).
  */
 
 

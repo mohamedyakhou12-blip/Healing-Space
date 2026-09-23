@@ -50,6 +50,39 @@ const ALLOWED_CSS_PROPS = new Set([
 ]);
 
 /**
+ * Decode HTML entities in a string (detection helper).
+ * Used ONLY to test attribute values the way a browser would decode them —
+ * the ORIGINAL string is never replaced with the decoded one (that would
+ * corrupt legitimately escaped content like `&lt;script&gt;`).
+ */
+function decodeEntities(value: string): string {
+  return value
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&amp;/gi, '&');
+}
+
+/** True when an href/src value is dangerous AFTER entity-decoding. */
+function isDangerousUrlValue(value: string): boolean {
+  const decoded = decodeEntities(value).trim();
+  return (
+    /^\s*javascript\s*:/i.test(decoded) ||
+    /^\s*vbscript\s*:/i.test(decoded) ||
+    /^\s*data\s*:\s*text\/html/i.test(decoded)
+  );
+}
+
+/** True when a style value is dangerous AFTER entity-decoding. */
+function isDangerousStyleValue(value: string): boolean {
+  const decoded = decodeEntities(value);
+  return /expression\s*\(|javascript\s*:|vbscript\s*:|@import/i.test(decoded);
+}
+
+/**
  * Sanitize HTML content to prevent XSS while preserving formatting.
  * This is for server-side use only.
  */
@@ -59,24 +92,51 @@ export function sanitizeHtml(html: string): string {
   // Strategy: parse and rebuild, keeping only allowed tags and attributes
   let result = html;
 
-  // Remove script tags and their content entirely
-  result = result.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  // Two passes: the first removes unclosed <script>/<style> OPEN tags, which
+  // can expose raw JS source as HTML text containing real tags — the second
+  // pass then removes any script/style pairs revealed by that.
+  for (let pass = 0; pass < 2; pass++) {
+    // Remove script tags and their content entirely
+    result = result.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
-  // Remove style tags (CSS can be used for attacks)
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    // Remove style tags (CSS can be used for attacks)
+    result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
 
-  // Remove iframe, object, embed, form, input tags
-  result = result.replace(/<(iframe|object|embed|form|input|textarea|select|button|meta|link|base|svg|math)\b[^>]*>/gi, '');
-  result = result.replace(/<\/(iframe|object|embed|form|input|textarea|select|button|meta|link|base|svg|math)>/gi, '');
+    // VIS-08: remove any remaining (UNCLOSED) script/style tags. Without the
+    // opening tag nothing inside can execute; content parses as inert text.
+    result = result.replace(/<\/?script\b[^>]*>/gi, '');
+    result = result.replace(/<\/?style\b[^>]*>/gi, '');
+
+    // Remove iframe, object, embed, form, input tags
+    result = result.replace(/<(iframe|object|embed|form|input|textarea|select|button|meta|link|base|svg|math)\b[^>]*>/gi, '');
+    result = result.replace(/<\/(iframe|object|embed|form|input|textarea|select|button|meta|link|base|svg|math)>/gi, '');
+  }
 
   // Remove event handler attributes (onclick, onload, onerror, etc.)
   result = result.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '');
 
-  // Remove javascript: and data: URLs in href/src
-  result = result.replace(/(href|src)\s*=\s*["']?\s*(javascript\s*:|data\s*:\s*text\/html)[^"'>]*/gi, '$1=""');
+  // VIS-08: validate href/src against the ENTITY-DECODED value — browsers
+  // decode e.g. href="java&#115;cript:alert(1)" before interpreting it,
+  // which bypasses a literal-pattern check. Blank the value if unsafe.
+  result = result.replace(
+    /\b(href|src)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/gi,
+    (match, attr, _quoted, doubleQ, singleQ, unquoted) => {
+      const value = doubleQ ?? singleQ ?? unquoted ?? '';
+      if (isDangerousUrlValue(value)) return `${attr}=""`;
+      return match;
+    }
+  );
 
   // Remove style attributes with expressions or url() pointing to scripts
-  result = result.replace(/style\s*=\s*["'][^"']*expression\s*\([^"']*["']/gi, 'style=""');
+  // (entity-decoded check as well).
+  result = result.replace(
+    /\bstyle\s*=\s*("([^"]*)"|'([^']*)')/gi,
+    (match, _attr, doubleQ, singleQ) => {
+      const value = doubleQ ?? singleQ ?? '';
+      if (isDangerousStyleValue(value)) return 'style=""';
+      return match;
+    }
+  );
 
   return result;
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   validateCSRFToken,
   getCSRFCookieName,
@@ -81,7 +82,17 @@ const ALLOWED_ORIGINS = [
 function isAllowedOrigin(origin: string): boolean {
   return ALLOWED_ORIGINS.some((allowed) => {
     if (allowed.startsWith(".")) {
-      return origin.endsWith(allowed) || origin.includes(allowed.slice(1));
+      // Match a real subdomain boundary on the HOSTNAME only: host must end
+      // with ".vercel.app", never accepting "vercel.app.evil.com", the bare
+      // suffix, or an origin with a fake path/query containing the suffix.
+      let host: string;
+      try {
+        host = new URL(origin).hostname.toLowerCase();
+      } catch {
+        return false;
+      }
+      const suffix = allowed.toLowerCase();
+      return host.endsWith(suffix) && host.length > suffix.length;
     }
     return origin === allowed;
   });
@@ -127,10 +138,7 @@ function getRateLimitCategory(path: string): { prefix: string; max: number } {
  * Adds rate limiting, CSRF protection, and security headers.
  */
 export default function proxy(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp(request);
 
   const path = request.nextUrl.pathname;
   const method = request.method.toUpperCase();

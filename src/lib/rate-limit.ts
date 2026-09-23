@@ -50,9 +50,28 @@ export function isRateLimited(
   return entry.count > max;
 }
 
+/**
+ * Resolve the real client IP.
+ *
+ * Security: the FIRST value of `x-forwarded-for` is fully attacker-controlled
+ * (headers sent by the client are prepended by trusted proxies). Using it lets
+ * an attacker rotate the key on every request and bypass every rate limit.
+ * Instead we prefer:
+ *   1. `x-real-ip` — set by the trusted edge proxy (Vercel sets it reliably).
+ *   2. the LAST value of `x-forwarded-for` — the value appended by the trusted
+ *      proxy closest to the server, i.e. the actual client.
+ */
+export function getClientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp && realIp.trim()) return realIp.trim();
+
+  const forwarded = request.headers.get("x-forwarded-for") || "";
+  const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+  if (parts.length > 0) return parts[parts.length - 1];
+
+  return "unknown";
+}
+
 export function rateLimitKey(request: Request, prefix: string): string {
-  const ip =
-    (request.headers.get("x-forwarded-for") || "").split(",")[0]?.trim() ||
-    "unknown";
-  return `${prefix}:${ip}`;
+  return `${prefix}:${getClientIp(request)}`;
 }

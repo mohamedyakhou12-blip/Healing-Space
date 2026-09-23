@@ -389,7 +389,7 @@ const fr = {
     newCodePlaceholder: "Entrez le nouveau code",
     codeChanged: "Code d'accès modifié avec succès",
     wrongCurrentCode: "Le code actuel est incorrect",
-    codeMinLength: "Le code doit comporter au moins 4 caractères",
+    codeMinLength: "Le code doit comporter au moins 8 caractères",
     security: "Sécurité",
     subscriptionPrices: "Prix des abonnements",
     subscriptionPricesDesc: "Gérer les prix des plans d'abonnement",

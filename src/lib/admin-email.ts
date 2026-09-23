@@ -17,6 +17,14 @@ export const ADMIN_EMAIL: string = (process.env.ADMIN_EMAIL || "admin@gmail.com"
 
 export const ADMIN_PASSWORD: string = process.env.ADMIN_PASSWORD || "052307";
 
+/**
+ * True when ADMIN_PASSWORD was NOT provided via the environment, i.e. the
+ * hardcoded fallback above is in effect. In production this is a Critical
+ * vulnerability (the fallback is public), so login blocks it at login-time
+ * (fail-closed) without crashing the whole app at module load.
+ */
+export const ADMIN_PASSWORD_IS_DEFAULT: boolean = !process.env.ADMIN_PASSWORD;
+
 export const ADMIN_NAME: string = process.env.ADMIN_NAME || "Admin";
 
 export function isReservedAdminEmail(email: string): boolean {
