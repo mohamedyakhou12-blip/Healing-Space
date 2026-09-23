@@ -72,11 +72,22 @@ const PUBLIC_KEYS = new Set([
 export async function GET() {
   try {
     const settingsMap = await cached("api:public-settings", async () => {
-      const settings = await db.siteSetting.findMany({
-        orderBy: { key: "asc" },
-      });
-      const map: Record<string, string> = {};
+      const settings = await db.siteSetting.findMany();
+      // When duplicates of the same key exist (created across app versions),
+      // ALWAYS prefer the most recently created doc. Otherwise a stale value
+      // (e.g. an empty introVideoUrl) can shadow the current one.
+      const newestByKey = new Map<string, any>();
       for (const setting of settings) {
+        const existing = newestByKey.get(setting.key);
+        if (!existing) {
+          newestByKey.set(setting.key, setting);
+          continue;
+        }
+        const ts = (s: any) => (s.createdAt ? new Date(s.createdAt).getTime() : 0);
+        if (ts(setting) > ts(existing)) newestByKey.set(setting.key, setting);
+      }
+      const map: Record<string, string> = {};
+      for (const setting of newestByKey.values()) {
         // SECURITY: Only include explicitly allowed keys
         if (!PUBLIC_KEYS.has(setting.key)) continue;
         map[setting.key] = setting.value;

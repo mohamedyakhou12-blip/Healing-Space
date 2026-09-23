@@ -19,7 +19,9 @@ export async function PUT(request: NextRequest) {
   //    is already authenticated.
   const sessionAdminId = await requireAdmin();
   if (sessionAdminId) {
-    return changeCode(request);
+    const body = await request.json();
+    const { newCode } = body;
+    return changeCode(newCode);
   }
 
   // 2. Otherwise fall back to code-based auth and require the current code.
@@ -44,24 +46,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Current admin code is incorrect" }, { status: 403 });
   }
 
-  return changeCode(request);
+  return changeCode(newCode);
 }
 
 /**
  * Persist the new admin code to Firestore (siteSettings.admin_access_code)
  * and verify the write by reading it back.
  */
-async function changeCode(request: NextRequest) {
-  const body = await request.json();
-  const { newCode } = body;
-
-  if (!newCode) {
-    return NextResponse.json({ error: "newCode is required" }, { status: 400 });
-  }
-  if (newCode.length < 4) {
-    return NextResponse.json({ error: "New code must be at least 4 characters" }, { status: 400 });
-  }
-
+async function changeCode(newCode: string) {
   try {
     const { db } = await import("@/lib/db");
     await db.siteSetting.upsert({

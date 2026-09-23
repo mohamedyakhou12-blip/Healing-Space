@@ -60,13 +60,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
     }
 
-    const settings = await db.siteSetting.findMany({
-      orderBy: { key: "asc" },
-    });
+    const settings = await db.siteSetting.findMany();
+
+    // Prefer the most recently created doc when duplicates exist for a key,
+    // so stale records (e.g. an empty introVideoUrl from an older version)
+    // never shadow the current value.
+    const newestByKey = new Map<string, any>();
+    for (const setting of settings) {
+      const existing = newestByKey.get(setting.key);
+      if (!existing) {
+        newestByKey.set(setting.key, setting);
+        continue;
+      }
+      const ts = (s: any) => (s.createdAt ? new Date(s.createdAt).getTime() : 0);
+      if (ts(setting) > ts(existing)) newestByKey.set(setting.key, setting);
+    }
 
     // Convert to key-value object
     const settingsMap: Record<string, string> = {};
-    for (const setting of settings) {
+    for (const setting of newestByKey.values()) {
       settingsMap[setting.key] = setting.value;
     }
 
