@@ -16,5 +16,19 @@
     { "source": "/subscriptions", "destination": "/" },
     { "source": "/payment", "destination": "/" },
     { "source": "/notifications", "destination": "/" }
+  ],
+  "headers": [
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/(.*)\.jfif",
+      "headers": [
+        { "key": "Content-Type", "value": "image/jpeg" }
+      ]
+    }
   ]
 }
