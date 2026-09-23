@@ -925,7 +925,9 @@ export default function HomePage() {
                       <img
                         src={svc.image}
                         alt={t(navKey(svc.key))}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        width={400}
+                        height={400}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       <div className={`absolute bottom-3 start-3 flex size-10 items-center justify-center rounded-xl ${svc.bg} shadow-lg`}>
