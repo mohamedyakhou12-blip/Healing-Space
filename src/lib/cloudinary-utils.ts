@@ -7,6 +7,7 @@
 /**
  * Get optimized image URL from a Cloudinary URL.
  * Adds auto-quality and auto-format transformations.
+ * For non-Cloudinary URLs (local images), returns the original URL unchanged.
  */
 export function getOptimizedImageUrl(
   originalUrl: string,

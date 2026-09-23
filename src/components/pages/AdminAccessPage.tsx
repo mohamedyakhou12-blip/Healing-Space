@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Shield, KeyRound, Heart } from "lucide-react";
+import { Lock, KeyRound, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -109,9 +109,13 @@ export default function AdminAccessPage() {
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
       >
-        <motion.div variants={fadeUp} custom={0} className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-            <Shield className="size-7 text-white" />
+<motion.div variants={fadeUp} custom={0} className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <img
+              src="/logo.jfif"
+              alt={t("adminAccess.title")}
+              className="size-16 object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold">{t("adminAccess.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
