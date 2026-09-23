@@ -66,6 +66,9 @@ export function hasAdminCode(): boolean {
 export async function validateAdminCode(providedCode: string | null): Promise<boolean> {
   if (!providedCode) return false;
 
+  let dbHadError = false;
+  let dbHasCode = false;
+
   // 1. Check database (authoritative source) — targeted query for efficiency
   try {
     const { db } = await import("@/lib/db");
@@ -77,49 +80,38 @@ export async function validateAdminCode(providedCode: string | null): Promise<bo
     if (codeRecord && codeRecord.value) {
       return timingSafeEqual(codeRecord.value, providedCode);
     }
+    dbHasCode = !!codeRecord?.value;
   } catch (dbError) {
-    console.warn("[Admin Code] DB query failed, falling back to env var:", dbError instanceof Error ? dbError.message : String(dbError));
+    dbHadError = true;
+    console.error(
+      "[Admin Code] DB query failed:",
+      dbError instanceof Error ? dbError.message : String(dbError)
+    );
   }
 
-  // 2. Fallback: check env var (when DB has no admin_access_code record)
-  const effectiveCode = getEnvCode();
-  if (effectiveCode.length > 0 && timingSafeEqual(providedCode, effectiveCode)) return true;
-
-  // 3. Last resort: if no admin code is configured anywhere (neither DB nor env var),
-  //    allow a default code for initial setup. This ensures the admin can always
-  //    access the dashboard at least once to configure a proper code.
-  //    IMPORTANT: After the admin sets a code via the settings page, this default
-  //    will no longer be accepted because the DB check (step 1) will find the record.
-  //    SECURITY: Never accept the built-in default code in production — the live
-  //    site must have a real code configured (env var or DB) or admin auth is denied.
-  if (process.env.NODE_ENV === "production") return false;
-
-  const envCode = getEnvCode();
-  const hasDbCode = await checkDbHasAdminCode();
-  if (!envCode && !hasDbCode) {
-    // No admin code configured anywhere — use default for initial setup
-    const DEFAULT_SETUP_CODE = "052307";
-    console.warn("[Admin Code] ⚠️ No admin code configured! Using default setup code. Set ADMIN_ACCESS_CODE env var or configure in admin settings.");
-    if (timingSafeEqual(providedCode, DEFAULT_SETUP_CODE)) return true;
+  // 2a. If the DB errored (unreachable/misconfigured) we MUST NOT silently
+  //     accept an env-var fallback in production: that would let a stale
+  //     ADMIN_ACCESS_CODE keep working after the code was rotated in the DB,
+  //     which is exactly the "old code still works" bug. Fail closed instead.
+  if (dbHadError) {
+    if (process.env.NODE_ENV === "production") {
+      console.error(
+        "[Admin Code] DB verification unavailable in production. " +
+        "Refusing to authenticate admin code (fail-closed). Check FIREBASE_SERVICE_ACCOUNT_KEY."
+      );
+      return false;
+    }
+    // In development, DB may legitimately be unavailable (no local emulator):
+    // fall through to the env var so local testing still works.
   }
 
-  return false;
-}
-
-/**
- * Check if the DB has an admin_access_code record.
- * Returns false if DB is unavailable or no record exists.
- */
-async function checkDbHasAdminCode(): Promise<boolean> {
-  try {
-    const { db } = await import("@/lib/db");
-    const codeRecord = await db.siteSetting.findUnique({
-      where: { key: "admin_access_code" },
-    });
-    return !!codeRecord && !!codeRecord.value;
-  } catch {
-    // DB unavailable
+  // 2. Fallback: check env var (only when the DB has NO admin_access_code record)
+  if (!dbHasCode) {
+    const effectiveCode = getEnvCode();
+    if (effectiveCode.length > 0 && timingSafeEqual(providedCode, effectiveCode)) return true;
+    return false;
   }
+
   return false;
 }
 
