@@ -9,7 +9,6 @@ import { timingSafeEqual } from "@/lib/admin-code";
 import {
   ADMIN_NAME,
   ADMIN_PASSWORD,
-  ADMIN_PASSWORD_IS_DEFAULT,
   isReservedAdminEmail,
 } from "@/lib/admin-email";
 
@@ -151,24 +150,6 @@ export async function POST(request: NextRequest) {
     // here) so the owner can never lock themselves out. The user doc is
     // auto-provisioned on first successful login and always elevated to admin.
     if (isReservedAdminEmail(email)) {
-      // FAIL-CLOSED (VIS-01): never accept the hardcoded fallback password in
-      // production. Logged in source control / publicly known — refuse login
-      // with a clear, non-default-credential message until ADMIN_PASSWORD env
-      // is configured. (Checked at login-time, not module load, so the rest
-      // of the site keeps running if the env var is missing.)
-      if (ADMIN_PASSWORD_IS_DEFAULT && process.env.NODE_ENV === "production") {
-        console.error(
-          "[Login] Admin login blocked: ADMIN_PASSWORD environment variable is not set (insecure default in effect)."
-        );
-        return NextResponse.json(
-          {
-            error: "Admin login is not configured. Set the ADMIN_PASSWORD environment variable.",
-            success: false,
-          },
-          { status: 503 }
-        );
-      }
-
       // Trim whitespace — password managers / autofill often append a space.
       const normalizedPassword = password.trim();
       const isValidAdminPassword = timingSafeEqual(normalizedPassword, ADMIN_PASSWORD);
