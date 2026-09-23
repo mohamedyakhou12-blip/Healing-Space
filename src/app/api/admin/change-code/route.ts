@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/verifyAdminAccess";
 import { validateAdminCode } from "@/lib/admin-code";
+import { requireAdmin } from "@/lib/session";
 import { isRateLimited, rateLimitKey } from "@/lib/rate-limit";
 
 export async function PUT(request: NextRequest) {
@@ -13,62 +14,80 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  // 1. Rule out a fully signed-in admin session (dashboard) — they may change
+  //    the code without re-entering the stored value, since the session itself
+  //    is already authenticated.
+  const sessionAdminId = await requireAdmin();
+  if (sessionAdminId) {
+    return changeCode(request);
+  }
+
+  // 2. Otherwise fall back to code-based auth and require the current code.
+  const isAuthorized = await verifyAdminAccess(request);
+  if (!isAuthorized) {
+    return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { currentCode, newCode } = body;
+
+  if (!currentCode || !newCode) {
+    return NextResponse.json({ error: "Both currentCode and newCode are required" }, { status: 400 });
+  }
+  if (newCode.length < 4) {
+    return NextResponse.json({ error: "New code must be at least 4 characters" }, { status: 400 });
+  }
+
+  // Validate current code
+  const isValid = await validateAdminCode(currentCode);
+  if (!isValid) {
+    return NextResponse.json({ error: "Current admin code is incorrect" }, { status: 403 });
+  }
+
+  return changeCode(request);
+}
+
+/**
+ * Persist the new admin code to Firestore (siteSettings.admin_access_code)
+ * and verify the write by reading it back.
+ */
+async function changeCode(request: NextRequest) {
+  const body = await request.json();
+  const { newCode } = body;
+
+  if (!newCode) {
+    return NextResponse.json({ error: "newCode is required" }, { status: 400 });
+  }
+  if (newCode.length < 4) {
+    return NextResponse.json({ error: "New code must be at least 4 characters" }, { status: 400 });
+  }
+
   try {
-    // Verify admin access
-    const isAuthorized = await verifyAdminAccess(request);
-    if (!isAuthorized) {
-      return NextResponse.json({ error: "Unauthorized - admin access required" }, { status: 401 });
-    }
+    const { db } = await import("@/lib/db");
+    await db.siteSetting.upsert({
+      where: { key: "admin_access_code" },
+      update: { value: newCode },
+      create: { key: "admin_access_code", value: newCode },
+    });
 
-    const body = await request.json();
-    const { currentCode, newCode } = body;
+    // Verify the save by reading back from DB (targeted query)
+    const found = await db.siteSetting.findUnique({
+      where: { key: "admin_access_code" },
+    });
 
-    if (!currentCode || !newCode) {
-      return NextResponse.json({ error: "Both currentCode and newCode are required" }, { status: 400 });
-    }
-    if (newCode.length < 4) {
-      return NextResponse.json({ error: "New code must be at least 4 characters" }, { status: 400 });
-    }
-
-    // Validate current code
-    const isValid = await validateAdminCode(currentCode);
-    if (!isValid) {
-      return NextResponse.json({ error: "Current admin code is incorrect" }, { status: 403 });
-    }
-
-    // Save new code to database
-    try {
-      const { db } = await import("@/lib/db");
-      await db.siteSetting.upsert({
-        where: { key: "admin_access_code" },
-        update: { value: newCode },
-        create: { key: "admin_access_code", value: newCode },
-      });
-
-      // Verify the save by reading back from DB (targeted query)
-      const found = await db.siteSetting.findUnique({
-        where: { key: "admin_access_code" },
-      });
-
-      if (!found || found.value !== newCode) {
-        return NextResponse.json({
-          error: "Database save could not be verified",
-        }, { status: 500 });
-      }
-    } catch (err: unknown) {
-      console.error("Database save failed:", err);
+    if (!found || found.value !== newCode) {
       return NextResponse.json({
-        error: "Database save failed",
+        error: "Database save could not be verified",
       }, { status: 500 });
     }
-
+  } catch (err: unknown) {
+    console.error("Database save failed:", err);
     return NextResponse.json({
-      message: "Admin code updated successfully",
-    });
-  } catch (error: any) {
-    console.error("Change admin code error:", error);
-    return NextResponse.json({
-      error: "Internal server error",
+      error: "Database save failed",
     }, { status: 500 });
   }
+
+  return NextResponse.json({
+    message: "Admin code updated successfully",
+  });
 }

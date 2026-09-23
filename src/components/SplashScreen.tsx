@@ -120,7 +120,7 @@ export function SplashScreen() {
 
           {/* Center content */}
           <div className="relative z-10 flex flex-col items-center gap-5">
-            {/* Leaf icon with breathing animation */}
+            {/* Logo with breathing animation */}
             <motion.div
               className="relative flex size-24 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50"
               initial={{ scale: 0.5, opacity: 0 }}
@@ -144,7 +144,11 @@ export function SplashScreen() {
                 animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
-              <Leaf className="relative z-10 size-12 text-amber-600 dark:text-amber-400" />
+              <img
+                src="/logo.jfif"
+                alt="Healing Space"
+                className="relative z-10 size-14 rounded-full object-cover"
+              />
             </motion.div>
 
             {/* Title: "Healing Space" */}
