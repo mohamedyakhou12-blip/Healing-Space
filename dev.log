@@ -5,3 +5,173 @@
 ✓ Ready in 750ms
   Applying modifyConfig from v0-preview
 
+  Reload env: .env.development.local
+ GET / 200 in 2.8s (next.js: 1818ms, application-code: 1004ms)
+ GET / 200 in 2.8s (next.js: 1891ms, application-code: 924ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="ar" dir="rtl" suppressHydrationWarning={true}>
+                          <head>
+                            <script
++                             type="application/ld+json"
+-                             type={null}
+                              dangerouslySetInnerHTML={{
++                               __html: "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebSite\",\"@id..."
+-                               __html: "window.__V0_SANDBOX_ID__=\"sb-4zsmwje9vwl5\";window.__V0_CHAT_ID__=\"HisowKWt..."
+                              }}
+                            >
+                            ...
+                          ...
+                  ...
+ 
+[Firebase Admin] Initialized with service account credentials.
+ GET /api/auth/session 200 in 533ms (next.js: 286ms, proxy.ts: 224ms, application-code: 23ms)
+ GET /api/homepage-images 200 in 2.2s (next.js: 1402ms, proxy.ts: 134ms, application-code: 670ms)
+ GET /api/courses?status=published&limit=4 200 in 2.1s (next.js: 343ms, proxy.ts: 1287ms, application-code: 450ms)
+ GET /api/public-settings?_t=1790123370002 200 in 2.1s (next.js: 280ms, proxy.ts: 1420ms, application-code: 393ms)
+ GET /api/sliders 200 in 844ms (next.js: 395ms, proxy.ts: 178ms, application-code: 271ms)
+ GET /api/auth/profile 401 in 672ms (next.js: 298ms, proxy.ts: 306ms, application-code: 68ms)
+ GET /api/podcasts?status=published&limit=4 200 in 2.1s (next.js: 271ms, proxy.ts: 1269ms, application-code: 586ms)
+ GET /api/articles?status=published&limit=4 200 in 2.3s (next.js: 1050ms, proxy.ts: 126ms, application-code: 1085ms)
+ GET /api/csrf-token 200 in 631ms (next.js: 323ms, proxy.ts: 294ms, application-code: 15ms)
+ GET /api/courses?status=published&limit=4 200 in 558ms (next.js: 338ms, proxy.ts: 213ms, application-code: 6ms)
+ GET /api/public-settings 200 in 794ms (next.js: 293ms, proxy.ts: 221ms, application-code: 280ms)
+ GET /api/articles?status=published&limit=4 200 in 492ms (next.js: 270ms, proxy.ts: 214ms, application-code: 8ms)
+ GET /api/podcasts?status=published&limit=4 200 in 402ms (next.js: 130ms, proxy.ts: 265ms, application-code: 7ms)
+ GET /api/public-settings 200 in 410ms (next.js: 73ms, proxy.ts: 330ms, application-code: 6ms)
+ GET /api/csrf-token 200 in 332ms (next.js: 62ms, proxy.ts: 264ms, application-code: 6ms)
+ GET /api/public-settings?_t=1790123370134 200 in 190ms (next.js: 62ms, proxy.ts: 122ms, application-code: 6ms)
+ GET /api/homepage-images 200 in 585ms (next.js: 61ms, proxy.ts: 61ms, application-code: 463ms)
+ GET /api/sliders 200 in 558ms (next.js: 48ms, proxy.ts: 54ms, application-code: 456ms)
+ GET /api/auth/profile 401 in 595ms (next.js: 493ms, proxy.ts: 55ms, application-code: 47ms)
+ GET /api/auth/session 200 in 597ms (next.js: 529ms, proxy.ts: 54ms, application-code: 14ms)
+ GET /api/public-settings 200 in 581ms (next.js: 533ms, proxy.ts: 43ms, application-code: 5ms)
+ GET /api/public-settings 200 in 27ms (next.js: 5ms, proxy.ts: 18ms, application-code: 4ms)
+ GET / 200 in 592ms (next.js: 83ms, application-code: 508ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="ar" dir="rtl" suppressHydrationWarning={true}>
+                          <head>
+                            <script
++                             type="application/ld+json"
+-                             type={null}
+                              dangerouslySetInnerHTML={{
++                               __html: "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"WebSite\",\"@id..."
+-                               __html: "window.__V0_SANDBOX_ID__=\"sb-4zsmwje9vwl5\";window.__V0_CHAT_ID__=\"HisowKWt..."
+                              }}
+                            >
+                            ...
+                          ...
+                            <HomePage>
+                              <div className="min-h-screen" dir="rtl">
+                                <section>
+                                <section
++                                 className="bg-background px-4 py-16 sm:px-6 lg:px-8"
+-                                 className="bg-background px-4 py-20 sm:px-6 lg:px-8"
+                                >
+                                  <div
++                                   className="mx-auto max-w-5xl"
+-                                   className="mx-auto max-w-7xl"
+                                  >
+                                    <motion.div className="mb-8 text-..." initial="hidden" whileInView="visible" ...>
+                                      <div
++                                       className="mb-8 text-center"
+-                                       className="mb-12 text-center"
+                                        style={{opacity:0,transform:"translateY..."}}
+                                        ref={function useMotionRef.useCallback}
+                                      >
++                                       <div className="flex items-center justify-center gap-2 mb-3">
+-                                       <h2 className="mb-3 text-3xl font-bold sm:text-4xl">
+                                        ...
+                                    ...
+                                ...
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at div (<anonymous>)
+ GET /api/auth/session 200 in 22ms (next.js: 9ms, proxy.ts: 7ms, application-code: 6ms)
+ GET /api/public-settings?_t=1790123375497 200 in 42ms (next.js: 19ms, proxy.ts: 19ms, application-code: 4ms)
+ GET /api/auth/profile 401 in 48ms (next.js: 22ms, proxy.ts: 21ms, application-code: 5ms)
+ GET /api/csrf-token 200 in 44ms (next.js: 24ms, proxy.ts: 16ms, application-code: 4ms)
+ GET /api/public-settings 200 in 45ms (next.js: 27ms, proxy.ts: 15ms, application-code: 4ms)
+ GET /api/public-settings?_t=1790123375526 200 in 46ms (next.js: 23ms, proxy.ts: 18ms, application-code: 5ms)
+ GET /api/auth/session 200 in 14ms (next.js: 3ms, proxy.ts: 5ms, application-code: 6ms)
+ GET /api/auth/profile 401 in 45ms (next.js: 7ms, proxy.ts: 4ms, application-code: 34ms)
+ GET /api/public-settings 200 in 62ms (next.js: 8ms, proxy.ts: 50ms, application-code: 4ms)
+ GET / 200 in 199ms (next.js: 7ms, application-code: 192ms)
+ GET /api/public-settings 200 in 66ms (next.js: 35ms, proxy.ts: 27ms, application-code: 4ms)
+ GET /api/sliders 200 in 79ms (next.js: 41ms, proxy.ts: 27ms, application-code: 11ms)
+ GET /api/public-settings?_t=1790123426634 200 in 64ms (next.js: 30ms, proxy.ts: 30ms, application-code: 3ms)
+ GET /api/homepage-images 200 in 84ms (next.js: 37ms, proxy.ts: 33ms, application-code: 13ms)
+ GET /api/csrf-token 200 in 68ms (next.js: 28ms, proxy.ts: 36ms, application-code: 4ms)
+ GET /api/auth/session 200 in 66ms (next.js: 27ms, proxy.ts: 33ms, application-code: 7ms)
+ GET /api/public-settings 200 in 58ms (next.js: 27ms, proxy.ts: 27ms, application-code: 4ms)
+ GET /api/auth/profile 401 in 54ms (next.js: 23ms, proxy.ts: 25ms, application-code: 5ms)
+ GET /api/courses?status=published&limit=4 200 in 239ms (next.js: 16ms, proxy.ts: 8ms, application-code: 215ms)
+ GET /api/podcasts?status=published&limit=4 200 in 292ms (next.js: 38ms, proxy.ts: 12ms, application-code: 242ms)
+ GET /api/articles?status=published&limit=4 200 in 335ms (next.js: 31ms, proxy.ts: 12ms, application-code: 291ms)
