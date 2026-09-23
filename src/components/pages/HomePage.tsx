@@ -904,19 +904,13 @@ export default function HomePage() {
             <div className="mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-stone-500 to-amber-400" />
           </motion.div>
 
-          <motion.div
+          <div
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: { transition: { staggerChildren: 0.1 } },
-              hidden: {},
-            }}
           >
             {services.map((svc) => {
               const Icon = svc.icon;
               return (
-                <motion.div key={svc.key} variants={fadeUp}>
+                <div key={svc.key}>
                   <Card
                     className={`group cursor-pointer border ${svc.border} bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden`}
                     onClick={() => navigate(svc.key)}
@@ -948,10 +942,10 @@ export default function HomePage() {
                       </span>
                     </CardFooter>
                   </Card>
-                </motion.div>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
       )}
