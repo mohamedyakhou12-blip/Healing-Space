@@ -25,7 +25,7 @@
       ]
     },
     {
-      "source": "/(.*)\.jfif",
+      "source": "/images/(.*).jfif",
       "headers": [
         { "key": "Content-Type", "value": "image/jpeg" }
       ]
